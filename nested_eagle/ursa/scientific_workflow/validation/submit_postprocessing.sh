@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J perform_validation 
+#SBATCH -J perform_postprocessing
 #SBATCH -o slurm-%j.out
 #SBATCH -e slurm-%j.err
 #SBATCH --account=epic
@@ -14,6 +14,6 @@ source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 
-conda activate wxvx 
+conda activate eagle 
 
-wxvx -c wxvx_lam.yaml -t plots
+python postprocess.py
