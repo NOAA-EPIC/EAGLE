@@ -56,4 +56,4 @@ If you are using a non-conda-forge conda installation, add the flags
 When activated, the environment automatically includes the **met2go** package,  
 which provides **MET**, select **METplus** executables, and supporting data files.  
 
-For more details, see the **met2go documentation**.
+For more details, see the `met2go documentation <https://github.com/maddenp-cu/met2go/blob/main/README.md>`_.
