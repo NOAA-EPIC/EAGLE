@@ -4,9 +4,9 @@ baseline:
   type: point
   url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
 cycles:
-  start: 2022-02-04T12:00:00
+  start: 2022-02-03T12:00:00
   step: 0
-  stop: 2022-02-04T12:00:00
+  stop: 2022-02-03T12:00:00
 forecast:
   coords:
     latitude: latitude
@@ -28,7 +28,7 @@ forecast:
 leadtimes:
   start: 0
   step: 6
-  stop: 48
+  stop: 240
 meta:
   grids: "{{ meta.workdir }}/grids"
   workdir: wxvx_workdir/lam

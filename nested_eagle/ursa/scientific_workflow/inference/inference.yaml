@@ -1,5 +1,5 @@
 checkpoint_path: ../training/outputs/checkpoint/6b67c174-ae26-41e3-b8aa-50b74469fe80/inference-last.ckpt
-lead_time: 48
+lead_time: 240
 input_dataset_kwargs:
   cutout:
     - dataset: ../data/hrrr.zarr
@@ -9,6 +9,6 @@ input_dataset_kwargs:
   min_distance_km: 0
 output_path: inference_files
 
-start_date: 2022-02-04T12
-end_date: 2022-02-04T12
+start_date: 2022-02-03T12
+end_date: 2022-02-03T12
 freq: 6h

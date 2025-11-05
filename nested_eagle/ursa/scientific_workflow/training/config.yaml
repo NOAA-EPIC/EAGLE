@@ -83,13 +83,13 @@ dataloader:
     min_distance_km: 0
   training:
     start: 2022-02-01
-    end: 2022-02-04
+    end: 2022-02-03
   validation:
-    start: 2022-02-05
-    end: 2022-02-07
+    start: 2022-02-04
+    end: 2022-02-15
   test:
-    start: 2022-02-08
-    end: 2022-02-10
+    start: 2022-02-16
+    end: 2022-02-17
 
 diagnostics:
   log:

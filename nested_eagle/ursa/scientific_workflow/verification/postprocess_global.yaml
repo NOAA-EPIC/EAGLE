@@ -35,6 +35,6 @@ horizontal_regrid_kwargs:
     method: "conservative_normed"
   target_grid_path: "../data/global_one_degree.nc"
 
-start_date: 2022-02-04T12
-end_date: 2022-02-04T12
+start_date: 2022-02-03T12
+end_date: 2022-02-03T12
 freq: 6h

@@ -20,6 +20,6 @@ levels:
   - 500
   - 850
 
-start_date: 2022-02-04T12
-end_date: 2022-02-04T12
+start_date: 2022-02-03T12
+end_date: 2022-02-03T12
 freq: 6h
