@@ -62,8 +62,8 @@ jobs:
             https://epic-eagle--${{ github.event.pull_request.number }}.org.readthedocs.build/en/${{ github.event.pull_request.number }}
             `
             github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: message
+             issue_number: context.issue.number,
+             owner: context.repo.owner,
+             repo: context.repo.repo,
+             body: message
             })
