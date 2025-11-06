@@ -3,8 +3,8 @@ output_path: postprocessed_files/lam
 model_type: nested-lam
 lam_index: 64220
 lcc_info:
-  n_y: 338
-  n_x: 190
+  n_y: 190
+  n_x: 338
 vars_of_interest:
   - t2m
   - gh
@@ -20,6 +20,6 @@ levels:
   - 500
   - 850
 
-start_date: 2022-02-05T12
-end_date: 2022-02-07T12
+start_date: 2022-02-03T12
+end_date: 2022-02-03T12
 freq: 6h

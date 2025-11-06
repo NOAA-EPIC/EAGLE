@@ -1,0 +1,40 @@
+forecast_path: inference_files
+output_path: postprocessed_files/global
+model_type: nested-global
+
+lam_index: 64220
+lcc_info:
+  n_x: 338
+  n_y: 190
+
+vars_of_interest:
+  - t2m
+  - gh
+  - sp
+  - t
+  - u
+  - u10
+  - v
+  - v10
+
+levels:
+  - 250
+  - 500
+  - 850
+
+anemoi_reference_dataset_kwargs:
+  cutout:
+    - dataset: "../data/hrrr.zarr"
+      trim_edge: [10, 11, 10, 11]
+    - dataset: "../data/gfs.zarr"
+  adjust: all
+  min_distance_km: 0
+
+horizontal_regrid_kwargs:
+  regridder_kwargs:
+    method: "conservative_normed"
+  target_grid_path: "../data/global_one_degree.nc"
+
+start_date: 2022-02-03T12
+end_date: 2022-02-03T12
+freq: 6h

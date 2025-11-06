@@ -9,6 +9,6 @@ input_dataset_kwargs:
   min_distance_km: 0
 output_path: inference_files
 
-start_date: 2022-02-05T12
-end_date: 2022-02-07T12
+start_date: 2022-02-03T12
+end_date: 2022-02-03T12
 freq: 6h
