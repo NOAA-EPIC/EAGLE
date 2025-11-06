@@ -3,9 +3,6 @@ name: Build and Deploy Documentation
 on:
   push:
     branches: [ feature/auto_docs ]
-    paths:
-      - docs/**
-  workflow_dispatch:
 
 jobs:
 
