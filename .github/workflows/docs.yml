@@ -14,9 +14,6 @@ jobs:
 
   documentation:
 
-    permissions:
-      pull-requests: 'write'
-
     runs-on: ubuntu-latest
     name: Build and deploy documentation
 
