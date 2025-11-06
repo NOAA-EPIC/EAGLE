@@ -4,10 +4,10 @@ on:
     branches: [ feature/auto_docs ]
     paths:
       - docs/**
-        #pull_request:
-        #types: [issues, opened, reopened, synchronize]
-        #paths:
-        #- docs/**
+  pull_request:
+    types: [issues, opened, reopened, synchronize]
+    paths:
+      - docs/**
   workflow_dispatch:
 
 jobs:
