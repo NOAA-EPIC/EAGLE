@@ -14,4 +14,6 @@ conda activate eagle
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 
-python postprocess.py
+eagle-tools prewxvx postprocess_global.yaml
+
+eagle-tools prewxvx postprocess_lam.yaml
