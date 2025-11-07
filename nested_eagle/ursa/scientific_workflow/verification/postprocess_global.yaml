@@ -1,4 +1,4 @@
-forecast_path: inference_files
+forecast_path: ../inference/inference_files
 output_path: postprocessed_files/global
 model_type: nested-global
 
