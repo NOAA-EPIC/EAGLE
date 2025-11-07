@@ -9,7 +9,7 @@ on:
 
 jobs:
   shellcheck:
-    name: Run ShellCheck
+    name: Run shellcheck linter
     runs-on: ubuntu-latest
 
     steps:

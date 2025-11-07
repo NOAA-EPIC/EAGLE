@@ -9,6 +9,7 @@ on:
 
 jobs:
   ruff:
+    name: Run ruff linter
     runs-on: ubuntu-latest
 
     steps:
@@ -27,4 +28,4 @@ jobs:
 
       - name: Run Ruff
         run: |
-          ruff check . --exclude global_eagle --verbose
+          ruff check . --exclude 'global_eagle' --verbose

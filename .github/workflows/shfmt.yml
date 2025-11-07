@@ -9,6 +9,7 @@ on:
 
 jobs:
   shfmt:
+    name: Run shfmt format checker
     runs-on: ubuntu-latest
 
     steps:
