@@ -146,5 +146,6 @@ jobs:
              echo "Slurm job $JOB_ID to perform verification has been completed."
 
              cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/wxvx_workdir
-             find . -name "*.png" -print -quit | grep -q . || { echo "Error: No verification plots found."; exit 1; } 
+             find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM verification plots found."; exit 1; } 
+             find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global verification plots found."; exit 1; } 
              echo "Verification process has been successfully completed."
