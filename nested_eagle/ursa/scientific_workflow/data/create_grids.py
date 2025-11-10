@@ -2,6 +2,7 @@
 # Author: Tim Smith, NOAA PSL
 # Description: Creation of target grids required for data processing and model training.
 
+import os
 import xesmf
 import cf_xarray as cfxr
 import numpy as np
@@ -30,7 +31,7 @@ def get_conus_data_grid():
     hds = hrrr.open_sample_dataset(
         dims={"t0": hrrr.t0[0], "fhr": hrrr.fhr[0]},
         open_static_vars=True,
-        cache_dir="cache/grid-creation",
+        cache_dir=f"cache/grid-creation",
     )
     hds = hds.rename({"latitude": "lat", "longitude": "lon"})
 

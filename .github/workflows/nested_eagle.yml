@@ -74,6 +74,8 @@ jobs:
              if [[ -n $JOB_ID ]]; then squeue -j $JOB_ID; fi
              sleep 30  # Wait for 30 seconds before checking again.
            done
+             cd $CHECKPOINT
+             lsof -w "$(find . -name inference-last.ckpt)" && sleep 10 || echo "file is written" 
              scancel $JOB_ID
              
            echo "Slurm job to train the data has been completed."
