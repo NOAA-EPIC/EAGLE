@@ -155,6 +155,7 @@ jobs:
              find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global verification plots found."; exit 1; } 
              echo "Verification process has been successfully completed."
       - name: Remove label from pull request 
+        if: always()
         uses: mondeja/remove-labels-gh-action@v2.0.0
         with:
           labels: 'ci-running'
