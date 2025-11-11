@@ -40,16 +40,15 @@ jobs:
 
              echo "Slurm job $JOB_ID to generate the grids has completed."
 
-  Generate_Forecasts:
+  Prepare_Training_Data:
     # The type of runner that the job will run on
     runs-on: ursa
     timeout-minutes: 1440
     needs: Submit_Grids
     steps:
-      - name: Generate GFS & HRRR Forecasts
+      - name: Prepare GFS & HRRR Training Data
         run: |
           cd nested_eagle/ursa/scientific_workflow/data
-          echo "Slurm jobs to generate the GFS & HRRR forecasts have completed."
 
           JOB_ID1=$(sbatch submit_gfs.sh | awk '{print $4}')
           JOB_ID2=$(sbatch submit_hrrr.sh | awk '{print $4}')
@@ -61,14 +60,14 @@ jobs:
                 sleep 30  # Wait for 30 seconds before checking again.
              done
              
-             echo "Slurm jobs $JOB_ID1 and $JOB_ID2 to generate the GFS & HRRR forecasts have completed."
+             echo "Slurm jobs $JOB_ID1 and $JOB_ID2 to prepare the GFS & HRRR training data have completed."
   Run_Training:
     # The type of runner that the job will run on
     runs-on: ursa
     timeout-minutes: 1440
-    needs: Generate_Forecasts
+    needs: Prepare_Training_Data
     steps:
-      - name: Run Training Against the Generated Forecasts
+      - name: Run Training With GFS & HRRR Input
         run: |
           cd nested_eagle/ursa/scientific_workflow/training
 

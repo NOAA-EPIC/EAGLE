@@ -1,8 +1,8 @@
-## Nested-Eagle Workflow
+## Nested-EAGLE Workflow
 
 Follow the workflow outlined below to complete the entire pipeline.
 
-Please see our [nested-eagle documentation](https://epic-eagle.readthedocs.io/en/latest/nested_eagle.html) for more information about the Nested-Eagle setup, such as a description of the model architucture and an explanation about the nested domain.
+Please see our [nested-eagle documentation](https://epic-eagle.readthedocs.io/en/latest/nested_eagle.html) for more information about the Nested-EAGLE setup, such as a description of the model architucture and an explanation about the nested domain.
 
 #### Step 1: Data Creation (/data)
 
