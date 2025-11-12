@@ -9,7 +9,7 @@ on:
       - 'nested_eagle/**' #only run for changes to nested eagle changes.
 jobs:
   Submit_Grids:
-    if: github.event.review.state == 'approved' && ${{ !contains(github.event.pull_request.labels.*.name, 'ci-running') }}
+    if: ${{ github.event.review.state == 'approved' && !contains(github.event.pull_request.labels.*.name, 'ci-running') }}
     # Only run the workflow if a PR is submitted and approved.
     runs-on: ursa
     timeout-minutes: 1440
