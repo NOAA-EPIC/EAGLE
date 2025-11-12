@@ -8,9 +8,9 @@ The key steps to this pipeline include:
 1) Data preprocessing using `ufs2arco` to create training, validation, and test datasets
 2) Model training using `anemoi-core` modules to train a graph-based model
 3) Creating a forecast with `anemoi-inference` to run inference from a model checkpoint
-4) Verifying your forecast (or multiple) with `wxvx` to verify against gridded analysis or observervations
+4) Verifying forecasts with `wxvx` against gridded analysis or observervations
 
-Throughout this process you will also use a `eagle-tools` library that provides various utilites for tasks such as executing certain modules or post-processing needs.
+This pipeline also implements an `eagle-tools` library that provides various utilites for tasks such as executing modules or post-processing needs.
 
 For more information about model configurations or the various steps of the pipeline, please see our [documentation](https://epic-eagle.readthedocs.io/en/latest/).
 

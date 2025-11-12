@@ -1,6 +1,14 @@
-### Conda Environment Setup on Ursa
+## nested-EAGLE Setup on Ursa
 
-Before starting anything, you must create two conda environments.
+There are two folders:
+
+1) `scientific_workflow` will guide you through an entire ML pipeline to create training data, train a model, run inference, and verify a forecast. 
+
+2) `operational_inference` provides scripts to run inference from a checkpoint in near real time. These scripts will assume you have a checkpoint from completing `scientific_workflow` and want to run a near real time forecast with it.
+
+#### Conda Environments
+
+Two conda environments are required to complete this pipeline:
 1) `eagle` environment to use for data creation, training, and inference
 2) `wxvx` environment to use for verification
 

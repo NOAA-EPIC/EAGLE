@@ -1,8 +1,14 @@
-## Nested-EAGLE Workflow
+## nested-EAGLE Workflow
 
-Follow the workflow outlined below to complete the entire pipeline.
+Please see our [nested-EAGLE documentation](https://epic-eagle.readthedocs.io/en/latest/nested_eagle.html) for more information about the nested-EAGLE setup, such as a description of the model architucture and an explanation about the nested domain.
 
-Please see our [nested-eagle documentation](https://epic-eagle.readthedocs.io/en/latest/nested_eagle.html) for more information about the Nested-EAGLE setup, such as a description of the model architucture and an explanation about the nested domain.
+#### Workflow Instructions
+
+Before beginning, clone this repository:
+
+```
+git clone https://github.com/NOAA-EPIC/global-eagle.git
+```
 
 #### Step 1: Data Creation (/data)
 
