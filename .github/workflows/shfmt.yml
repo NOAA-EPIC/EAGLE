@@ -1,5 +1,5 @@
 ---
-name: Nested-EAGLE shfmt
+name: shfmt
 
 on:
   push:

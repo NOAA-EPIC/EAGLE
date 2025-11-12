@@ -7,9 +7,15 @@
 
 ## Description:
 <!-- This description will become the commit message for the PR. -->
+<!-- See https://cbea.ms/git-commit for commit message suggestions. -->
 <!--
 Provide a clear and concise description of *what* this PR does and *why*.
 Explain why this change is needed and any context that helps reviewers.
+Add the related GitHub Issues here.
+Please be sure to add the issue this PR resolves using the word "Resolves". If there are any issues that are related but not yet resolved (including in other repos), you may use "Refs".
+Resolves #1234
+Refs #4321
+Refs NOAA-EMC/repo#5678
 -->
 
 ## Type of change:
@@ -20,7 +26,6 @@ Delete options that are not applicable.
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Code cleanup or refactor
-- [ ] Test update
 - [ ] Documentation update
 - [ ] CI/CD or tooling change
 
@@ -44,31 +49,17 @@ Provide a concise commit message for any subcomponents; delete unnecessary info.
 * UFS2ARCO - 
 * WXVX - 
 ```
-## Git Tracking
-### NOAA-EPIC/EAGLE and Subcomponent Issues:
+## Subcomponent Pull Requests:
 <!--
-Add the related GitHub Issues here.
-Please be sure to add the issue this PR solves using the word "Resolves". If there are any issues that are related but not yet resolved (including in other repos), you may use "Refs".
-Resolves #1234
-Refs #4321
-Refs NOAA-EMC/repo#5678
--->
-
-### Subcomponent Pull Requests:
-<!--
-Provide a list of subcomponents involved with this PR and include links to subcomponent PRs.
+Provide a list of NOAA-EPIC/EAGLE subcomponents involved with this PR and include links to subcomponent PRs.
 Example:
+* EAGLE: NOAA-EPIC/EAGLE#13
 * UFS2ARCO: NOAA-PSL/UFS2ARCO#734
 * WXVX: maddenp-cu/wxvx#33
 Delete sections that are not needed.
 -->
+* EAGLE -
 * UFS2ARCO - 
 * WXVX - 
 * None
 
-### NOAA-EPIC/EAGLE Blocking Dependencies:
-<!--
-Please include any NOAA-EPIC/EAGLE PRs (with links) that need to be completed before this one; delete what is not needed.
--->
-- [ ] Blocked by #
-- [ ] None
