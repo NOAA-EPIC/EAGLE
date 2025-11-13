@@ -14,7 +14,7 @@ forecast:
       inittime: forecast_reference_time
       validtime: time
   name: anemoi_results
-  path: /content/EAGLE/global_Eagle/getting_started/colab_notebook_demo/verification/prewxvx/postprocessed_files/2022-01-03T00_postprocessed.nc
+  path: /content/EAGLE/global_Eagle/getting_started/colab_notebook_demo/verification/prewxvx/postprocessed_files/global.2022-01-03T12.240h.nc
   projection:
     proj: latlon
 leadtimes:
