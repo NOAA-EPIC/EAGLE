@@ -106,6 +106,8 @@ jobs:
                sleep 30  # Wait for 30 seconds before checking again.
             done
 
+          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/inference
+          find ./inference_files -name "*.nc" -print -quit | grep -q . || { echo "Error: No inference files found."; exit 1; } 
           echo "Slurm job $JOB_ID to run inference on the data has been completed."
 
   Perform_Inference_Postprocessing:
@@ -131,8 +133,8 @@ jobs:
             done
 
           cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/prewxvx/postprocessed_files
-          find ./nested-global -name "*.nc" -print -quit | grep -q . || { echo "Error: No global postprocessed files found."; exit 1; } 
-          find ./nested-lam -name "*.nc" -print -quit | grep -q . || { echo "Error: No lam postprocessed files found."; exit 1; } 
+          find ./global -name "*.nc" -print -quit | grep -q . || { echo "Error: No global postprocessed files found."; exit 1; } 
+          find ./lam -name "*.nc" -print -quit | grep -q . || { echo "Error: No lam postprocessed files found."; exit 1; } 
           echo "Slurm job $JOB_ID to perform inference postprocessing has been completed."
 
   Perform_Verification:
