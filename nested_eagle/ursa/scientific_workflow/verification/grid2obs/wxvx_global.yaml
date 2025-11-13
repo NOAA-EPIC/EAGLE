@@ -15,23 +15,17 @@ forecast:
     time:
       inittime: forecast_reference_time
       validtime: time
-  name: nested_lam
-  path: postprocessed_files/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc
+  name: nested_global
+  path: ../prewxvx/postprocessed_files/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc
   projection:
-    a: 6371229
-    b: 6371229
-    lat_0: 38.5
-    lat_1: 38.5
-    lat_2: 38.5
-    lon_0: 262.5
-    proj: lcc
+    proj: latlon
 leadtimes:
   start: 0
   step: 6
   stop: 240
 meta:
   grids: "{{ meta.workdir }}/grids"
-  workdir: wxvx_workdir/lam
+  workdir: wxvx_workdir/global
 paths:
   grids:
     forecast: "{{ meta.grids }}/forecast"

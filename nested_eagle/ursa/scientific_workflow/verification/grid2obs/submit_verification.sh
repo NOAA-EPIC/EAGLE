@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J nested_eagle_verification
+#SBATCH -J nested_eagle_obs_verification
 #SBATCH -o slurm/verification.%j.out
 #SBATCH -e slurm/verification.%j.err
 #SBATCH --account=epic
