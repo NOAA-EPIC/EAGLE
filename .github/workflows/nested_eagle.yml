@@ -116,7 +116,7 @@ jobs:
     steps:
       - name: Perform inference postprocessing
         run: |
-          cd nested_eagle/ursa/scientific_workflow/verification
+          cd nested_eagle/ursa/scientific_workflow/verification/prewxvx
 
           mkdir -p postprocessed_files/lam
 
