@@ -1,8 +1,8 @@
 baseline:
-  compare: false
-  name: PREPBUFR
-  type: point
-  url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
+  compare: true
+  name: GFS
+  type: grid
+  url: https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{{ yyyymmdd }}/{{ hh }}/atmos/gfs.t{{ hh }}z.pgrb2.0p25.f{{ "%03d" % fh }}
 cycles:
   start: 2022-02-03T12:00:00
   step: 0
@@ -16,24 +16,24 @@ forecast:
       inittime: forecast_reference_time
       validtime: time
   name: nested_global
-  path: postprocessed_files/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc
+  path: ../prewxvx/postprocessed_files/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc
   projection:
     proj: latlon
 leadtimes:
   start: 0
   step: 6
-  stop: 240
+  stop: 48
 meta:
   grids: "{{ meta.workdir }}/grids"
   workdir: wxvx_workdir/global
 paths:
   grids:
     forecast: "{{ meta.grids }}/forecast"
-  obs: "{{ meta.workdir }}/obs"
+    baseline: "{{ meta.grids }}/baseline"
   run: "{{ meta.workdir }}/run"
 regrid:
-  method: BILIN
-  to: G104
+  method: NEAREST
+  to: forecast
 variables:
   t2m:
     level_type: heightAboveGround

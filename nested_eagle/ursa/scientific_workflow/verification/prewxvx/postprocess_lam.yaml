@@ -1,4 +1,4 @@
-forecast_path: ../inference/inference_files
+forecast_path: ../../inference/inference_files
 output_path: postprocessed_files/lam
 model_type: nested-lam
 lam_index: 64220

@@ -7,7 +7,7 @@ Please see our [nested-EAGLE documentation](https://epic-eagle.readthedocs.io/en
 Before beginning, clone this repository:
 
 ```
-git clone https://github.com/NOAA-EPIC/global-eagle.git
+git clone https://github.com/NOAA-EPIC/EAGLE.git
 ```
 
 #### Step 1: Data Creation (/data)
