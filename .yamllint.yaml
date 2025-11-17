@@ -1,0 +1,8 @@
+extends: default
+
+ignore: global_eagle
+
+rules:
+  line-length:
+    max: 100
+    level: warning

@@ -32,7 +32,7 @@ jobs:
 
           JOB_ID=$(sbatch submit_grids.sh | awk '{print $4}')
              echo "Submitted Slurm job with ID: $JOB_ID"
-             
+
              while squeue -j $JOB_ID &>/dev/null; do
                echo "Slurm job $JOB_ID is still running or pending. Waiting..."
                sleep 30 # Wait for 30 seconds before checking again
@@ -59,7 +59,6 @@ jobs:
                 squeue -j ${JOB_ID1},${JOB_ID2}
                 sleep 30  # Wait for 30 seconds before checking again.
              done
-             
              echo "Slurm jobs $JOB_ID1 and $JOB_ID2 to prepare the GFS & HRRR training data have completed."
 
   Run_Training:
@@ -82,9 +81,8 @@ jobs:
              sleep 30  # Wait for 30 seconds before checking again.
            done
              cd $CHECKPOINT
-             lsof -w "$(find . -name inference-last.ckpt)" && sleep 10 || echo "file is written" 
+             lsof -w "$(find . -name inference-last.ckpt)" && sleep 10 || echo "file is written"
              scancel $JOB_ID
-             
            echo "Slurm job to train the data has been completed."
 
   Run_Inference:
@@ -100,14 +98,14 @@ jobs:
           JOB_ID=$(sbatch submit_inference.sh | awk '{print $4}')
 
             echo "Submitted Inference Slurm job with ID: $JOB_ID"
-           
+
             while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
                squeue -j $JOB_ID
                sleep 30  # Wait for 30 seconds before checking again.
             done
 
           cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/inference
-          find ./inference_files -name "*.nc" -print -quit | grep -q . || { echo "Error: No inference files found."; exit 1; } 
+          find ./inference_files -name "*.nc" -print -quit | grep -q . || { echo "Error: No inference files found."; exit 1; }
           echo "Slurm job $JOB_ID to run inference on the data has been completed."
 
   Perform_Inference_Postprocessing:
@@ -126,15 +124,15 @@ jobs:
           JOB_ID=$(sbatch submit_postprocessing.sh | awk '{print $4}')
 
             echo "Submitted Validation Slurm job with ID: $JOB_ID"
-           
+
             while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
                squeue -j $JOB_ID
                sleep 30  # Wait for 30 seconds before checking again.
             done
 
           cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/prewxvx/postprocessed_files
-          find ./global -name "*.nc" -print -quit | grep -q . || { echo "Error: No global postprocessed files found."; exit 1; } 
-          find ./lam -name "*.nc" -print -quit | grep -q . || { echo "Error: No lam postprocessed files found."; exit 1; } 
+          find ./global -name "*.nc" -print -quit | grep -q . || { echo "Error: No global postprocessed files found."; exit 1; }
+          find ./lam -name "*.nc" -print -quit | grep -q . || { echo "Error: No lam postprocessed files found."; exit 1; }
           echo "Slurm job $JOB_ID to perform inference postprocessing has been completed."
 
   Perform_Verification:
@@ -160,13 +158,13 @@ jobs:
              done
 
             cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2obs/wxvx_workdir
-            find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2obs verification plots found."; exit 1; } 
-            find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2obs verification plots found."; exit 1; } 
+            find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2obs verification plots found."; exit 1; }
+            find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2obs verification plots found."; exit 1; }
             echo "Grid2obs Verification process has been successfully completed."
 
             cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2grid/wxvx_workdir
-            find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2grid verification plots found."; exit 1; } 
-            find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2grid verification plots found."; exit 1; } 
+            find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2grid verification plots found."; exit 1; }
+            find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2grid verification plots found."; exit 1; }
             echo "Grid2grid Verification process has been successfully completed."
       - name: Remove label from pull request
         if: always()
