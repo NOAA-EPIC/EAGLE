@@ -26,14 +26,11 @@ jobs:
         with:
           labels: "ci-running" # Adding ci-running label to prevent duplicate runs.
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Submit Initial Grids (Slurm) and wait
+      - name: Submit Initial Grids
         run: |
           set -euo pipefail
-          cd nested_eagle/ursa/scientific_workflow/data
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/data" 
 
-          JOB_ID=$(sbatch submit_grids.sh | awk '{print $4}')
-             echo "Submitted Slurm job with ID: $JOB_ID"
-             
           submit_and_wait() {
             local submit_script="$1"
             JOB_ID=$(sbatch "$submit_script" | awk '{print $4}')
@@ -63,7 +60,7 @@ jobs:
       - name: Prepare GFS & HRRR Training Data
         run: |
           set -euo pipefail 
-          cd nested_eagle/ursa/scientific_workflow/data
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/data" 
 
           submit_job() {
             local script="$1"
@@ -156,29 +153,33 @@ jobs:
       - name: Run Inference against the training data
         run: |
           set -euo pipefail
-          cd nested_eagle/ursa/scientific_workflow/inference
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/inference" 
 
-          JOB_ID=$(sbatch submit_inference.sh | awk '{print $4}')
-          echo "Submitted Inference Slurm job with ID: $JOB_ID"
+          submit_and_wait() {
+            local submit_script="$1"
+            JOB_ID=$(sbatch "$submit_script" | awk '{print $4}')
+            echo "Submitted Slurm job with ID: $JOB_ID"
+            while true; do
+              STATE=$(sacct -j "$JOB_ID" --format=State --noheader | head -n1 | awk '{print $1}')
+              case "${STATE:-}" in
+                COMPLETED) echo "Slurm job $JOB_ID COMPLETED"; break ;;
+                FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
+                  echo "Slurm job $JOB_ID terminal failure: $STATE"; exit 1 ;;
+                ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
+                *) echo "Slurm job $JOB_ID state: $STATE" ;;
+              esac
+              sleep 20
+            done
+          }
 
-          while true; do
-            STATE=$(sacct -j "$JOB_ID" --format=State --noheader | head -n1 | awk '{print $1}')
-            case "${STATE:-}" in
-              COMPLETED) echo "Inference job $JOB_ID COMPLETED"; break ;;
-              FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
-                echo "Inference job $JOB_ID terminal failure: $STATE"; exit 1 ;;
-              ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
-              *) echo "Inference job $JOB_ID state: $STATE" ;;
-            esac
-            sleep 20
-          done
+          submit_and_wait submit_inference.sh
 
           cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/inference"
           find ./inference_files -name "*.nc" -print -quit | grep -q . || { echo "Error: No inference files found."; exit 1; }
           echo "Inference stage completed."
 
   Perform_Inference_Postprocessing:
-    # The type of runner that the job will run on
+     cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/inference"# The type of runner that the job will run on
     runs-on: ursa
     timeout-minutes: 1440
     needs: Run_Inference
@@ -191,20 +192,24 @@ jobs:
           mkdir -p postprocessed_files/lam
           mkdir -p postprocessed_files/global
 
-          JOB_ID=$(sbatch submit_postprocessing.sh | awk '{print $4}')
-          echo "Submitted postprocessing Slurm job with ID: $JOB_ID"
+          submit_and_wait() {
+            local submit_script="$1"
+            JOB_ID=$(sbatch "$submit_script" | awk '{print $4}')
+            echo "Submitted Slurm job with ID: $JOB_ID"
+            while true; do
+              STATE=$(sacct -j "$JOB_ID" --format=State --noheader | head -n1 | awk '{print $1}')
+              case "${STATE:-}" in
+                COMPLETED) echo "Slurm job $JOB_ID COMPLETED"; break ;;
+                FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
+                  echo "Slurm job $JOB_ID terminal failure: $STATE"; exit 1 ;;
+                ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
+                *) echo "Slurm job $JOB_ID state: $STATE" ;;
+              esac
+              sleep 20
+            done
+          }
 
-          while true; do
-            STATE=$(sacct -j "$JOB_ID" --format=State --noheader | head -n1 | awk '{print $1}')
-            case "${STATE:-}" in
-              COMPLETED) echo "Postprocessing job $JOB_ID COMPLETED"; break ;;
-              FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
-                echo "Postprocessing job $JOB_ID terminal failure: $STATE"; exit 1 ;;
-              ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
-              *) echo "Postprocessing job $JOB_ID state: $STATE" ;;
-            esac
-            sleep 20
-          done
+          submit_and_wait submit_postprocessing.sh
 
           cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/prewxvx/postprocessed_files"
           find ./global -name "*.nc" -print -quit | grep -q . || { echo "Error: No global postprocessed files found."; exit 1; }
