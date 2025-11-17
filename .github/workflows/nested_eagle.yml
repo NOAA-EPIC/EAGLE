@@ -98,7 +98,7 @@ jobs:
           JOB_ID=$(sbatch submit_inference.sh | awk '{print $4}')
 
             echo "Submitted Inference Slurm job with ID: $JOB_ID"
- 
+            
             while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
                squeue -j $JOB_ID
                sleep 30  # Wait for 30 seconds before checking again.
@@ -124,7 +124,7 @@ jobs:
           JOB_ID=$(sbatch submit_postprocessing.sh | awk '{print $4}')
 
             echo "Submitted Validation Slurm job with ID: $JOB_ID"
- 
+
             while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
                squeue -j $JOB_ID
                sleep 30  # Wait for 30 seconds before checking again.
