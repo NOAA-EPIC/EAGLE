@@ -1,0 +1,40 @@
+forecast_path: ../../inference/inference_files
+output_path: postprocessed_files/
+model_type: global
+
+vars_of_interest:
+  - pressfc
+  - spfh
+  - spfh2m
+  - tmp
+  - tmp2m
+  - ugrd
+  - ugrd10m
+  - vgrd
+  - vgrd10m
+
+levels:
+  - 25
+  - 75
+  - 125
+  - 175
+  - 225
+  - 275
+  - 325
+  - 375
+  - 425
+  - 475
+  - 525
+  - 575
+  - 625
+  - 675
+  - 725
+  - 775
+  - 825
+  - 875
+  - 925
+  - 975
+
+start_date: 2022-01-03T12
+end_date: 2022-01-03T12
+freq: 6h

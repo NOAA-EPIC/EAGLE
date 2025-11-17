@@ -10,10 +10,10 @@ dependencies:
   - pip:
       - torch<2.7
       - anemoi-datasets==0.5.26
-      - anemoi-graphs==0.6.4
-      - anemoi-models==0.9.2
-      - anemoi-training==0.6.2
-      - anemoi-inference==0.7.1
-      - anemoi-utils==0.4.35
-      - anemoi-transform==0.1.16
+      - anemoi-graphs==0.6.6
+      - anemoi-models==0.9.5
+      - anemoi-training==0.6.5
+      - anemoi-inference==0.7.3
+      - anemoi-utils==0.4.37
+      - anemoi-transform==0.1.17
       - eagle-tools

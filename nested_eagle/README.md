@@ -1,10 +1,8 @@
-### Overview
+## Overview
 
-There are two folders within this `nested_eagle` directory:
+As of right now, the nested-EAGLE pipline has been configured to run on Ursa. It is possible to run these configurations on other machines; however, that will take some adjustments. A few tips are provided throughout the pipeline to help users implement this pipeline elsewhere.
 
-1) `scientific_workflow` will guide you through an entire ML pipeline to create training data, train a model, run inference, and verify a forecast. 
-
-2) `operational_inference` provides scripts to run inference from a checkpoint in near real time. These scripts will assume you have a checkpoint from completing `scientific_workflow` and want to run a near real time forecast with it.
+See the `ursa` folder to complete the `nested-EAGLE` pipeline on Ursa.
 
 ### Acknowledgements
 

@@ -11,7 +11,8 @@
 #SBATCH --qos=gpuwf
 #SBATCH --ntasks-per-node=1
 
-source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate 
+# shellcheck disable=SC1091
+source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate
 conda activate eagle
 module load openmpi cuda gcc
 

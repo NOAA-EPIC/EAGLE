@@ -44,7 +44,7 @@ optimizer:
 
 # select model
 model_task:
-  anemoi.training.train.forecaster.GraphForecaster
+  anemoi.training.train.tasks.GraphForecaster
   # select strategy
 strategy:
   _target_: anemoi.training.distributed.strategy.DDPGroupStrategy

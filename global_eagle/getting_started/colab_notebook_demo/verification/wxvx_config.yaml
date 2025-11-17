@@ -4,7 +4,7 @@ baseline:
   type: grid
   url: https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{{ yyyymmdd }}/{{ hh }}/atmos/gfs.t{{ hh }}z.pgrb2.0p25.f{{ "%03d" % fh }}
 cycles:
-  - 2022-01-03T00:00:00
+  - 2022-01-03T12:00:00
 forecast:
   coords:
     latitude: latitude
@@ -14,17 +14,17 @@ forecast:
       inittime: forecast_reference_time
       validtime: time
   name: anemoi_results
-  path: /content/global-eagle/examples/getting_started/colab_notebook_demo/inference/2022-01-03T00_postprocessed.nc
+  path: /content/EAGLE/global_eagle/getting_started/colab_notebook_demo/verification/prewxvx/postprocessed_files/global.2022-01-03T12.240h.nc
   projection:
     proj: latlon
 leadtimes:
   start: "00:00:00"
   step: "06:00:00"
-  stop: "48:00:00"
+  stop: "240:00:00"
 meta:
   grids: "{{ meta.workdir }}/grids"
   levels: &levels [925]
-  workdir: /content/global-eagle/examples/getting_started/colab_notebook_demo/verification
+  workdir: /content/EAGLE/global_eagle/getting_started/colab_notebook_demo/verification
 paths:
   grids:
     baseline: "{{ meta.grids }}/baseline"

@@ -2,6 +2,9 @@
 Train a Graph-Based Model
 =================
 
+anemoi-core Overview
+-------------------------
+
 We deploy the anemoi-core modules to train a graph-based model.
 
 See Anemoi documentation for further information:

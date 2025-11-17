@@ -68,7 +68,7 @@ dataloader:
   num_workers:
     training: 2
     validation: 2
-    test: 2
+    test: 1
   batch_size:
     # note that the batch_size is set locally, so
     # global_batch_size = num_nodes * num_gpus_per_node * batch_size / num_gpus_per_model
@@ -77,13 +77,13 @@ dataloader:
     test: 1
   training:
     start: "2022-01-01"
-    end: "2022-01-02"
-  validation:
-    start: "2022-01-03"
     end: "2022-01-04"
-  test:
+  validation:
     start: "2022-01-05"
-    end: "2022-01-06"
+    end: "2022-01-14"
+  test:
+    start: "2022-01-15"
+    end: "2022-01-16"
 
 diagnostics:
   plot:
@@ -103,7 +103,7 @@ diagnostics:
     callbacks:
       # Add plot callbacks here
       - _target_: anemoi.training.diagnostics.callbacks.plot.GraphTrainableFeaturesPlot
-        every_n_epochs: 5
+        every_n_epochs: 1
       - _target_: anemoi.training.diagnostics.callbacks.plot.PlotLoss
         # group parameters by categories when visualizing contributions to the loss
         # one-parameter groups are possible to highlight individual parameters

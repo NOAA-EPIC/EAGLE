@@ -2,17 +2,17 @@ mover:
   name: mpidatamover
 
 directories:
-  zarr: global-eagle/examples/getting_started/colab_notebook_demo/data/replay.zarr
-  cache: global-eagle/examples/getting_started/colab_notebook_demo/data/cache
-  logs: global-eagle/examples/getting_started/colab_notebook_demo/data/logs
+  zarr: EAGLE/global_eagle/getting_started/colab_notebook_demo/data/replay.zarr
+  cache: EAGLE/global_eagle/getting_started/colab_notebook_demo/data/cache
+  logs: EAGLE/global_eagle/getting_started/colab_notebook_demo/data/logs
 
 source:
   name: gcs_replay_atmosphere
   uri: gs://noaa-ufs-gefsv13replay/ufs-hr1/0.25-degree-subsampled/03h-freq/zarr/fv3.zarr
   time:
     start: 2022-01-01T00
-    end: 2022-01-04T21
-    freq: 3h
+    end: 2022-01-14T18
+    freq: 6h
 
   variables:
     # 3D Atmospheric Variables
@@ -66,7 +66,7 @@ target:
   sort_channels_by_levels: True
   statistics_period:
     start: 2022-01-01T00
-    end: 2022-01-04T21
+    end: 2022-01-04T18
 
   forcings:
     - cos_latitude

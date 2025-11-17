@@ -9,6 +9,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 
+# shellcheck disable=SC1091
 source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate
 conda activate eagle
 module load gcc

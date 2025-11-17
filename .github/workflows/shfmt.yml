@@ -1,0 +1,28 @@
+---
+name: shfmt
+
+on:
+  push:
+    branches: [main, feature/*]
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  shfmt:
+    name: Run shfmt format checker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install shfmt
+        run: |
+          SHFMT_VERSION="v3.7.0"
+          curl -sSL "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64" -o shfmt
+          chmod +x shfmt
+
+      - name: Run shfmt
+        run: |
+          ./shfmt -d nested_eagle/ .github/ docs/

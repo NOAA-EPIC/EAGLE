@@ -2,9 +2,9 @@ mover:
   name: mpidatamover
 
 directories:
-  zarr: global-eagle/examples/getting_started/colab_notebook_demo/data/gfs.zarr
-  cache: global-eagle/examples/getting_started/colab_notebook_demo/data/cache
-  logs: global-eagle/examples/getting_started/colab_notebook_demo/data/logs
+  zarr: EAGLE/global_eagle/getting_started/colab_notebook_demo/data/gfs.zarr
+  cache: EAGLE/global_eagle/getting_started/colab_notebook_demo/data/cache
+  logs: EAGLE/global_eagle/getting_started/colab_notebook_demo/data/logs
 
 source:
   name: gfs_archive

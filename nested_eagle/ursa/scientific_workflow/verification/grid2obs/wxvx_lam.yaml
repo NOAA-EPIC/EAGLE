@@ -1,0 +1,74 @@
+baseline:
+  compare: false
+  name: PREPBUFR
+  type: point
+  url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
+cycles:
+  start: 2022-02-03T12:00:00
+  step: 0
+  stop: 2022-02-03T12:00:00
+forecast:
+  coords:
+    latitude: latitude
+    level: level
+    longitude: longitude
+    time:
+      inittime: forecast_reference_time
+      validtime: time
+  name: nested_lam
+  path: ../prewxvx/postprocessed_files/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc
+  projection:
+    a: 6371229
+    b: 6371229
+    lat_0: 38.5
+    lat_1: 38.5
+    lat_2: 38.5
+    lon_0: 262.5
+    proj: lcc
+leadtimes:
+  start: 0
+  step: 6
+  stop: 240
+meta:
+  grids: "{{ meta.workdir }}/grids"
+  workdir: wxvx_workdir/lam
+paths:
+  grids:
+    forecast: "{{ meta.grids }}/forecast"
+  obs: "{{ meta.workdir }}/obs"
+  run: "{{ meta.workdir }}/run"
+regrid:
+  method: BILIN
+  to: G104
+variables:
+  t2m:
+    level_type: heightAboveGround
+    levels: [2]
+    name: 2t
+  gh:
+    level_type: isobaricInhPa
+    levels: [500]
+    name: gh
+  sp:
+    level_type: surface
+    name: sp
+  t:
+    level_type: isobaricInhPa
+    levels: [850]
+    name: t
+  u:
+    level_type: isobaricInhPa
+    levels: [250]
+    name: u
+  u10:
+    level_type: heightAboveGround
+    levels: [10]
+    name: u_10m
+  v:
+    level_type: isobaricInhPa
+    levels: [250]
+    name: v
+  v10:
+    level_type: heightAboveGround
+    levels: [10]
+    name: v_10m

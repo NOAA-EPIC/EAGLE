@@ -3,7 +3,7 @@ Welcome to Eagle!
 ###################
 
 Welcome to the github repository for Project EAGLE (Experimental AI Global and Limited-area Ensemble forecast system)! 
-EAGLE is a joint effort  between NOAA Research Laboratories and the Earth Prediction Innovation Center (EPIC) in the 
+EAGLE is a joint effort between NOAA Research Laboratories and the Earth Prediction Innovation Center (EPIC) in the 
 Office of Oceanic and Atmospheric Research (OAR), and the National Weather Service (NWS). 
 The goal of Project EAGLE is to provide the community with tools to test and deploy their own AI models for weather prediction. 
 As a part of Project EAGLE, this repository current contains various configurations to guide users through 
@@ -18,17 +18,18 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 1
-   :caption: Full Pipeline
+   :caption: A ML Pipeline for Weather Prediction
 
-   pipeline_overview
+   environment_setup
    data_creation
    train_a_model
    inference
    verification
+   visualize_results
 
 .. toctree::
    :maxdepth: 1
-   :caption: Examples
+   :caption: Modeling Options
 
    getting_started
    nested_eagle

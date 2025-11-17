@@ -11,10 +11,10 @@
 #SBATCH --qos=gpuwf
 #SBATCH --ntasks-per-node=1
 
-export CHECKPOINT=`ls -d ../training/outputs/checkpoint/*`
-
+CHECKPOINT=$(ls -d ../training/outputs/checkpoint/*)
 sed -i "/^.*checkpoint_path:.*$/c\checkpoint_path: $CHECKPOINT\/inference-last.ckpt" inference.yaml
 
+# shellcheck disable=SC1091
 source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate
 conda activate eagle
 module load cuda

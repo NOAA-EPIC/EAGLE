@@ -1,9 +1,11 @@
 =================
-Verify a Forecast
+Verify Model Performance
 =================
 
-wxvx: A Lightweight MET-Driven Verification Workflow
+wxvx Overview
 ----------------------------------------------------
+
+wxvx: A Lightweight MET-Driven Verification Workflow
 
 NOAA is developing **wxvx**, a Python-based workflow that streamlines verification of rapidly evolving AI-based weather models.  
 Traditional tools like **MET** are powerful but can be difficult to install, configure, and adapt to non-standard AI datasets.  

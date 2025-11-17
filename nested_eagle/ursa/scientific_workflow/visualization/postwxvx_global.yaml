@@ -1,0 +1,21 @@
+start_date: 2022-02-03T12
+end_date: 2022-02-03T12
+freq: 6h
+
+leadtimes:
+  start: 0
+  end: 240
+  step: 6
+
+variable_prefixes:
+  - 2t_heightAboveGround_0002
+  - u_10m_heightAboveGround_0010
+  - v_10m_heightAboveGround_0010
+  - gh_isobaricInhPa_0500
+  - t_isobaricInhPa_0850
+  - u_isobaricInhPa_0250
+  - v_isobaricInhPa_0250
+  - sp_surface
+
+stat_prefix: point_stat_nested_global
+work_path: ../verification/wxvx_workdir/global

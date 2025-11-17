@@ -1,11 +1,11 @@
-checkpoint: "../train/training-output/checkpoint/35a9632c-ab04-4284-af5e-4defcef37cff/inference-last.ckpt"
+checkpoint_path: ../train/training-output/checkpoint/ddf570a0-ea8f-4c25-b9ff-0c5077ef1af7/inference-last.ckpt
 
-lead_time: 48 # hours
+lead_time: 240
 
-date: 2022-01-03T00
+start_date: 2022-01-03T12
+end_date: 2022-01-03T12
+freq: 6h
 
-input:
-  dataset: "../data/replay.zarr"
+input_dataset_kwargs: ../data/replay.zarr
 
-output:
-  netcdf: "2022-01-03T00.nc"
+output_path: inference_files

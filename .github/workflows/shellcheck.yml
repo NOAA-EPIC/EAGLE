@@ -1,0 +1,34 @@
+---
+name: Shellcheck
+
+on:
+  push:
+    branches: [main, feature/*]
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  shellcheck:
+    name: Run shellcheck linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          ignore_paths: ./global_eagle/**
+
+      - name: Run ShellCheck
+        run: |
+          scripts=$(find nested_eagle/ docs/ .github/ -type f -name "*.sh")
+          if [ -z "$scripts" ]; then
+            echo "No shell scripts found."
+          else
+            echo "Running ShellCheck on the following scripts:"
+            echo "$scripts"
+            shellcheck $scripts
+          fi

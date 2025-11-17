@@ -5,9 +5,11 @@ name: Nested Eagle CI Pipeline
 on:
   pull_request_review:
     types: [submitted]
+    paths:
+      - "nested_eagle/**" #only run for changes to nested eagle changes.
 jobs:
   Submit_Grids:
-    if: github.event.review.state == 'approved'
+    if: ${{ github.event.review.state == 'approved' && !contains(github.event.pull_request.labels.*.name, 'ci-running') }}
     # Only run the workflow if a PR is submitted and approved.
     runs-on: ursa
     timeout-minutes: 1440
@@ -19,6 +21,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - name: Add a ci-running label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: "ci-running" # Adding ci-running label to prevent duplicate runs.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Submit Initial Grids
         run: |
           cd nested_eagle/ursa/scientific_workflow/data
@@ -33,16 +40,15 @@ jobs:
 
              echo "Slurm job $JOB_ID to generate the grids has completed."
 
-  Generate_Forecasts:
+  Prepare_Training_Data:
     # The type of runner that the job will run on
     runs-on: ursa
     timeout-minutes: 1440
     needs: Submit_Grids
     steps:
-      - name: Generate GFS & HRRR Forecasts
+      - name: Prepare GFS & HRRR Training Data
         run: |
           cd nested_eagle/ursa/scientific_workflow/data
-          echo "Slurm jobs to generate the GFS & HRRR forecasts have completed."
 
           JOB_ID1=$(sbatch submit_gfs.sh | awk '{print $4}')
           JOB_ID2=$(sbatch submit_hrrr.sh | awk '{print $4}')
@@ -54,14 +60,15 @@ jobs:
                 sleep 30  # Wait for 30 seconds before checking again.
              done
              
-             echo "Slurm jobs $JOB_ID1 and $JOB_ID2 to generate the GFS & HRRR forecasts have completed."
+             echo "Slurm jobs $JOB_ID1 and $JOB_ID2 to prepare the GFS & HRRR training data have completed."
+
   Run_Training:
     # The type of runner that the job will run on
     runs-on: ursa
     timeout-minutes: 1440
-    needs: Generate_Forecasts
+    needs: Prepare_Training_Data
     steps:
-      - name: Run Training Against the Generated Forecasts
+      - name: Run Training With GFS & HRRR Input
         run: |
           cd nested_eagle/ursa/scientific_workflow/training
 
@@ -74,6 +81,8 @@ jobs:
              if [[ -n $JOB_ID ]]; then squeue -j $JOB_ID; fi
              sleep 30  # Wait for 30 seconds before checking again.
            done
+             cd $CHECKPOINT
+             lsof -w "$(find . -name inference-last.ckpt)" && sleep 10 || echo "file is written" 
              scancel $JOB_ID
              
            echo "Slurm job to train the data has been completed."
@@ -97,7 +106,9 @@ jobs:
                sleep 30  # Wait for 30 seconds before checking again.
             done
 
-             echo "Slurm job $JOB_ID to run inference on the data has been completed."
+          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/inference
+          find ./inference_files -name "*.nc" -print -quit | grep -q . || { echo "Error: No inference files found."; exit 1; } 
+          echo "Slurm job $JOB_ID to run inference on the data has been completed."
 
   Perform_Inference_Postprocessing:
     # The type of runner that the job will run on
@@ -107,9 +118,10 @@ jobs:
     steps:
       - name: Perform inference postprocessing
         run: |
-          cd nested_eagle/ursa/scientific_workflow/verification
+          cd nested_eagle/ursa/scientific_workflow/verification/prewxvx
 
           mkdir -p postprocessed_files/lam
+          mkdir -p postprocessed_files/global
 
           JOB_ID=$(sbatch submit_postprocessing.sh | awk '{print $4}')
 
@@ -119,30 +131,46 @@ jobs:
                squeue -j $JOB_ID
                sleep 30  # Wait for 30 seconds before checking again.
             done
-             
-             echo "Slurm job $JOB_ID to perform inference postprocessing has been completed."
+
+          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/prewxvx/postprocessed_files
+          find ./global -name "*.nc" -print -quit | grep -q . || { echo "Error: No global postprocessed files found."; exit 1; } 
+          find ./lam -name "*.nc" -print -quit | grep -q . || { echo "Error: No lam postprocessed files found."; exit 1; } 
+          echo "Slurm job $JOB_ID to perform inference postprocessing has been completed."
 
   Perform_Verification:
     # The type of runner that the job will run on
     runs-on: ursa
     timeout-minutes: 1440
-    needs: Perform_Inference_Postprocessing 
+    needs: Perform_Inference_Postprocessing
     steps:
-      - name: Perform verification with wxvx
+      - name: Perform grid2obs and grid2obs verification with wxvx
         run: |
-          cd nested_eagle/ursa/scientific_workflow/verification
+          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2obs
 
-          JOB_ID=$(sbatch submit_verification.sh | awk '{print $4}')
+          JOB_ID1=$(sbatch submit_obs_verification.sh | awk '{print $4}')
 
-            echo "Submitted Verification Slurm job with ID: $JOB_ID"
-           
-            while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
-               squeue -j $JOB_ID
-               sleep 30  # Wait for 30 seconds before checking again.
-            done
+          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2grid
 
-             echo "Slurm job $JOB_ID to perform verification has been completed."
+          JOB_ID2=$(sbatch submit_grid_verification.sh | awk '{print $4}')
 
-             cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/wxvx_workdir
-             find . -name "*.png" -print -quit | grep -q . || { echo "Error: No verification plots found."; exit 1; } 
-             echo "Verification process has been successfully completed."
+             echo "Submitted Slurm job with ID: $JOB_ID1"
+             echo "Submitted Slurm job with ID: $JOB_ID2"
+             while squeue -h -j ${JOB_ID1},${JOB_ID2} | grep -q "${JOB_ID1}\|${JOB_ID2}"; do
+                squeue -j ${JOB_ID1},${JOB_ID2}
+             done
+
+            cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2obs/wxvx_workdir
+            find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2obs verification plots found."; exit 1; } 
+            find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2obs verification plots found."; exit 1; } 
+            echo "Grid2obs Verification process has been successfully completed."
+
+            cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2grid/wxvx_workdir
+            find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2grid verification plots found."; exit 1; } 
+            find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2grid verification plots found."; exit 1; } 
+            echo "Grid2grid Verification process has been successfully completed."
+      - name: Remove label from pull request
+        if: always()
+        uses: mondeja/remove-labels-gh-action@v2.0.0
+        with:
+          labels: "ci-running"
+          token: ${{ secrets.GITHUB_TOKEN }}
