@@ -61,22 +61,23 @@ jobs:
         run: |
           set -euo pipefail 
           cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/data" 
-
           submit_job() {
             local script="$1"
             sbatch "$script" | awk '{print $4}'
           }
 
+          # Now takes two args: <job_id> <label>
           wait_terminal() {
             local id="$1"
+            local label="$2"
             while true; do
               STATE=$(sacct -j "$id" --format=State --noheader | head -n1 | awk '{print $1}')
               case "${STATE:-}" in
-                COMPLETED) echo "Job $id COMPLETED"; break ;;
+                COMPLETED) echo "${label} (${id}) COMPLETED"; break ;;
                 FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
-                  echo "Job $id terminal failure: $STATE"; exit 1 ;;
+                  echo "${label} (${id}) terminal failure: ${STATE}"; exit 1 ;;
                 ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
-                *) echo "Job $id state: $STATE" ;;
+                *) echo "${label} (${id}) state: ${STATE}" ;;
               esac
               sleep 20
             done
@@ -87,10 +88,11 @@ jobs:
           echo "Submitted GFS: $JOB_ID1"
           echo "Submitted HRRR: $JOB_ID2"
 
-          wait_terminal "$JOB_ID1"
-          wait_terminal "$JOB_ID2"
+          wait_terminal "$JOB_ID1" "GFS"
+          wait_terminal "$JOB_ID2" "HRRR"
 
           echo "GFS & HRRR training data preparation completed."
+
 
   Run_Training:
     # The type of runner that the job will run on
@@ -221,7 +223,7 @@ jobs:
     timeout-minutes: 1440
     needs: Perform_Inference_Postprocessing
     steps:
-      - name: Perform grid2obs and grid2obs verification with wxvx
+      - name: Perform grid2obs and grid2grid verification with wxvx
         run: |
           set -euo pipefail
 
@@ -234,23 +236,25 @@ jobs:
           echo "Submitted grid2obs: $JOB_ID1"
           echo "Submitted grid2grid: $JOB_ID2"
 
+          # Now takes two args: <job_id> <label>
           wait_terminal() {
             local id="$1"
+            local label="$2"
             while true; do
               STATE=$(sacct -j "$id" --format=State --noheader | head -n1 | awk '{print $1}')
               case "${STATE:-}" in
-                COMPLETED) echo "Job $id COMPLETED"; break ;;
+                COMPLETED) echo "${label} (${id}) COMPLETED"; break ;;
                 FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
-                  echo "Job $id terminal failure: $STATE"; exit 1 ;;
+                  echo "${label} (${id}) terminal failure: ${STATE}"; exit 1 ;;
                 ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
-                *) echo "Job $id state: $STATE" ;;
+                *) echo "${label} (${id}) state: ${STATE}" ;;
               esac
               sleep 20
             done
           }
 
-          wait_terminal "$JOB_ID1"
-          wait_terminal "$JOB_ID2"
+          wait_terminal "$JOB_ID1" "Grid2Obs"
+          wait_terminal "$JOB_ID2" "Grid2Grid"
 
           cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2obs/wxvx_workdir"
           find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2obs verification plots found."; exit 1; }
@@ -261,7 +265,6 @@ jobs:
           find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2grid verification plots found."; exit 1; }
           find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2grid verification plots found."; exit 1; }
           echo "Grid2grid verification completed."
-
 
       - name: Remove label from pull request
         if: always()
