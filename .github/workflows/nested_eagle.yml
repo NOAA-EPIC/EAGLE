@@ -28,17 +28,28 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Submit Initial Grids
         run: |
-          cd nested_eagle/ursa/scientific_workflow/data
+          set -euo pipefail
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/data" 
 
-          JOB_ID=$(sbatch submit_grids.sh | awk '{print $4}')
-             echo "Submitted Slurm job with ID: $JOB_ID"
-             
-             while squeue -j $JOB_ID &>/dev/null; do
-               echo "Slurm job $JOB_ID is still running or pending. Waiting..."
-               sleep 30 # Wait for 30 seconds before checking again
-             done
+          submit_and_wait() {
+            local submit_script="$1"
+            JOB_ID=$(sbatch "$submit_script" | awk '{print $4}')
+            echo "Submitted Slurm job with ID: $JOB_ID"
+            while true; do
+              STATE=$(sacct -j "$JOB_ID" --format=State --noheader | head -n1 | awk '{print $1}')
+              case "${STATE:-}" in
+                COMPLETED) echo "Slurm job $JOB_ID COMPLETED"; break ;;
+                FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
+                  echo "Slurm job $JOB_ID terminal failure: $STATE"; exit 1 ;;
+                ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
+                *) echo "Slurm job $JOB_ID state: $STATE" ;;
+              esac
+              sleep 20
+            done
+          }
 
-             echo "Slurm job $JOB_ID to generate the grids has completed."
+          submit_and_wait submit_grids.sh
+          echo "Grid generation completed."
 
   Prepare_Training_Data:
     # The type of runner that the job will run on
@@ -48,19 +59,66 @@ jobs:
     steps:
       - name: Prepare GFS & HRRR Training Data
         run: |
-          cd nested_eagle/ursa/scientific_workflow/data
+          set -euo pipefail 
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/data" 
+          submit_job() {
+            local script="$1"
+            sbatch "$script" | awk '{print $4}'
+          }
 
-          JOB_ID1=$(sbatch submit_gfs.sh | awk '{print $4}')
-          JOB_ID2=$(sbatch submit_hrrr.sh | awk '{print $4}')
+          # Best-effort current state right after submission
+          job_state() {
+            local id="$1"
+            local st
+            st=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
+            if [ -z "$st" ]; then
+              st=$(sacct -j "$id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')
+            fi
+            echo "${st:-UNKNOWN}"
+          }
 
-             echo "Submitted Slurm job with ID: $JOB_ID1"
-             echo "Submitted Slurm job with ID: $JOB_ID2"
-             while squeue -h -j ${JOB_ID1},${JOB_ID2} | grep -q "${JOB_ID1}\|${JOB_ID2}"; do
-                squeue -j ${JOB_ID1},${JOB_ID2}
-                sleep 30  # Wait for 30 seconds before checking again.
-             done
-             
-             echo "Slurm jobs $JOB_ID1 and $JOB_ID2 to prepare the GFS & HRRR training data have completed."
+          # Verbose wait: log PENDING/RUNNING transitions, then terminal state
+          wait_terminal() {
+            local id="$1"
+            local label="$2"
+            local prev=""
+            while true; do
+              local live state
+              live=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
+              if [ -n "$live" ]; then
+                state="$live"
+              else
+                state=$(sacct -j "$id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')
+                state="${state:-UNKNOWN}"
+              fi
+
+              if [ "$state" != "$prev" ]; then
+                echo "${label} (${id}) state: ${state}"
+                prev="$state"
+              fi
+
+              case "$state" in
+                COMPLETED) echo "${label} (${id}) COMPLETED"; break ;;
+                FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
+                  echo "${label} (${id}) terminal failure: ${state}"; exit 1 ;;
+              esac
+
+              sleep 20
+            done
+          }
+
+          JOB_ID1=$(submit_job submit_gfs.sh)
+          JOB_ID2=$(submit_job submit_hrrr.sh)
+
+          STATUS1=$(job_state "$JOB_ID1")
+          STATUS2=$(job_state "$JOB_ID2")
+          echo "Submitted GFS:  $JOB_ID1 (status: ${STATUS1})"
+          echo "Submitted HRRR: $JOB_ID2 (status: ${STATUS2})"
+
+          wait_terminal "$JOB_ID1" "GFS"
+          wait_terminal "$JOB_ID2" "HRRR"
+
+          echo "GFS & HRRR training data preparation completed."
 
   Run_Training:
     # The type of runner that the job will run on
@@ -70,22 +128,49 @@ jobs:
     steps:
       - name: Run Training With GFS & HRRR Input
         run: |
+          set -euo pipefail
           cd nested_eagle/ursa/scientific_workflow/training
 
-          JOB_ID=$(sbatch submit_training.sh | awk '{print $4}')
-          CHECKPOINT="$PWD/outputs/checkpoint"
+          CHECKPOINT_DIR="$PWD/outputs/checkpoint"
 
-          echo "Submitted Slurm job with ID: $JOB_ID"
-           while [ ! -d "$CHECKPOINT" ]; do
-             echo "Directory '$CHECKPOINT' doesn't exist yet."
-             if [[ -n $JOB_ID ]]; then squeue -j $JOB_ID; fi
-             sleep 30  # Wait for 30 seconds before checking again.
-           done
-             cd $CHECKPOINT
-             lsof -w "$(find . -name inference-last.ckpt)" && sleep 10 || echo "file is written" 
-             scancel $JOB_ID
-             
-           echo "Slurm job to train the data has been completed."
+          JOB_ID=$(sbatch submit_training.sh | awk '{print $4}')
+          echo "Submitted Training Slurm job with ID: $JOB_ID"
+
+          # Wait for either a checkpoint to appear, or terminal state
+          while true; do
+            if [ -d "$CHECKPOINT_DIR" ]; then
+              echo "Checkpoint directory detected at $CHECKPOINT_DIR — stopping training."
+              scancel "$JOB_ID" || true
+              sleep 10
+              break
+            fi
+
+            STATE=$(sacct -j "$JOB_ID" --format=State --noheader | head -n1 | awk '{print $1}')
+            case "${STATE:-}" in
+              COMPLETED) echo "Training job $JOB_ID COMPLETED before checkpoint detection."; break ;;
+              FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
+                echo "Training job $JOB_ID terminal failure: $STATE"; exit 1 ;;
+              ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
+              *) echo "Training job $JOB_ID state: $STATE" ;;
+            esac
+            sleep 20
+          done
+
+          # Optional: ensure the most recent checkpoint file is fully written (if present)
+          if compgen -G "$CHECKPOINT_DIR/*.ckpt" > /dev/null; then
+            CKPT_FILE=$(ls -1t "$CHECKPOINT_DIR"/*.ckpt | head -n1)
+            echo "Latest checkpoint: $CKPT_FILE"
+            # If lsof exists and file is open, wait a bit; otherwise continue
+            if command -v lsof >/dev/null 2>&1; then
+              if lsof -w "$CKPT_FILE" >/dev/null 2>&1; then
+                echo "Checkpoint file still open; waiting 10s..."
+                sleep 10
+              fi
+            fi
+          fi
+
+          echo "Training stage completed (checkpoint available)."
+
 
   Run_Inference:
     # The type of runner that the job will run on
@@ -95,47 +180,68 @@ jobs:
     steps:
       - name: Run Inference against the training data
         run: |
-          cd nested_eagle/ursa/scientific_workflow/inference
+          set -euo pipefail
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/inference" 
 
-          JOB_ID=$(sbatch submit_inference.sh | awk '{print $4}')
-
-            echo "Submitted Inference Slurm job with ID: $JOB_ID"
-           
-            while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
-               squeue -j $JOB_ID
-               sleep 30  # Wait for 30 seconds before checking again.
+          submit_and_wait() {
+            local submit_script="$1"
+            JOB_ID=$(sbatch "$submit_script" | awk '{print $4}')
+            echo "Submitted Slurm job with ID: $JOB_ID"
+            while true; do
+              STATE=$(sacct -j "$JOB_ID" --format=State --noheader | head -n1 | awk '{print $1}')
+              case "${STATE:-}" in
+                COMPLETED) echo "Slurm job $JOB_ID COMPLETED"; break ;;
+                FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
+                  echo "Slurm job $JOB_ID terminal failure: $STATE"; exit 1 ;;
+                ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
+                *) echo "Slurm job $JOB_ID state: $STATE" ;;
+              esac
+              sleep 20
             done
+          }
 
-          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/inference
-          find ./inference_files -name "*.nc" -print -quit | grep -q . || { echo "Error: No inference files found."; exit 1; } 
-          echo "Slurm job $JOB_ID to run inference on the data has been completed."
+          submit_and_wait submit_inference.sh
+
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/inference"
+          find ./inference_files -name "*.nc" -print -quit | grep -q . || { echo "Error: No inference files found."; exit 1; }
+          echo "Inference stage completed."
 
   Perform_Inference_Postprocessing:
-    # The type of runner that the job will run on
     runs-on: ursa
     timeout-minutes: 1440
     needs: Run_Inference
     steps:
       - name: Perform inference postprocessing
         run: |
-          cd nested_eagle/ursa/scientific_workflow/verification/prewxvx
+          set -euo pipefail
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/prewxvx" 
 
           mkdir -p postprocessed_files/lam
           mkdir -p postprocessed_files/global
 
-          JOB_ID=$(sbatch submit_postprocessing.sh | awk '{print $4}')
-
-            echo "Submitted Validation Slurm job with ID: $JOB_ID"
-           
-            while squeue -h -j ${JOB_ID} | grep -q "${JOB_ID}"; do
-               squeue -j $JOB_ID
-               sleep 30  # Wait for 30 seconds before checking again.
+          submit_and_wait() {
+            local submit_script="$1"
+            JOB_ID=$(sbatch "$submit_script" | awk '{print $4}')
+            echo "Submitted Slurm job with ID: $JOB_ID"
+            while true; do
+              STATE=$(sacct -j "$JOB_ID" --format=State --noheader | head -n1 | awk '{print $1}')
+              case "${STATE:-}" in
+                COMPLETED) echo "Slurm job $JOB_ID COMPLETED"; break ;;
+                FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
+                  echo "Slurm job $JOB_ID terminal failure: $STATE"; exit 1 ;;
+                ""|PENDING|RUNNING|CONFIGURING|COMPLETING|SUSPENDED|REQUEUED|RESIZING|STAGE_OUT|STOPPED) ;;
+                *) echo "Slurm job $JOB_ID state: $STATE" ;;
+              esac
+              sleep 20
             done
+          }
 
-          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/prewxvx/postprocessed_files
-          find ./global -name "*.nc" -print -quit | grep -q . || { echo "Error: No global postprocessed files found."; exit 1; } 
-          find ./lam -name "*.nc" -print -quit | grep -q . || { echo "Error: No lam postprocessed files found."; exit 1; } 
-          echo "Slurm job $JOB_ID to perform inference postprocessing has been completed."
+          submit_and_wait submit_postprocessing.sh
+
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/prewxvx/postprocessed_files"
+          find ./global -name "*.nc" -print -quit | grep -q . || { echo "Error: No global postprocessed files found."; exit 1; }
+          find ./lam -name "*.nc" -print -quit | grep -q . || { echo "Error: No lam postprocessed files found."; exit 1; }
+          echo "Inference postprocessing completed."
 
   Perform_Verification:
     # The type of runner that the job will run on
@@ -143,31 +249,76 @@ jobs:
     timeout-minutes: 1440
     needs: Perform_Inference_Postprocessing
     steps:
-      - name: Perform grid2obs and grid2obs verification with wxvx
+      - name: Perform grid2obs and grid2grid verification with wxvx
         run: |
-          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2obs
+          set -euo pipefail
 
+          # Best-effort current state right after submission
+          job_state() {
+            local id="$1"
+            local st
+            st=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
+            if [ -z "$st" ]; then
+              st=$(sacct -j "$id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')
+            fi
+            echo "${st:-UNKNOWN}"
+          }
+
+          # Verbose wait: log PENDING/RUNNING transitions, then terminal state
+          wait_terminal() {
+            local id="$1"
+            local label="$2"
+            local prev=""
+            while true; do
+              local live state
+              live=$(squeue -h -j "$id" -o "%T" 2>/dev/null || true)
+              if [ -n "$live" ]; then
+                state="$live"
+              else
+                state=$(sacct -j "$id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')
+                state="${state:-UNKNOWN}"
+              fi
+
+              if [ "$state" != "$prev" ]; then
+                echo "${label} (${id}) state: ${state}"
+                prev="$state"
+              fi
+
+              case "$state" in
+                COMPLETED) echo "${label} (${id}) COMPLETED"; break ;;
+                FAILED|CANCELLED|TIMEOUT|NODE_FAIL|OUT_OF_MEMORY)
+                  echo "${label} (${id}) terminal failure: ${state}"; exit 1 ;;
+              esac
+
+              sleep 20
+            done
+          }
+
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2obs"
           JOB_ID1=$(sbatch submit_obs_verification.sh | awk '{print $4}')
 
-          cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2grid
-
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2grid"
           JOB_ID2=$(sbatch submit_grid_verification.sh | awk '{print $4}')
 
-             echo "Submitted Slurm job with ID: $JOB_ID1"
-             echo "Submitted Slurm job with ID: $JOB_ID2"
-             while squeue -h -j ${JOB_ID1},${JOB_ID2} | grep -q "${JOB_ID1}\|${JOB_ID2}"; do
-                squeue -j ${JOB_ID1},${JOB_ID2}
-             done
+          STATUS1=$(job_state "$JOB_ID1")
+          STATUS2=$(job_state "$JOB_ID2")
+          echo "Submitted grid2obs:  $JOB_ID1 (status: ${STATUS1})"
+          echo "Submitted grid2grid: $JOB_ID2 (status: ${STATUS2})"
 
-            cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2obs/wxvx_workdir
-            find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2obs verification plots found."; exit 1; } 
-            find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2obs verification plots found."; exit 1; } 
-            echo "Grid2obs Verification process has been successfully completed."
+          wait_terminal "$JOB_ID1" "Grid2Obs"
+          wait_terminal "$JOB_ID2" "Grid2Grid"
 
-            cd $GITHUB_WORKSPACE/nested_eagle/ursa/scientific_workflow/verification/grid2grid/wxvx_workdir
-            find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2grid verification plots found."; exit 1; } 
-            find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2grid verification plots found."; exit 1; } 
-            echo "Grid2grid Verification process has been successfully completed."
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2obs/wxvx_workdir"
+          find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2obs verification plots found."; exit 1; }
+          find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2obs verification plots found."; exit 1; }
+          echo "Grid2obs verification completed."
+
+          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2grid/wxvx_workdir"
+          find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2grid verification plots found."; exit 1; }
+          find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2grid verification plots found."; exit 1; }
+          echo "Grid2grid verification completed."
+
+
       - name: Remove label from pull request
         if: always()
         uses: mondeja/remove-labels-gh-action@v2.0.0
