@@ -12,7 +12,6 @@ jobs:
   mypy:
     name: Run mypy type checker
     runs-on:
-      group: ubuntu-runners
       labels: ubuntu-20.04-16core
 
     steps:
