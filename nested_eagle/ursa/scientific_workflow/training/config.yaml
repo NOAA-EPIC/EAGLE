@@ -83,13 +83,13 @@ dataloader:
     min_distance_km: 0
   training:
     start: 2022-02-01
-    end: 2022-02-03
+    end: 2022-02-02
   validation:
-    start: 2022-02-04
-    end: 2022-02-15
+    start: 2022-02-03
+    end: 2022-02-04
   test:
-    start: 2022-02-16
-    end: 2022-02-17
+    start: 2022-02-05
+    end: 2022-02-06
 
 diagnostics:
   log:
@@ -113,7 +113,7 @@ diagnostics:
       http_max_retries: 35
   plot:
     frequency:
-      batch: 500
+      batch: 50
       epoch: 1
     parameters:
       - gh_500
@@ -280,11 +280,11 @@ model:
         - q_1000
 
 training:
-  max_steps: 3000 # make 30000
+  max_steps: 50 # make 30000
   # LR = local_rate * num_gpus_per_node * num_nodes / gpus_per_model
   #    = local_rate * total_gpus / gpus_per_model
   lr:
-    warmup: 100 #make 1000
+    warmup: 5 #make 1000
     rate: 0.625e-4
     iterations: ${training.max_steps}
     min: 3e-7

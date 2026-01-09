@@ -5,8 +5,8 @@ pylint
 xesmf==0.8.10
 cf_xarray==0.10.9
 numpy==1.26.4
-ufs2arco==0.17.1
+ufs2arco==0.18.0
 anemoi-datasets==0.5.26
 anemoi-graphs==0.6.6
-eagle-tools==0.3.0
+eagle-tools==0.6.1
 pyyaml==6.0.3

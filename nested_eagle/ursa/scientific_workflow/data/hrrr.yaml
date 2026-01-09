@@ -11,8 +11,8 @@ multisource:
   - source:
       name: aws_hrrr_archive
       t0:
-        start: 2022-02-01T06 # make 2015-02-01T06 for full run
-        end: 2022-02-15T18
+        start: 2022-02-01T06
+        end: 2022-02-04T18
         freq: 6h
 
       fhr:
@@ -67,8 +67,8 @@ multisource:
   - source:
       name: aws_hrrr_archive
       t0:
-        start: 2022-02-01T00 # make 2015-02-01T00 for full run
-        end: 2022-02-15T12
+        start: 2022-02-01T00
+        end: 2022-02-04T12
         freq: 6h
 
       fhr:
@@ -93,8 +93,8 @@ target:
   sort_channels_by_levels: True
   compute_temporal_residual_statistics: True
   statistics_period:
-    start: 2022-02-01T06 # make 2022-02-01T06 for full run
-    end: 2022-02-03T12
+    start: 2022-02-01T06
+    end: 2022-02-02T18
   forcings:
     - cos_latitude
     - sin_latitude

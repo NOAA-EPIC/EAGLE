@@ -4,7 +4,7 @@
 #SBATCH -e slurm/inference.%j.err
 #SBATCH --nodes=1
 #SBATCH --account=epic
-#SBATCH -t 01:00:00
+#SBATCH -t 30:00
 #SBATCH --partition=u1-h100
 #SBATCH --gres=gpu:h100:1
 #SBATCH --mem=64g

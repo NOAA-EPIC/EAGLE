@@ -5,7 +5,7 @@
 #SBATCH --account=epic
 #SBATCH --partition=u1-service
 #SBATCH --mem=128g
-#SBATCH -t 01:00:00
+#SBATCH -t 30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 

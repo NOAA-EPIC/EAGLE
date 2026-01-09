@@ -16,7 +16,7 @@ forecast:
       inittime: forecast_reference_time
       validtime: time
   name: nested_lam
-  path: ../prewxvx/postprocessed_files/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc
+  path: ../prewxvx/postprocessed_files/lam/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc
   projection:
     a: 6371229
     b: 6371229
@@ -28,7 +28,7 @@ forecast:
 leadtimes:
   start: 0
   step: 6
-  stop: 240
+  stop: 24
 meta:
   grids: "{{ meta.workdir }}/grids"
   workdir: wxvx_workdir/lam

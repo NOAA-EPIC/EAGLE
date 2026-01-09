@@ -1,5 +1,5 @@
 checkpoint_path: ../training/outputs/checkpoint/6b67c174-ae26-41e3-b8aa-50b74469fe80/inference-last.ckpt
-lead_time: 240
+lead_time: 24
 input_dataset_kwargs:
   cutout:
     - dataset: ../data/hrrr.zarr

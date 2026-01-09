@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -J nested_eagle_create_grids
-#SBATCH -o slurm/grids_preprocessing.%j.out
-#SBATCH -e slurm/grids_preprocessing.%j.err
+#SBATCH -J nested_eagle_grid_verification
+#SBATCH -o slurm/verification.%j.out
+#SBATCH -e slurm/verification.%j.err
 #SBATCH --account=epic
 #SBATCH --partition=u1-service
 #SBATCH --mem=128g
@@ -11,9 +11,11 @@
 
 # shellcheck disable=SC1091
 source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate
-conda activate eagle
-module load gcc
+conda activate wxvx
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+export WORKDIR_BASE_PATH=$PWD
 
-python create_grids.py
+sed -i "/^.*workdir:.*$/c\  workdir: $WORKDIR_BASE_PATH\/wxvx_workdir\/lam" wxvx_lam.yaml
+
+wxvx -c wxvx_lam.yaml -t plots

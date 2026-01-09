@@ -171,7 +171,6 @@ jobs:
 
           echo "Training stage completed (checkpoint available)."
 
-
   Run_Inference:
     # The type of runner that the job will run on
     runs-on: ursa
@@ -295,18 +294,26 @@ jobs:
           }
 
           cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2obs"
-          JOB_ID1=$(sbatch submit_obs_verification.sh | awk '{print $4}')
+          JOB_ID1=$(sbatch submit_global_obs_verification.sh | awk '{print $4}')
+          JOB_ID2=$(sbatch submit_lam_obs_verification.sh | awk '{print $4}')
 
           cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2grid"
-          JOB_ID2=$(sbatch submit_grid_verification.sh | awk '{print $4}')
+          JOB_ID3=$(sbatch submit_global_grid_verification.sh | awk '{print $4}')
+          JOB_ID4=$(sbatch submit_lam_grid_verification.sh | awk '{print $4}')
 
           STATUS1=$(job_state "$JOB_ID1")
           STATUS2=$(job_state "$JOB_ID2")
-          echo "Submitted grid2obs:  $JOB_ID1 (status: ${STATUS1})"
-          echo "Submitted grid2grid: $JOB_ID2 (status: ${STATUS2})"
+          STATUS3=$(job_state "$JOB_ID3")
+          STATUS4=$(job_state "$JOB_ID4")
+          echo "Submitted grid2obs for global:  $JOB_ID1 (status: ${STATUS1})"
+          echo "Submitted grid2ob for lam: $JOB_ID2 (status: ${STATUS2})"
+          echo "Submitted grid2grid for global:  $JOB_ID3 (status: ${STATUS3})"
+          echo "Submitted grid2grid lam: $JOB_ID4 (status: ${STATUS4})"
 
-          wait_terminal "$JOB_ID1" "Grid2Obs"
-          wait_terminal "$JOB_ID2" "Grid2Grid"
+          wait_terminal "$JOB_ID1" "Grid2ObsGlobal"
+          wait_terminal "$JOB_ID2" "Grid2ObsLam"
+          wait_terminal "$JOB_ID3" "Grid2GridGlobal"
+          wait_terminal "$JOB_ID4" "Grid2GridLam"
 
           cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/verification/grid2obs/wxvx_workdir"
           find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2obs verification plots found."; exit 1; }
@@ -317,7 +324,6 @@ jobs:
           find ./lam -name "*.png" -print -quit | grep -q . || { echo "Error: No LAM grid2grid verification plots found."; exit 1; }
           find ./global -name "*.png" -print -quit | grep -q . || { echo "Error: No global grid2grid verification plots found."; exit 1; }
           echo "Grid2grid verification completed."
-
 
       - name: Remove label from pull request
         if: always()

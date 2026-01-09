@@ -30,7 +30,7 @@ anemoi_reference_dataset_kwargs:
   adjust: all
   min_distance_km: 0
 
-horizontal_regrid_kwargs:
+forecast_regrid_kwargs:
   regridder_kwargs:
     method: "conservative_normed"
   target_grid_path: "../../data/global_one_degree.nc"
@@ -38,3 +38,5 @@ horizontal_regrid_kwargs:
 start_date: 2022-02-03T12
 end_date: 2022-02-03T12
 freq: 6h
+
+lead_time: 24

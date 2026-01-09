@@ -23,3 +23,5 @@ levels:
 start_date: 2022-02-03T12
 end_date: 2022-02-03T12
 freq: 6h
+
+lead_time: 24

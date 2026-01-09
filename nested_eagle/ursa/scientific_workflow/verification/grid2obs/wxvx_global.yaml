@@ -16,13 +16,13 @@ forecast:
       inittime: forecast_reference_time
       validtime: time
   name: nested_global
-  path: ../prewxvx/postprocessed_files/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc
+  path: ../prewxvx/postprocessed_files/global/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc
   projection:
     proj: latlon
 leadtimes:
   start: 0
   step: 6
-  stop: 48
+  stop: 24
 meta:
   grids: "{{ meta.workdir }}/grids"
   workdir: wxvx_workdir/global
