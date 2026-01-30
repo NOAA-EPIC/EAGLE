@@ -6,9 +6,9 @@
 #SBATCH --partition=u1-service
 #SBATCH --mem=128g
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
+#SBATCH --ntasks=15
 #SBATCH --cpus-per-task=1
-#SBATCH --time=01:00:00
+#SBATCH --time=30:00
 
 # shellcheck disable=SC1091
 source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate
