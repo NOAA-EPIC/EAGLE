@@ -1,0 +1,86 @@
+mover:
+  name: datamover
+  batch_size: 1
+
+directories:
+  zarr: datagfs.zarr
+  cache: data/cache/gfs
+  logs: data/logs/gfs
+
+source:
+  name: gfs_archive
+  t0:
+    start: to_programatically_change_in_production
+    end: to_programatically_change_in_production
+    freq: 6h
+
+  fhr:
+    start: 0
+    end: 0
+    step: 1
+
+  variables:
+        # 3D Prognostic
+        - gh
+        - u
+        - v
+        - w
+        - t
+        - q
+        # 2D Prognostic
+        - sp
+        - u10
+        - v10
+        - t2m
+        - t_surface
+        - sh2
+        # Forcing
+        - lsm
+        - orog
+
+  levels:
+        - 100
+        - 150
+        - 200
+        - 250
+        - 300
+        - 400
+        - 500
+        - 600
+        - 700
+        - 850
+        - 925
+        - 1000
+
+  slices:
+    sel:
+      latitude: [89.9, -89.9]
+
+transforms:
+  horizontal_regrid:
+    target_grid_path: global_one_degree.nc
+    regridder_kwargs:
+      method: conservative
+      reuse_weights: True
+      filename: conservative_719x1440_180x360.nc
+
+target:
+  name: anemoi_inference_with_forcings
+  sort_channels_by_levels: True
+  save_additional_step: True
+  forcings:
+    - cos_latitude
+    - sin_latitude
+    - cos_longitude
+    - sin_longitude
+    - cos_julian_day
+    - sin_julian_day
+    - cos_local_time
+    - sin_local_time
+    - insolation
+
+  chunks:
+    time: 1
+    variable: -1
+    ensemble: 1
+    cell: -1

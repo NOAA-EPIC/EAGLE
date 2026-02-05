@@ -1,0 +1,14 @@
+checkpoint_path: inference-last.ckpt
+lead_time: 48
+input_dataset_kwargs:
+  cutout:
+    - dataset: data/hrrr.zarr
+      trim_edge: [10, 11, 10, 11]
+    - dataset: data/gfs.zarr
+  adjust: all
+  min_distance_km: 0
+output_path: inference
+
+start_date: to_programatically_change_in_production
+end_date: to_programatically_change_in_production
+freq: 6h
