@@ -12,6 +12,7 @@
 # shellcheck disable=SC1091
 source /scratch4/NAGAPE/epic/role-epic/miniconda/bin/activate
 conda activate wxvx
+wxvx --version
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 export WORKDIR_BASE_PATH=$PWD
