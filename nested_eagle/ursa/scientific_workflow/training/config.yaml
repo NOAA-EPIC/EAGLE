@@ -159,15 +159,6 @@ diagnostics:
           ] # in mm
         precip_and_related_fields: ${diagnostics.plot.precip_and_related_fields}
         colormaps: ${diagnostics.plot.colormaps}
-      - _target_: anemoi.training.diagnostics.callbacks.plot.PlotSpectrum
-        sample_idx: ${diagnostics.plot.sample_idx}
-        every_n_batches: ${diagnostics.plot.frequency.batch}
-        parameters:
-          - gh_500
-          - accum_tp
-          - t2m
-          - u10
-          - v10
       - _target_: anemoi.training.diagnostics.callbacks.plot.PlotHistogram
         sample_idx: ${diagnostics.plot.sample_idx}
         every_n_batches: ${diagnostics.plot.frequency.batch}
@@ -280,11 +271,11 @@ model:
         - q_1000
 
 training:
-  max_steps: 50 # make 30000
+  max_steps: 20 # make 30000
   # LR = local_rate * num_gpus_per_node * num_nodes / gpus_per_model
   #    = local_rate * total_gpus / gpus_per_model
   lr:
-    warmup: 5 #make 1000
+    warmup: 2 #make 1000
     rate: 0.625e-4
     iterations: ${training.max_steps}
     min: 3e-7

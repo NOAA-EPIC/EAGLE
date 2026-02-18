@@ -7,7 +7,6 @@
 #SBATCH --mem=128g
 #SBATCH --nodes=1
 #SBATCH --ntasks=15
-#SBATCH --cpus-per-task=1
 #SBATCH --time=30:00
 
 # shellcheck disable=SC1091
