@@ -1,5 +1,6 @@
 baseline:
-  compare: true
+  name: truth
+truth:
   name: GFS
   type: grid
   url: https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{{ yyyymmdd }}/{{ hh }}/atmos/gfs.t{{ hh }}z.pgrb2.0p25.f{{ "%03d" % fh }}
@@ -25,11 +26,12 @@ leadtimes:
   stop: 24
 meta:
   grids: "{{ meta.workdir }}/grids"
-  workdir: wxvx_workdir/global
+  workdir: /scratch4/NCEPDEV/global/Anil.Kumar/EAGLE/nested_eagle/ursa/scientific_workflow/verification/grid2grid/wxvx_workdir/global
+ncdiffs: true
 paths:
   grids:
     forecast: "{{ meta.grids }}/forecast"
-    baseline: "{{ meta.grids }}/baseline"
+    truth: "{{ meta.grids }}/truth"
   run: "{{ meta.workdir }}/run"
 regrid:
   method: NEAREST

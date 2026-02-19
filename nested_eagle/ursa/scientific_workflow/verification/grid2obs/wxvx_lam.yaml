@@ -1,5 +1,4 @@
-baseline:
-  compare: false
+truth:
   name: PREPBUFR
   type: point
   url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
@@ -31,7 +30,8 @@ leadtimes:
   stop: 24
 meta:
   grids: "{{ meta.workdir }}/grids"
-  workdir: wxvx_workdir/lam
+  workdir: /scratch4/NCEPDEV/global/Anil.Kumar/EAGLE/nested_eagle/ursa/scientific_workflow/verification/grid2obs/wxvx_workdir/lam
+ncdiffs: false
 paths:
   grids:
     forecast: "{{ meta.grids }}/forecast"

@@ -1,5 +1,6 @@
 baseline:
-  compare: true
+  name: truth
+truth:
   name: HRRR
   type: grid
   url: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.{{ yyyymmdd }}/conus/hrrr.t{{ hh }}z.wrfprsf{{ "%02d" % fh }}.grib2
@@ -31,11 +32,12 @@ leadtimes:
   stop: 24
 meta:
   grids: "{{ meta.workdir }}/grids"
-  workdir: wxvx_workdir/lam
+  workdir: /scratch4/NCEPDEV/global/Anil.Kumar/EAGLE/nested_eagle/ursa/scientific_workflow/verification/grid2grid/wxvx_workdir/lam
+ncdiffs: true
 paths:
   grids:
     forecast: "{{ meta.grids }}/forecast"
-    baseline: "{{ meta.grids }}/baseline"
+    truth: "{{ meta.grids }}/truth"
   run: "{{ meta.workdir }}/run"
 regrid:
   method: NEAREST
