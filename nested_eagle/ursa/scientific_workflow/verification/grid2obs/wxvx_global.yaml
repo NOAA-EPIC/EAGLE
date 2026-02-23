@@ -24,7 +24,7 @@ leadtimes:
   stop: 24
 meta:
   grids: "{{ meta.workdir }}/grids"
-  workdir: /scratch4/NCEPDEV/global/Anil.Kumar/EAGLE/nested_eagle/ursa/scientific_workflow/verification/grid2obs/wxvx_workdir/global
+  workdir: wxvx_workdir/global
 ncdiffs: false 
 paths:
   grids:
