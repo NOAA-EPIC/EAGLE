@@ -15,7 +15,7 @@ Add the related GitHub Issues here.
 Please be sure to add the issue this PR resolves using the word "Resolves". If there are any issues that are related but not yet resolved (including in other repos), you may use "Refs".
 Resolves #1234
 Refs #4321
-Refs NOAA-EMC/repo#5678
+Refs NOAA-EPIC/repo#5678
 -->
 
 ## Type of change:
@@ -25,9 +25,20 @@ Delete options that are not applicable.
 -->
 - [ ] Bug fix
 - [ ] New feature
-- [ ] Code cleanup or refactor
-- [ ] Documentation update
-- [ ] CI/CD or tooling change
+- [ ] Refactor / cleanup
+- [ ] Documentation
+- [ ] CI/CD or tooling
+- [ ] Other:
+
+## Area(s) affected
+<!-- Check all that apply -->
+- [ ] nested_eagle workflow
+- [ ] Verification / evaluation (via WXVX)
+- [ ] Data prep / UFS2ARCO
+- [ ] Config (YAML)
+- [ ] Plotting / post-processing
+- [ ] Infrastructure / Slurm scripts
+- [ ] Other:
 
 ## Commit Requirements:
 <!--
@@ -41,25 +52,48 @@ Delete options that are not applicable.
 - [ ] My changes generate no new warnings
 - [ ] I have made corresponding changes to the system documentation if necessary
 
+## Testing / Verification:
+<!--
+Provide minimal reproducible steps and results.
+Include configs, commands, and expected outputs where possible.
+Delete this section if not applicable.
+-->
+- [ ] I ran and/or verified the changes (or provided a test plan)
+- Commands/config used:
+  - 
+- Evidence (logs, key output paths, screenshots if relevant):
+  - 
+
+## Runtime Environment:
+<!--
+Fill in if you ran on HPC or a specific system. Delete if not applicable.
+-->
+- System/HPC:
+- Account/role:
+- Conda env:
+- Key versions (optional):
+  - `python --version`:
+  - `wxvx --version` (if applicable):
+  - MET version (if applicable):
+
 ## Commit Message:
 <!--
 Provide a concise commit message for any subcomponents; delete unnecessary info.
 -->
-```
-* UFS2ARCO - 
-* WXVX - 
-```
+* UFS2ARCO -
+* WXVX (verification) -
+
 ## Subcomponent Pull Requests:
 <!--
 Provide a list of NOAA-EPIC/EAGLE and subcomponents involved with this PR and include links to subcomponent PRs.
 Example:
 * EAGLE: NOAA-EPIC/EAGLE#13
 * UFS2ARCO: NOAA-PSL/UFS2ARCO#734
-* WXVX: maddenp-cu/wxvx#33
+* WXVX: NOAA-EPIC/WXVX#33
 Delete sections that are not needed.
 -->
-* EAGLE -
-* UFS2ARCO - 
-* WXVX - 
+* EAGLE: NOAA-EPIC/EAGLE#
+* UFS2ARCO: NOAA-PSL/UFS2ARCO#
+* WXVX (verification): NOAA-EPIC/WXVX#
 * None
 
