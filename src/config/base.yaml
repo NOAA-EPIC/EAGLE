@@ -1,17 +1,10 @@
+# This is the base EAGLE config. It currently configures the Nested EAGLE case.
+
 app:
   base: /path/to/eagle/src
-  gpu:
-    batchargs: &gpu-batchargs
-      --gres: 'gpu:h100:1' # NB: Brittle, tied both to Slurm and to Ursa.
-      nodes: 1
-      partition: '{{ app.gpu.partition }}'
-      queue: gpuwf # NB: Brittle, tied to Ursa.
-    partition: u1-h100
-  partitions:
-    netaccess: u1-service
-  platform: &platform
-    account: epic
-    scheduler: slurm
+  gpu: # set by platform config
+  partitions: # set by platform config
+  platform: # set by platform config
   rundir: '{{ app.base }}/run'
   time:
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'

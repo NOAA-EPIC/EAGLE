@@ -1,0 +1,14 @@
+# Configuration for the NOAA RDHPCS Ursa platform.
+
+app:
+  gpu:
+    batchargs: &gpu-batchargs
+      --gres: 'gpu:h100:1'
+      nodes: 1
+      partition: u1-h100
+      queue: gpuwf
+  partitions:
+    netaccess: u1-service
+  platform: &platform
+    account: epic
+    scheduler: slurm

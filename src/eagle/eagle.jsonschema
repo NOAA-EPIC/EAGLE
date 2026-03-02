@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "app": {
+      "type": "object"
+    },
+    "grids_and_meshes": {
+      "type": "object"
+    },
+    "inference": {
+      "type": "object"
+    },
+    "platform": {
+      "type": "object"
+    },
+    "prewxvx": {
+      "type": "object"
+    },
+    "training": {
+      "type": "object"
+    },
+    "ufs2arco": {
+      "type": "object"
+    },
+    "val": {
+      "type": "object"
+    },
+    "vx": {
+      "type": "object"
+    },
+    "zarrs": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "app",
+    "grids_and_meshes",
+    "inference",
+    "platform",
+    "prewxvx",
+    "training",
+    "ufs2arco",
+    "val",
+    "vx",
+    "zarrs"
+  ],
+  "type": "object"
+}

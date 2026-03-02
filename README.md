@@ -9,7 +9,9 @@ This repository contains configuration and driver code for running an end-to-end
 - **Prepare output for verification:** Postprocesses forecast output into the formats and directory structure expected by `wxvx`.
 - **Verify model performance:** Runs `wxvx` verification against gridded analysis and/or observations, producing MET statistics and plots.
 
-## Quickstart: Recipe for End-to-End Run of Nested EAGLE on Ursa
+## Quickstart
+
+This sections provides a recipe for an end-to-end run of Nested EAGLE on Ursa.
 
 In the `src/` directory:
 
@@ -19,27 +21,31 @@ This step creates the runtime software environment, comprising conda virtual env
 
 Developers who will be modifying Python driver code should replace `make env` with `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, typechecking, and unit testing.
  
-### 2. Set the `app.base` value in `eagle.yaml` to the absolute path to the current (`src/`) directory.
+### 2. Run `make config compose=base:ursa >eagle.yaml` to create the EAGLE YAML config.
+
+The `config` target operates on `.yaml` files in the `config/` directory, so this command composes `config/base.yaml` and `config/ursa.yaml` and redirects the composed config into `eagle.yaml`.
+
+### 3. Set the `app.base` value in `eagle.yaml` to the absolute path to the current (`src/`) directory.
 
 The run directories from subsequent steps, along with the output of those steps, will be created in the `run/` subdirectory of `app.base`.
 
-### 3. Run `make data config=eagle.yaml`.
+### 4. Run `make data config=eagle.yaml`.
 
 This step provisions data required for training and inference. The `data` target delegates to targets `grids-and-meshes`, `zarr-gfs`, and `zarr-hrrr`, which can also be run individually (e.g. `make grids-and-meshes config=eagle.yaml`), but note that `grids-and-meshes`, which runs locally, must be run first. The `zarr-gfs` and `zarr-hrrr` targets can be run in quick succession, as they submit batch jobs: Do not proceed until their batch jobs complete successfully (see the files `run/data/*.out`).
 
-### 4. Run `make training config=eagle.yaml`.
+### 5. Run `make training config=eagle.yaml`.
 
 This step trains a model using data provisioned by the previous step. It submits a batch job: Do not proceed until the batch job completes successfully (see the file `run/training/runscript.training.out`).
 
-### 5. Run `make inference config=eagle.yaml`.
+### 6. Run `make inference config=eagle.yaml`.
 
 This step performs inference, producing a forecast. It submits a batch job: Do not proceed until the batch job completes successfully (see the file `run/inference/runscript.inference.out`.)
 
-### 6. Run `make prewxvx-global config=eagle.yaml` followed by `make prewxvx-lam config=eagle.yaml`.
+### 7. Run `make prewxvx-global config=eagle.yaml` followed by `make prewxvx-lam config=eagle.yaml`.
 
 These steps prepare forecast output from the previous step for verification by `wxvx`. They run locally, it is safe to proceed when the commands return. See the files `run/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out` for details.
 
-### 7. Run any or all of `make vx-grid-global config=eagle.yaml`, `make vx-grid-lam config=eagle.yaml`, `make vx-obs-global config=eagle.yaml`, `make vx-obs-lam config=eagle.yaml`.
+### 8. Run any or all of `make vx-grid-global config=eagle.yaml`, `make vx-grid-lam config=eagle.yaml`, `make vx-obs-global config=eagle.yaml`, `make vx-obs-lam config=eagle.yaml`.
 
 These steps perform verification, either of the `global` or `lam` forecasts, and against gridded analyses (`*-grid-*`) or prepbufr observations (`*-obs-*`) as truth. Each submits a batch job, so the four `make` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch job completes, MET `.stat` files and `.png` plot files can be found under the `stats/` and `plots/` subdirectories of `run/vx/grid2{grid,obs}/{global,lam}/run/`. The files `run/vx/*.log` contain the logs from each verification run.
 
@@ -76,6 +82,22 @@ Run `make` with no argument to list available targets.
 
 ## Configuration
 
+### Config Creation
+
+The final EAGLE YAML config is created by composing a base config together with one or more fragments providing values for specific platforms, use cases, etc. The command `make config compose=a:b:c` would compose together `config/a.yaml`, `config/b.yaml`, and `config/c.yaml`. In practice, composition should begin with the `base` config (i.e. `config/base.yaml`), which provides generally applicable settings for EAGLE runs (see the [Quickstart](#quickstart) for an example.) The composed config can then be manually edited for experiment-specific requirements.
+
+For advanced use cases, for example for composing configs in arbitrary locations, the underlying `uwtools` command can be used. In the `src/` directory:
+
+``` bash
+bash
+source conda/etc/profile.d/conda.sh
+conda activate base
+uw config compose /path/to/some/a.yaml /path/to/another/b.yaml >eagle.yaml
+exit
+```
+
+### Config Description
+
 The following subsections describe various parts of the EAGLE YAML config.
 
 Some configuration parameters are common across `uwtools`-based component drivers and occur in multiple configuration blocks:
@@ -85,6 +107,28 @@ Some configuration parameters are common across `uwtools`-based component driver
 - The `rundir:` parameter specifies where driver runtime assets will be created.
 
 Additionally, many configuration blocks include a `common:` block, which provides parameters shared by several configurations, to avoid unnecessary repetition.
+
+### Config Realization
+
+EAGLE YAML configs contain a variety of Jinja2 expressions that are normally resolved by the various pipeline steps at run time. Sometimes it can be helpful to resolve these references ("realize" the config in `uwtools` terms) in advance, to get a better understanding of the final configuration parameters. To do so, run:
+
+``` bash
+make realize config=eagle.yaml
+```
+
+The resulting config could be used in place of the unrealized `eagle.yaml`, as the two should be equivalent -- though the realized config may be significantly longer due to, for example, repetition of common elements previously factored out using Jinja2.
+
+Note that the realized config may still contain some Jinja2 expressions that can only be realized at run time by the component using a particular config block.
+
+### Config Validation
+
+To validate the EAGLE YAML config:
+
+``` bash
+make validate config=eagle.yaml
+```
+
+This will perform validation of config blocks that are not owned by drivers; driver config blocks will be validated at run time by the drivers themselves.
 
 ### app
 
