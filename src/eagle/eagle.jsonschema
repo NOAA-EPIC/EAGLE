@@ -1,6 +1,144 @@
 {
+  "$defs": {
+    "datetime": {
+      "anyOf": [
+        {
+          "type": "datetime"
+        },
+        {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}(:[0-9]{2})?(:[0-9]{2})?$",
+          "type": "string"
+        }
+      ]
+    },
+    "timedelta": {
+      "anyOf": [
+        {
+          "type": "timedelta"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "pattern": "^[0-9]+(:[0-9]+(:[0-9]+)?)?$",
+          "type": "string"
+        }
+      ]
+    }
+  },
   "properties": {
     "app": {
+      "additionalProperties": true,
+      "properties": {
+        "base": {
+          "type": "string"
+        },
+        "gpu": {
+          "additionalProperties": true,
+          "properties": {
+            "batchargs": {
+              "additionalProperties": true,
+              "properties": {
+                "--gres": {
+                  "type": "string"
+                },
+                "nodes": {
+                  "type": "integer"
+                },
+                "partition": {
+                  "type": "string"
+                },
+                "queue": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "--gres",
+                "nodes",
+                "partition",
+                "queue"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "batchargs"
+          ],
+          "type": "object"
+        },
+        "partitions": {
+          "additionalProperties": true,
+          "properties": {
+            "netaccess": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "netaccess"
+          ],
+          "type": "object"
+        },
+        "platform": {
+          "additionalProperties": true,
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "scheduler": {
+              "enum": [
+                "lsf",
+                "pbs",
+                "slurm"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "rundir": {
+          "type": "string"
+        },
+        "time": {
+          "additionalProperties": true,
+          "properties": {
+            "inference_start": {
+              "$ref": "#/$defs/datetime"
+            },
+            "inference_stop": {
+              "$ref": "#/$defs/datetime"
+            },
+            "leadtime": {
+              "type": "integer"
+            },
+            "start": {
+              "$ref": "#/$defs/datetime"
+            },
+            "step": {
+              "$ref": "#/$defs/timedelta"
+            },
+            "stop": {
+              "$ref": "#/$defs/datetime"
+            }
+          },
+          "required": [
+            "inference_start",
+            "inference_stop",
+            "leadtime",
+            "start",
+            "step",
+            "stop"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "base",
+        "gpu",
+        "partitions",
+        "platform",
+        "rundir",
+        "time"
+      ],
       "type": "object"
     },
     "grids_and_meshes": {

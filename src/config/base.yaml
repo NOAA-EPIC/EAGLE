@@ -72,7 +72,7 @@ prewxvx:
       start_date: !datetime "{{ app.time.inference_start }}"
       end_date: !datetime "{{ app.time.inference_stop }}"
       vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
-    rundir: "{{ app.rundir }}/vx"
+    rundir: "{{ val.vx.rundir }}"
   global:
     prewxvx:
       execution:
@@ -81,7 +81,7 @@ prewxvx:
       name: global
       eagle_tools:
         <<: *prewxvx-common
-        output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}"
+        output_path: "{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}"
         model_type: nested-global
         anemoi_reference_dataset_kwargs:
           <<: *dataset-kwargs
@@ -89,7 +89,7 @@ prewxvx:
           regridder_kwargs:
             method: "conservative_normed"
           target_grid_path: "{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}"
-      rundir: '{{ prewxvx.common.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
+      rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
     platform: *platform
   lam:
     prewxvx:
@@ -99,9 +99,9 @@ prewxvx:
       name: lam
       eagle_tools:
         <<: *prewxvx-common
-        output_path: "{{ prewxvx.common.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}"
+        output_path: "{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}"
         model_type: nested-lam
-      rundir: '{{ prewxvx.common.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
+      rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
     platform: *platform
 training:
   anemoi:
@@ -519,6 +519,8 @@ val:
     forecast:
       # Diagnostic
       - accum_tp
+  vx:
+    rundir: '{{ app.rundir }}/vx'
 vx:
   common:
     execution: 
@@ -532,15 +534,14 @@ vx:
         - set -ex
     paths_grid:
       grids:
-        forecast: "{{ vx.common.rundir }}/TRUTH/EXTENT/grids/forecast"
-        truth: "{{ vx.common.rundir }}/TRUTH/EXTENT/grids/truth"
-      run: "{{ vx.common.rundir }}/TRUTH/EXTENT/run"
+        forecast: "{{ val.vx.rundir }}/TRUTH/EXTENT/grids/forecast"
+        truth: "{{ val.vx.rundir }}/TRUTH/EXTENT/grids/truth"
+      run: "{{ val.vx.rundir }}/TRUTH/EXTENT/run"
     paths_obs:
       grids:
-        forecast: "{{ vx.common.rundir }}/TRUTH/EXTENT/forecast"
-      obs: "{{ vx.common.rundir }}/TRUTH/EXTENT/obs"
-      run: "{{ vx.common.rundir }}/TRUTH/EXTENT/run"
-    rundir: "{{ prewxvx.common.rundir }}"
+        forecast: "{{ val.vx.rundir }}/TRUTH/EXTENT/forecast"
+      obs: "{{ val.vx.rundir }}/TRUTH/EXTENT/obs"
+      run: "{{ val.vx.rundir }}/TRUTH/EXTENT/run"
     wxvx: &wxvx-common
       cycles:
         start: !datetime "{{ app.time.inference_start }}"
@@ -559,9 +560,9 @@ vx:
         step: "{{ app.time.step }}"
         stop: "{{ app.time.leadtime }}"
       meta:
-        workdir: "{{ vx.common.rundir }}/TRUTH/EXTENT"
-        grids: "{{ vx.common.rundir }}/TRUTH/EXTENT/grids"
-        post_files: "{{ vx.common.rundir }}/postprocessed_files/EXTENT"
+        workdir: "{{ val.vx.rundir }}/TRUTH/EXTENT"
+        grids: "{{ val.vx.rundir }}/TRUTH/EXTENT/grids"
+        post_files: "{{ val.vx.rundir }}/postprocessed_files/EXTENT"
       variables:
         t2m:
           level_type: heightAboveGround
@@ -605,7 +606,7 @@ vx:
           envcmds: !list "{{ vx.common.execution.envcmds }}"
           executable: wxvx -c vx-grid2grid-global.yaml -t plots -f
         name: grid2grid-global
-        rundir: "{{ vx.common.rundir }}/grid2grid/global"
+        rundir: "{{ val.vx.rundir }}/grid2grid/global"
         wxvx:
           <<: *wxvx-common
           truth:
@@ -634,7 +635,7 @@ vx:
           envcmds: !list "{{ vx.common.execution.envcmds }}"
           executable: wxvx -c vx-grid2grid-lam.yaml -t plots -f
         name: grid2grid-lam
-        rundir: "{{ vx.common.rundir }}/grid2grid/lam"
+        rundir: "{{ val.vx.rundir }}/grid2grid/lam"
         wxvx:
           <<: *wxvx-common
           truth:
@@ -668,7 +669,7 @@ vx:
           envcmds: !list "{{ vx.common.execution.envcmds }}"
           executable: wxvx -c vx-grid2obs-global.yaml -t plots -f
         name: grid2obs-global
-        rundir: "{{ vx.common.rundir }}/grid2obs/global"
+        rundir: "{{ val.vx.rundir }}/grid2obs/global"
         wxvx:
           <<: *wxvx-common
           truth:
@@ -695,7 +696,7 @@ vx:
           envcmds: !list "{{ vx.common.execution.envcmds }}"
           executable: wxvx -c vx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
-        rundir: "{{ vx.common.rundir }}/grid2obs/lam"
+        rundir: "{{ val.vx.rundir }}/grid2obs/lam"
         wxvx:
           <<: *wxvx-common
           truth: !dict "{{ vx.grid2obs.global.vx.wxvx.truth }}"

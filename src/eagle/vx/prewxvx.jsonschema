@@ -19,11 +19,36 @@
         "eagle_tools": {
           "additionalProperties": true,
           "properties": {
+            "anemoi_reference_dataset_kwargs": {
+              "type": "object"
+            },
             "end_date": {
               "$ref": "#/$defs/datetime"
             },
             "forecast_path": {
               "type": "string"
+            },
+            "forecast_regrid_kwargs": {
+              "properties": {
+                "open_target_kwargs": {
+                  "type": "object"
+                },
+                "regridder_kwargs": {
+                  "properties": {
+                    "method": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method"
+                  ],
+                  "type": "object"
+                },
+                "target_grid_path": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
             },
             "freq": {
               "type": "string"
@@ -51,11 +76,17 @@
             },
             "levels": {
               "items": {
-                "type": "integer"
+                "type": "number"
               },
               "type": "array"
             },
             "model_type": {
+              "enum": [
+                "global",
+                "lam",
+                "nested-global",
+                "nested-lam"
+              ],
               "type": "string"
             },
             "output_path": {
