@@ -19,7 +19,7 @@ In the `src/` directory:
 
 This step creates the runtime software environment, comprising conda virtual environments `data`, `training`, `inference`, and `vx` for data prep, training, inference, and verification, respectively. The `conda/` subdirectory it creates is self-contained and can be removed and recreated by running the `make env` command again, as long as pipeline steps are not currently running.
 
-Developers who will be modifying Python driver code should replace `make env` with `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, typechecking, and unit testing.
+Developers who will be modifying Python driver code should replace `make env` with `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, typechecking, and unit testing.
  
 ### 2. Run `make config compose=base:ursa >eagle.yaml` to create the EAGLE YAML config.
 
@@ -255,10 +255,11 @@ See [Runtime Environment](#runtime-environment) for a description of the `cudasc
 After successful completion, the following `make` targets will be available:
 
 ``` bash
-make format   # format Python code
-make lint     # run the linter on Python code
-make typecheck # run the typechecker on Python code
-make test     # all of the above except formatting
+make format     # format Python code
+make lint       # run the linter on Python code
+make shellcheck # run shellcheck on Bash scripts
+make typecheck  # run the typechecker on Python code
+make test       # all of the above except formatting
 ```
 
 The `lint` and `typecheck` targets accept an optional `env=<name>` key-value pair that, if provided, will restrict the tool to the code associated with a particular virtual environment. For example, `make lint env=data` will lint only the code associated with the `data` environment. If no `env` value is provided, all code will be tested.

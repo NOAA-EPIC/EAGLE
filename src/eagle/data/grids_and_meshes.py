@@ -8,7 +8,9 @@ from threading import Lock
 import cf_xarray as cfxr
 import numpy as np
 import xesmf  # type: ignore[import-untyped]
-from anemoi.graphs.generate.utils import get_coordinates_ordering  # type: ignore[import-untyped]
+from anemoi.graphs.generate.utils import (  # type: ignore[import-untyped]
+    get_coordinates_ordering,
+)
 from anemoi.transform.spatial import cutout_mask  # type: ignore[import-untyped]
 from iotaa import Asset, collection, task
 from ufs2arco import sources  # type: ignore[import-untyped]
@@ -36,7 +38,9 @@ class GridsAndMeshes(AssetsTimeInvariant):
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
         gmesh = _global_latent_grid()
-        cmesh = _conus_latent_grid(_conus_data_grid(self.rundir, self._conus_data_grid_logfile))
+        cmesh = _conus_latent_grid(
+            _conus_data_grid(self.rundir, self._conus_data_grid_logfile)
+        )
         coords = _combined_global_and_conus_meshes(gmesh, cmesh)
         np.savez(path, lon=coords["lon"], lat=coords["lat"])
 
@@ -89,13 +93,17 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @property
     def _conus_data_grid_logfile(self):
-        return (self.rundir / self.config["filenames"]["hrrr_target_grid"]).with_suffix(".log")
+        return (self.rundir / self.config["filenames"]["hrrr_target_grid"]).with_suffix(
+            ".log"
+        )
 
 
 # Private functions
 
 
-def _combined_global_and_conus_meshes(gmesh: Dataset, cmesh: Dataset) -> dict[str, np.ndarray]:
+def _combined_global_and_conus_meshes(
+    gmesh: Dataset, cmesh: Dataset
+) -> dict[str, np.ndarray]:
     glon, glat = np.meshgrid(gmesh["lon"], gmesh["lat"])
     mask = cutout_mask(
         lats=cmesh["lat"].values.flatten(),
@@ -107,7 +115,7 @@ def _combined_global_and_conus_meshes(gmesh: Dataset, cmesh: Dataset) -> dict[st
     # Combine.
     lon = np.concatenate([glon.flatten()[mask], cmesh["lon"].values.flatten()])
     lat = np.concatenate([glat.flatten()[mask], cmesh["lat"].values.flatten()])
-    # Sort, following exactly what anemoi-graphs does for the dat.
+    # Sort, following exactly what anemoi-graphs does for the data.
     coords = np.stack([lon, lat], axis=-1)
     order = get_coordinates_ordering(coords)
     lon = coords[order, 0]
@@ -174,8 +182,9 @@ def _conus_latent_grid(cds: Dataset, trim: int = 10, coarsen: int = 2) -> Datase
 
 def _global_latent_grid() -> Dataset:
     """
-    For the high-res version, this will process the original grid. However, since the data grid
-    is on an xESMF generated grid, it works out just fine to generate another xESMF grid here.
+    For the high-res version, this will process the original grid. However, since the
+    data grid is on an xESMF generated grid, it works out just fine to generate another
+    xESMF grid here.
     """
     mesh: Dataset = xesmf.util.grid_global(2, 2, cf=True, lon1=360)
     return mesh.drop_vars("latitude_longitude")

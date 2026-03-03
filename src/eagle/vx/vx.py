@@ -8,7 +8,8 @@ from uwtools.api.driver import DriverTimeInvariant
 
 class VX(DriverTimeInvariant):
     """
-    Run verification for a single method (grid2grid or grid2obs) and domain (global or lam).
+    Run verification for a single method (grid2grid or grid2obs) and domain (global or
+    lam).
     """
 
     @collection

@@ -131,7 +131,7 @@ conda_install() {
   (
     conda_activate $name
     set +eu
-    conda install -y -q $@
+    conda install -y -q "$@"
     set -eu
   )
 }
@@ -140,7 +140,7 @@ conda_install_devpkgs() {
   local name=$1
   local devpkgs=( $MAKE mypy=1.19.* ruff=0.14.* )
   msg Installing dev packages into environment: $name
-  conda_install $name ${devpkgs[@]}
+  conda_install $name "${devpkgs[@]}"
 }
 
 cuda_command_file() {
@@ -180,7 +180,7 @@ msg() {
 parse_kvargs() {
   local arg key required val
   declare -g -A ARGS
-  for arg in $@; do
+  for arg in "$@"; do
     IFS="=" read -r key val <<< $arg
     ARGS[$key]=$val
   done
@@ -196,7 +196,7 @@ pip_install() {
   shift
   (
     conda_activate $name
-    pip install $@
+    pip install "$@"
   )
 }
 
@@ -217,9 +217,9 @@ fi
 EOF
 }
 
-parse_kvargs $@
+parse_kvargs "$@"
 install_conda
-conda_install base $UWTOOLS
+conda_install base shellcheck $UWTOOLS
 environments=( base data training inference vx )
 for name in ${environments[*]}; do
   conda_create_$name
