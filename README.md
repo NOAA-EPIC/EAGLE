@@ -73,8 +73,8 @@ A variety of `make` targets are available to execute pipeline steps:
 | inference        | Performs Anemoi inference                     | training          | inference        |
 | prewxvx-global   | Postprocesses global inference output         | inference         | vx               |
 | prewxvx-lam      | Postprocesses LAM inference output            | inference         | vx               |
-| vx-grid-global   | Verify global against grided analysis         | prewxvx-global    | vx               |
-| vx-grid-lam      | Verify LAM against grided analysis            | prewxvx-lam       | vx               |
+| vx-grid-global   | Verify global against gridded analysis        | prewxvx-global    | vx               |
+| vx-grid-lam      | Verify LAM against gridded analysis           | prewxvx-lam       | vx               |
 | vx-obs-global    | Verify global against obs                     | prewxvx-global    | vx               |
 | vx-obs-lam       | Verify LAM against obs                        | prewxvx-lam       | vx               |
 
