@@ -270,7 +270,7 @@ The `lint` and `typecheck` targets accept an optional `env=<name>` key-value pai
     - `runscript.<target>.out`: The captured `stdout` and `stderr` of the batch job.
     - `runscript.<target>.submit`: A file containing the job ID of the submitted batch job, if applicable.
     - `runscript.<target>.done`: Created if the core component completes successfully (i.e. exits with status code 0).
-- EAGLE drivers are idempotent and, as such, will not take further action if run again unless the output they previously created is removed. In general, removing `.done` (and, when present, `.submit`) files in the appropriate run directory should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or renaming the enite run directory also works.
+- EAGLE drivers are idempotent and, as such, will not take further action if run again unless the output they previously created is removed. In general, removing `.done` (and, when present, `.submit`) files in the appropriate run directory should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or renaming the entire run directory also works.
 
 ## Further Reading 
 
