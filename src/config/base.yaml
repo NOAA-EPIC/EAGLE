@@ -2,10 +2,11 @@
 
 app:
   base: /path/to/eagle/src
+  experiment_name: default
   gpu: # set by platform config
   partitions: # set by platform config
   platform: # set by platform config
-  rundir: '{{ app.base }}/run'
+  rundir: '{{ app.base }}/run/{{ app.experiment_name }}'
   time:
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
     inference_start: !datetime 2022-02-03T12
@@ -16,9 +17,9 @@ app:
     stop: !datetime 2022-02-05T12
 grids_and_meshes:
   filenames:
-    combined_grids: '{{ val.filenames.combined_grids }}'
     gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
+    latent_mesh: '{{ val.filenames.latent_mesh }}'
   rundir: '{{ val.data.rundir }}'
 inference:
   anemoi:
@@ -183,7 +184,7 @@ training:
         validation: 1
       test:
         start: '{{ (app.time.start + app.time.step * 16).strftime("%Y-%m-%d") }}'
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        end: '{{ (app.time.start + app.time.step * 20).strftime("%Y-%m-%d") }}'
       training:
         start: '{{ app.time.start.strftime("%Y-%m-%d") }}'
         end: '{{ (app.time.start + app.time.step * 4).strftime("%Y-%m-%d") }}'
@@ -486,9 +487,9 @@ val:
   data:
     rundir: '{{ app.rundir }}/data'
   filenames:
-    combined_grids: latentx2.spongex1.combined.sorted.npz
     gfs_target_grid: global_one_degree.nc
     hrrr_target_grid: hrrr_15km.nc
+    latent_mesh: latentx2.spongex1.combined.sorted.npz
   levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
   statsdelta:
     aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'

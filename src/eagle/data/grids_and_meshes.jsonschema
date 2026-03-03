@@ -6,20 +6,20 @@
         "filenames": {
           "additionalProperties": false,
           "properties": {
-            "combined_grids": {
-              "type": "string"
-            },
             "gfs_target_grid": {
               "type": "string"
             },
             "hrrr_target_grid": {
               "type": "string"
+            },
+            "latent_mesh": {
+              "type": "string"
             }
           },
           "required": [
-            "combined_grids",
             "gfs_target_grid",
-            "hrrr_target_grid"
+            "hrrr_target_grid",
+            "latent_mesh"
           ],
           "type": "object"
         },

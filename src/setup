@@ -29,7 +29,7 @@ conda_create() {
   # In each runtime virtual environment, "make format" requires jq to format JSON Schema files;
   # invoking make targets requires make itself; and driver execution and config management require
   # uwtools, so install those.
-  conda create -y -q -c ufs-community -n "$*" jq $MAKE $UWTOOLS
+  conda create -y -q -c ufs-community -n $* jq $MAKE $UWTOOLS
   (
     # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
     # files in the runtime area, rather than in the user's home directory, which might impact their

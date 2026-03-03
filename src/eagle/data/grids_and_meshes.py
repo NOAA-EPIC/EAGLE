@@ -28,23 +28,6 @@ class GridsAndMeshes(AssetsTimeInvariant):
     # Public tasks
 
     @task
-    def combined_global_and_conus_meshes(self):
-        """
-        The combined global and CONUS meshes, provisioned to the rundir.
-        """
-        path = self.rundir / self.config["filenames"]["combined_grids"]
-        yield self.taskname(f"combined global and conus meshes {path}")
-        yield Asset(path, path.is_file)
-        yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        gmesh = _global_latent_grid()
-        cmesh = _conus_latent_grid(
-            _conus_data_grid(self.rundir, self._conus_data_grid_logfile)
-        )
-        coords = _combined_global_and_conus_meshes(gmesh, cmesh)
-        np.savez(path, lon=coords["lon"], lat=coords["lat"])
-
-    @task
     def conus_data_grid(self):
         """
         The CONUS grid, provisioned to the rundir.
@@ -71,6 +54,23 @@ class GridsAndMeshes(AssetsTimeInvariant):
         ds = ds.sortby("lat", ascending=False)  # GFS goes north -> south
         ds.to_netcdf(path)
 
+    @task
+    def latent_mesh(self):
+        """
+        The latent mesh, provisioned to the rundir.
+        """
+        path = self.rundir / self.config["filenames"]["latent_mesh"]
+        yield self.taskname(f"latent mesh {path}")
+        yield Asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        gmesh = _global_latent_grid()
+        cmesh = _conus_latent_grid(
+            _conus_data_grid(self.rundir, self._conus_data_grid_logfile)
+        )
+        coords = _combine_global_and_conus_meshes(gmesh, cmesh)
+        np.savez(path, lon=coords["lon"], lat=coords["lat"])
+
     @collection
     def provisioned_rundir(self):
         """
@@ -78,9 +78,9 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         yield self.taskname("provisioned run directory")
         yield [
-            self.combined_global_and_conus_meshes(),
             self.conus_data_grid(),
             self.global_data_grid(),
+            self.latent_mesh(),
         ]
 
     # Public methods
@@ -101,7 +101,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
 # Private functions
 
 
-def _combined_global_and_conus_meshes(
+def _combine_global_and_conus_meshes(
     gmesh: Dataset, cmesh: Dataset
 ) -> dict[str, np.ndarray]:
     glon, glat = np.meshgrid(gmesh["lon"], gmesh["lat"])
