@@ -257,7 +257,7 @@ After successful completion, the following `make` targets will be available:
 ``` bash
 make format   # format Python code
 make lint     # run the linter on Python code
-make typeheck # run the typechecker on Python code
+make typecheck # run the typechecker on Python code
 make test     # all of the above except formatting
 ```
 
