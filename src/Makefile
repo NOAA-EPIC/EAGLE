@@ -96,7 +96,7 @@ realize:
 shellcheck:
 	$(call activate,base)
 	@echo "=> Checking shell scripts"
-	@(set -x && shellcheck --format=gcc --severity=warning --shell=bash $(BASHSRCS))
+	@(set -x && shellcheck --format=gcc --severity=info --shell=bash $(BASHSRCS))
 
 test: lint shellcheck typecheck
 
