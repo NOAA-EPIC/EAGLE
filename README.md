@@ -71,8 +71,8 @@ A variety of `make` targets are available to execute pipeline steps:
 | zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data             |
 | training         | Performs Anemoi training                      | data              | training         |
 | inference        | Performs Anemoi inference                     | training          | inference        |
-| prewxvx-global   | Postprocesses global inference output         | inference         | eagle-tools      |
-| prewxvx-lam      | Postprocesses LAM inference output            | inference         | eagle-gools      |
+| prewxvx-global   | Postprocesses global inference output         | inference         | prewxvx          |
+| prewxvx-lam      | Postprocesses LAM inference output            | inference         | prewxvx          |
 | vx-grid-global   | Verify global against gridded analysis        | prewxvx-global    | wxvx             |
 | vx-grid-lam      | Verify LAM against gridded analysis           | prewxvx-lam       | wxvx             |
 | vx-obs-global    | Verify global against obs                     | prewxvx-global    | wxvx             |

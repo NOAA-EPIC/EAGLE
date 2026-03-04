@@ -86,13 +86,6 @@ EOF
   pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
 }
 
-conda_create_eagle_tools() {
-  local name=eagle-tools
-  conda_env_exists $name && return || true
-  conda_create $name python=3.13 xesmf
-  pip_install $name eagle-tools
-}
-
 conda_create_inference() {
   local name=inference
   conda_env_exists $name && return || true
@@ -102,6 +95,13 @@ conda_create_inference() {
     write_anemoi_activation_scripts
   )
   pip_install $name anemoi-inference==0.7.* anemoi-models==0.9.* eagle-tools
+}
+
+conda_create_prewxvx() {
+  local name=prewxvx
+  conda_env_exists $name && return || true
+  conda_create $name python=3.13 xesmf
+  pip_install $name eagle-tools
 }
 
 conda_create_training() {
@@ -228,7 +228,7 @@ EOF
 parse_kvargs $@
 install_conda
 conda_install base shellcheck $UWTOOLS
-environments=( base data eagle_tools inference training wxvx )
+environments=( base data inference prewxvx training wxvx )
 for name in ${environments[*]}; do
   conda_create_$name
   test -v EAGLE_DEV && conda_install_devpkgs $name

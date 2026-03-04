@@ -1,5 +1,5 @@
 BASHSRCS = format setup
-ENVS     = data eagle-tools inference training wxvx
+ENVS     = data inference prewxvx training wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
@@ -73,13 +73,13 @@ else
 endif
 
 prewxvx:
-	$(call activate,eagle-tools)
+	$(call activate,prewxvx)
 ifeq ($(task),?)
-	$(call tasklist,vx,prewxvx,PreWXVX)
+	$(call tasklist,prewxvx,prewxvx,PreWXVX)
 else
 	$(call check,$(config),config)
 	$(call check,$(extent),extent)
-	$(call exec,vx,prewxvx,PreWXVX,$(or $(task),run) --key-path prewxvx.$(extent))
+	$(call exec,prewxvx,prewxvx,PreWXVX,$(or $(task),run) --key-path prewxvx.$(extent))
 endif
 
 prewxvx-global:
@@ -126,12 +126,12 @@ validate:
 vx:
 	$(call activate,wxvx)
 ifeq ($(task),?)
-	$(call tasklist,vx,vx,VX)
+	$(call tasklist,wxvx,wxvx,VX)
 else
 	$(call check,$(config),config)
 	$(call check,$(extent),extent)
 	$(call check,$(truth),truth)
-	$(call exec,vx,vx,VX,$(or $(task),run) --key-path vx.$(truth).$(extent) --batch)
+	$(call exec,wxvx,wxvx,WXVX,$(or $(task),run) --key-path vx.$(truth).$(extent) --batch)
 endif
 
 vx-grid-global:
