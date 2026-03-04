@@ -228,7 +228,7 @@ EOF
 parse_kvargs $@
 install_conda
 conda_install base shellcheck $UWTOOLS
-environments=( base data eagle_tools inference training vx )
+environments=( base data eagle_tools inference training wxvx )
 for name in ${environments[*]}; do
   conda_create_$name
   test -v EAGLE_DEV && conda_install_devpkgs $name
