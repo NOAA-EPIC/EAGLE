@@ -1,5 +1,5 @@
 BASHSRCS = format setup
-ENVS     = data inference training vx
+ENVS     = data eagle-tools inference training wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
@@ -73,7 +73,7 @@ else
 endif
 
 prewxvx:
-	$(call activate,vx)
+	$(call activate,eagle-tools)
 ifeq ($(task),?)
 	$(call tasklist,vx,prewxvx,PreWXVX)
 else
@@ -124,7 +124,7 @@ validate:
 	@(set -x && uw config validate --input-file $(config) --schema-file eagle/eagle.jsonschema)
 
 vx:
-	$(call activate,vx)
+	$(call activate,wxvx)
 ifeq ($(task),?)
 	$(call tasklist,vx,vx,VX)
 else
