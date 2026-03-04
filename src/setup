@@ -89,8 +89,8 @@ EOF
 conda_create_eagle_tools() {
   local name=eagle-tools
   conda_env_exists $name && return || true
-  conda_create $name python=3.13
-  pip_install $name eagle-tools xesmf
+  conda_create $name python=3.13 xesmf
+  pip_install $name eagle-tools
 }
 
 conda_create_inference() {
