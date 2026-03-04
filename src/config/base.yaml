@@ -1,5 +1,7 @@
 # This is the base EAGLE config. It currently configures the Nested EAGLE case.
 
+# yamllint disable rule:anchors rule:line-length
+
 app:
   base: /path/to/eagle/src
   experiment_name: default

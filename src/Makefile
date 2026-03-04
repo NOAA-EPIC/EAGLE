@@ -3,7 +3,7 @@ ENVS     = data inference prewxvx training wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
-TOOLING  = config devenv env format lint realize shellcheck test typecheck validate
+TOOLING  = config devenv env format lint realize shellcheck test typecheck validate yamllint
 
 activate = @source conda/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
@@ -98,7 +98,7 @@ shellcheck:
 	@echo "=> Checking shell scripts"
 	@(set -x && shellcheck --format=gcc --severity=info --shell=bash $(BASHSRCS))
 
-test: lint shellcheck typecheck
+test: lint shellcheck typecheck yamllint
 
 training:
 	$(call activate,training)
@@ -145,6 +145,11 @@ vx-obs-global:
 
 vx-obs-lam:
 	@$(make) vx truth=grid2obs extent=lam
+
+yamllint:
+	$(call activate,base)
+	@echo "=> Linting YAML configs"
+	@(set -x && yamllint --no-warnings config/)
 
 zarr:
 	$(call activate,data)

@@ -146,7 +146,7 @@ conda_install() {
 
 conda_install_devpkgs() {
   local name=$1
-  local devpkgs=( $MAKE mypy=1.19.* ruff=0.14.* )
+  local devpkgs=( $MAKE mypy=1.19.* ruff=0.14.* yamllint=1.38.* )
   msg Installing dev packages into environment: $name
   conda_install $name "${devpkgs[@]}"
 }

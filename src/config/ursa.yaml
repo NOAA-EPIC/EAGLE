@@ -1,5 +1,7 @@
 # Configuration for the NOAA RDHPCS Ursa platform.
 
+# yamllint disable rule:anchors rule:line-length
+
 app:
   gpu:
     batchargs: &gpu-batchargs
