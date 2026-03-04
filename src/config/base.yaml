@@ -599,7 +599,7 @@ vx:
   grid2grid:
     global:
       platform: *platform
-      wxvx: # config gor the EAGLE driver
+      wxvx: # config for the EAGLE driver
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
@@ -629,7 +629,7 @@ vx:
             to: forecast
     lam:
       platform: *platform
-      wxvx: # config gor the EAGLE driver
+      wxvx: # config for the EAGLE driver
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
@@ -664,7 +664,7 @@ vx:
   grid2obs:
     global:
       platform: *platform
-      wxvx: # config gor the EAGLE driver
+      wxvx: # config for the EAGLE driver
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
@@ -692,7 +692,7 @@ vx:
             to: G104
     lam:
       platform: *platform
-      wxvx: # config gor the EAGLE driver
+      wxvx: # config for the EAGLE driver
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
