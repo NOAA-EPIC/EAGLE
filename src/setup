@@ -260,7 +260,7 @@ pip_install() {
   shift
   (
     conda_activate $name
-    pip install $@
+    pip install $@ | grep -v "^Requirement already satisfied: .*$"
   )
 }
 
