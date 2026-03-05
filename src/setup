@@ -10,6 +10,13 @@ UWTOOLS="uwtools=2.13.*"
 # In all functions, make variables local unless they are either intended for global use, or set in
 # a subshell that exits at the end of the function.
 
+cachedir() {
+  (
+    conda_activate $base
+    echo $CONDA_PREFIX/cache
+  )
+}
+
 conda_activate() {
   local env=$1
   source $INSTALLDIR/etc/profile.d/conda.sh
@@ -37,7 +44,7 @@ conda_create() {
 if [[ -v XDG_CACHE_HOME ]]; then
   export EAGLE_OLD_XDG_CACHE_HOME=\$XDG_CACHE_HOME
 fi
-export XDG_CACHE_HOME=\$_CONDA_ROOT/cache
+export XDG_CACHE_HOME=$(cachedir)
 EOF
     dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
     mkdir -pv $dir_deactivate
@@ -236,7 +243,7 @@ msg() {
 parse_kvargs() {
   local arg key required val
   declare -g -A ARGS
-  for arg in "$@"; do
+  for arg in $@; do
     IFS="=" read -r key val <<< $arg
     ARGS[$key]=$val
   done
@@ -253,7 +260,7 @@ pip_install() {
   shift
   (
     conda_activate $name
-    pip install "$@"
+    pip install $@
   )
 }
 
@@ -280,6 +287,7 @@ EOF
 
 parse_kvargs $@
 install_conda
+XDG_CACHE_HOME=$(cachedir)
 CONDA_OVERRIDE_CUDA=$(cuda_release)
 ENVIRONMENTS=( base data inference prewxvx training wxvx )
 for name in ${ENVIRONMENTS[@]}; do
