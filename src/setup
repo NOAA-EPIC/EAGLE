@@ -74,10 +74,11 @@ conda_create_data() {
     ufs2arco=0.18.*
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  local args=( $name ${pkgs[@]} )
   if [[ $(conda_env_exists $name) ]]; then
-    conda_install $name ${pkgs[@]}
+    conda_install ${args[@]}
   else
-    conda_create $name ${pkgs[@]}
+    conda_create ${args[@]}
     (
       conda_activate $name
       dir_activate=$CONDA_PREFIX/etc/conda/activate.d
@@ -106,51 +107,77 @@ conda_create_inference() {
   local name=inference
   local pkgs=(
     flash-attn=2.8.*
-    numpy=2.2.6
+    numpy=2.2.6.*
     python=3.12
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  local pre=( CONDA_OVERRIDE_CUDA=$(cuda_release) )
+  local args=( $name ${pkgs[@]} )
   if [[ $(conda_env_exists $name) ]]; then
-    conda_install $name ${pkgs[@]}
+    ${pre[@]} conda_install ${args[@]}
   else
-    CONDA_OVERRIDE_CUDA=$(cuda_release) conda_create $name
-    (
-      conda_activate $name
-      write_anemoi_activation_scripts
-    )
+    ${pre[@]} conda_create ${args[@]}
+    write_anemoi_activation_scripts
   fi
   pip_install $name anemoi-inference==0.7.* anemoi-models==0.9.* eagle-tools
 }
 
 conda_create_prewxvx() {
   local name=prewxvx
-  conda_env_exists $name && return || true
-  conda_create $name python=3.13 xesmf
+  local pkgs=(
+    numpy=2.4.2.*
+    pandas=3.0.1.*
+    python=3.13
+    xesmf=0.8.*
+  )
+  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  local args=( $name ${pkgs[@]} )
+  if [[ $(conda_env_exists $name) ]]; then
+    conda_install ${args[@]}
+  else
+    conda_create ${args[@]}
+  fi
   pip_install $name eagle-tools
 }
 
 conda_create_training() {
   local name=training
-  conda_env_exists $name && return || true
-  (
-    CONDA_OVERRIDE_CUDA=$(cuda_release) conda_create $name flash-attn=2.8.* numpy=1.26.4 python=3.12
-    conda_activate $name
-    write_anemoi_activation_scripts
+  local pkgs=(
+    flash-attn=2.8.*
+    numpy=1.26.4.*
+    python=3.12
   )
+  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  local pre=( CONDA_OVERRIDE_CUDA=$(cuda_release) )
+  local args=( $name ${pkgs[@]} )
+  if [[ $(conda_env_exists $name) ]]; then
+    ${pre[@]} conda_install ${args[@]}
+  else
+    ${pre[@]} conda_create ${args[@]}
+    write_anemoi_activation_scripts
+  fi
   pip_install $name anemoi-models==0.9.* anemoi-training==0.6.*
 }
 
 conda_create_wxvx() {
   local name=wxvx
-  conda_env_exists $name && return || true
-  conda_create $name -c oar-gsl wxvx=0.7.*
+  local pkgs=(
+    wxvx=0.7.*
+  )
+  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  local args=( $name -c oar-gsl ${pkgs[@]} )
+  if [[ $(conda_env_exists $name) ]]; then
+    conda_install ${args[@]}
+  else
+    conda_create ${args[@]}
+  fi
 }
 
 conda_env_exists() {
   name=$1
   (
     conda_activate base
-    if conda env list --json | jq -r .envs_details[].name | grep -q "^$name$"; then
+    if [[ conda env list --json | jq -r .envs_details[].name | grep -q "^$name$" ]]; then
       msg Found existing conda environment: $name
       exit 0
     fi
@@ -236,6 +263,9 @@ pip_install() {
 }
 
 write_anemoi_activation_scripts() {
+  local name=$1
+  (
+    conda_activate $name
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
 modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
 if [[ -n "\$modules" ]]; then
@@ -250,12 +280,12 @@ if [[ -v EAGLE_OLD_MODULES ]]; then
   unset EAGLE_OLD_MODULES
 fi
 EOF
+  )
 }
 
 parse_kvargs $@
 install_conda
-# environments=( base data inference prewxvx training wxvx )
-environments=( base data inference )
+environments=( base data inference prewxvx training wxvx )
 for name in ${environments[@]}; do
   conda_create_$name
 done

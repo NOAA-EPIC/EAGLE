@@ -11,7 +11,7 @@ This repository contains configuration and driver code for running an end-to-end
 
 ## Quickstart
 
-This section provides a recipe for an end-to-end run of Nested EAGLE on Ursa.
+This section provides a recipe for an end-to-end run of Nested EAGLE on Ursa. GNU `make` version 3.82 or higher is required.
 
 In the `src/` directory:
 
