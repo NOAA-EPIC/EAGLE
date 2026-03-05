@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=1090,1091,2046,2048,2086,2206,2155
+# shellcheck disable=1090,1091,2046,2048,2068,2086,2206,2155
 
 set -aeu
 
@@ -97,6 +97,13 @@ conda_create_inference() {
   pip_install $name anemoi-inference==0.7.* anemoi-models==0.9.* eagle-tools
 }
 
+conda_create_prewxvx() {
+  local name=prewxvx
+  conda_env_exists $name && return || true
+  conda_create $name python=3.13 xesmf
+  pip_install $name eagle-tools
+}
+
 conda_create_training() {
   local name=training
   conda_env_exists $name && return || true
@@ -108,11 +115,10 @@ conda_create_training() {
   pip_install $name anemoi-models==0.9.* anemoi-training==0.6.*
 }
 
-conda_create_vx() {
-  local name=vx
+conda_create_wxvx() {
+  local name=wxvx
   conda_env_exists $name && return || true
-  conda_create $name -c oar-gsl python=3.13 wxvx=0.7.* xesmf
-  pip_install $name eagle-tools
+  conda_create $name -c oar-gsl wxvx=0.7.*
 }
 
 conda_env_exists() {
@@ -219,10 +225,10 @@ fi
 EOF
 }
 
-parse_kvargs "$@"
+parse_kvargs $@
 install_conda
 conda_install base shellcheck $UWTOOLS
-environments=( base data training inference vx )
+environments=( base data inference prewxvx training wxvx )
 for name in ${environments[*]}; do
   conda_create_$name
   test -v EAGLE_DEV && conda_install_devpkgs $name

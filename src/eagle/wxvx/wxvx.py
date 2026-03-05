@@ -6,7 +6,7 @@ from uwtools.api.config import get_yaml_config
 from uwtools.api.driver import DriverTimeInvariant
 
 
-class VX(DriverTimeInvariant):
+class WXVX(DriverTimeInvariant):
     """
     Run verification for a single method (grid2grid or grid2obs) and domain (global or
     lam).
@@ -38,7 +38,7 @@ class VX(DriverTimeInvariant):
 
     @classmethod
     def driver_name(cls) -> str:
-        return "vx"
+        return "wxvx"
 
     # Private methods
 

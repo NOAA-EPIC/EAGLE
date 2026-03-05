@@ -17,7 +17,7 @@ In the `src/` directory:
 
 **1. Run `make env cudascript=ursa`.**
 
-This step creates the runtime software environment, comprising conda virtual environments `data`, `training`, `inference`, and `vx` for data prep, training, inference, and verification, respectively. The `conda/` subdirectory it creates is self-contained and can be removed and recreated by running the `make env` command again, as long as pipeline steps are not currently running.
+This step creates the runtime software environment, comprising conda virtual environments to support data prep, training, inference, and verification. The `conda/` subdirectory it creates is self-contained and can be removed and recreated by running the `make env` command again, as long as pipeline steps are not currently running.
 
 Developers who will be modifying Python driver code should replace `make env` with `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, typechecking, and unit testing.
  
@@ -27,27 +27,27 @@ The `config` target operates on `.yaml` files in the `config/` directory, so thi
 
 **3. Set the `app.base` value in `eagle.yaml` to the absolute path to the current (`src/`) directory.**
 
-The run directories from subsequent steps, along with the output of those steps, will be created in the `run/` subdirectory of `app.base`.
+The run directories from subsequent steps, along with the output of those steps, will be created in the `run/<expname>` subdirectory of `app.base`, where `<expname>` is the value of `app.experiment_name`.
 
 **4. Run `make data config=eagle.yaml`.**
 
-This step provisions data required for training and inference. The `data` target delegates to targets `grids-and-meshes`, `zarr-gfs`, and `zarr-hrrr`, which can also be run individually (e.g. `make grids-and-meshes config=eagle.yaml`), but note that `grids-and-meshes`, which runs locally, must be run first. The `zarr-gfs` and `zarr-hrrr` targets can be run in quick succession, as they submit batch jobs: Do not proceed until their batch jobs complete successfully (see the files `run/data/*.out`).
+This step provisions data required for training and inference. The `data` target delegates to targets `grids-and-meshes`, `zarr-gfs`, and `zarr-hrrr`, which can also be run individually (e.g. `make grids-and-meshes config=eagle.yaml`), but note that `grids-and-meshes`, which runs locally, must be run first. The `zarr-gfs` and `zarr-hrrr` targets can be run in quick succession, as they submit batch jobs: Do not proceed until their batch jobs complete successfully (see the files `run/<expname>/data/*.out`).
 
 **5. Run `make training config=eagle.yaml`.**
 
-This step trains a model using data provisioned by the previous step. It submits a batch job: Do not proceed until the batch job completes successfully (see the file `run/training/runscript.training.out`).
+This step trains a model using data provisioned by the previous step. It submits a batch job: Do not proceed until the batch job completes successfully (see the file `run/<expname>training/runscript.training.out`).
 
 **6. Run `make inference config=eagle.yaml`.**
 
-This step performs inference, producing a forecast. It submits a batch job: Do not proceed until the batch job completes successfully (see the file `run/inference/runscript.inference.out`.)
+This step performs inference, producing a forecast. It submits a batch job: Do not proceed until the batch job completes successfully (see the file `run/<expname>inference/runscript.inference.out`.)
 
 **7. Run `make prewxvx-global config=eagle.yaml` followed by `make prewxvx-lam config=eagle.yaml`.**
 
-These steps prepare forecast output from the previous step for verification by `wxvx`. They run locally, so it is safe to proceed when the commands return. See the files `run/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out` for details.
+These steps prepare forecast output from the previous step for verification by `wxvx`. They run locally, so it is safe to proceed when the commands return. See the files `run/<expname>vx/prewxvx/{global,lam}/runscript.prewxvx-*.out` for details.
 
 **8. Run any or all of `make vx-grid-global config=eagle.yaml`, `make vx-grid-lam config=eagle.yaml`, `make vx-obs-global config=eagle.yaml`, `make vx-obs-lam config=eagle.yaml`.**
 
-These steps perform verification, either of the `global` or `lam` forecasts, and against gridded analyses (`*-grid-*`) or prepbufr observations (`*-obs-*`) as truth. Each submits a batch job, so the four `make` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch job completes, MET `.stat` files and `.png` plot files can be found under the `stats/` and `plots/` subdirectories of `run/vx/grid2{grid,obs}/{global,lam}/run/`. The files `run/vx/*.log` contain the logs from each verification run.
+These steps perform verification, either of the `global` or `lam` forecasts, and against gridded analyses (`*-grid-*`) or prepbufr observations (`*-obs-*`) as truth. Each submits a batch job, so the four `make` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch job completes, MET `.stat` files and `.png` plot files can be found under the `stats/` and `plots/` subdirectories of `run/<expname>vx/grid2{grid,obs}/{global,lam}/run/`. The files `run/<expname>vx/*.log` contain the logs from each verification run.
 
 ## Runtime Environment
 
@@ -57,7 +57,7 @@ To build the EAGLE runtime virtual environments:
 make env cudascript=<name-or-path> # alternatively: ./setup cudascript=<name-or-path>
 ```
 
-This will install Miniforge conda in the current directory and create the virtual environments `data`, `training`, `inference`, and `vx`.
+This will install Miniforge conda in the current directory and create the various virtual environments.
 
 The value of the `cudascript=` argument should be either the name of a file under `src/cuda/` (e.g. `cudascript=ursa`), or an arbitrary path to a file (e.g. `cudascript=/path/to/file`). The file should contain a list of commands that need to be executed on the current system to make the CUDA `nvcc` program available on `PATH`. The `setup` script uses `nvcc` to determine the CUDA release number, used to select a matching `flash-attn` package. For systems needing no special setup to make `nvcc` available, `cudascript=none` may be specified.
 
@@ -71,12 +71,12 @@ A variety of `make` targets are available to execute pipeline steps:
 | zarr-hrrr        | Prepare Zarr-formatted HRRR input data        | grids-and-meshes  | data             |
 | training         | Performs Anemoi training                      | data              | training         |
 | inference        | Performs Anemoi inference                     | training          | inference        |
-| prewxvx-global   | Postprocesses global inference output         | inference         | vx               |
-| prewxvx-lam      | Postprocesses LAM inference output            | inference         | vx               |
-| vx-grid-global   | Verify global against gridded analysis        | prewxvx-global    | vx               |
-| vx-grid-lam      | Verify LAM against gridded analysis           | prewxvx-lam       | vx               |
-| vx-obs-global    | Verify global against obs                     | prewxvx-global    | vx               |
-| vx-obs-lam       | Verify LAM against obs                        | prewxvx-lam       | vx               |
+| prewxvx-global   | Postprocesses global inference output         | inference         | prewxvx          |
+| prewxvx-lam      | Postprocesses LAM inference output            | inference         | prewxvx          |
+| vx-grid-global   | Verify global against gridded analysis        | prewxvx-global    | wxvx             |
+| vx-grid-lam      | Verify LAM against gridded analysis           | prewxvx-lam       | wxvx             |
+| vx-obs-global    | Verify global against obs                     | prewxvx-global    | wxvx             |
+| vx-obs-lam       | Verify LAM against obs                        | prewxvx-lam       | wxvx             |
 
 Run `make` with no argument to list available targets.
 
@@ -228,11 +228,11 @@ $ make inference config=eagle.yaml task=runscript
 [2026-02-27T22:35:11]     INFO inference runscript.inference: Ready
 ```
 
-The previously non-existent `run/inference/` directory now contains:
+The previously non-existent `run/<expname>inference/` directory now contains:
 
 ``` bash
-$ tree run/inference/
-run/inference/
+$ tree run/<expname>/inference/
+run/<expname>inference/
 └── runscript.inference
 
 1 directory, 1 file

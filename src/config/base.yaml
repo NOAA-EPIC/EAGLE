@@ -56,7 +56,7 @@ prewxvx:
     execution: &prewxvx-common-execution
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
-        - conda activate vx
+        - conda activate prewxvx
         - set -ex
     prewxvx: &prewxvx-common
       forecast_path: '{{ inference.anemoi.output_path }}'
@@ -531,7 +531,7 @@ vx:
         walltime: '00:30:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
-        - conda activate vx
+        - conda activate wxvx
         - set -ex
     paths_grid:
       grids:
@@ -599,16 +599,16 @@ vx:
   grid2grid:
     global:
       platform: *platform
-      vx:
+      wxvx: # config for the EAGLE driver
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
-            rundir: '{{ vx.grid2grid.global.vx.rundir }}'
+            rundir: '{{ vx.grid2grid.global.wxvx.rundir }}'
           envcmds: !list '{{ vx.common.execution.envcmds }}'
-          executable: wxvx -c vx-grid2grid-global.yaml -t plots -f
+          executable: wxvx -c wxvx-grid2grid-global.yaml -t plots -f
         name: grid2grid-global
         rundir: '{{ val.vx.rundir }}/grid2grid/global'
-        wxvx:
+        wxvx: # config for the wxvx application
           <<: *wxvx-common
           truth:
             name: GFS
@@ -629,16 +629,16 @@ vx:
             to: forecast
     lam:
       platform: *platform
-      vx:
+      wxvx: # config for the EAGLE driver
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
-            rundir: '{{ vx.grid2grid.lam.vx.rundir }}'
+            rundir: '{{ vx.grid2grid.lam.wxvx.rundir }}'
           envcmds: !list '{{ vx.common.execution.envcmds }}'
-          executable: wxvx -c vx-grid2grid-lam.yaml -t plots -f
+          executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
         name: grid2grid-lam
         rundir: '{{ val.vx.rundir }}/grid2grid/lam'
-        wxvx:
+        wxvx: # config for the wxvx application
           <<: *wxvx-common
           truth:
             name: HRRR
@@ -658,22 +658,22 @@ vx:
               lon_0: 262.5
               proj: lcc
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
-          ncdiffs: !bool '{{ vx.grid2grid.global.vx.wxvx.ncdiffs }}'
+          ncdiffs: !bool '{{ vx.grid2grid.global.wxvx.wxvx.ncdiffs }}'
           paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
-          regrid: !dict '{{ vx.grid2grid.global.vx.wxvx.regrid }}'
+          regrid: !dict '{{ vx.grid2grid.global.wxvx.wxvx.regrid }}'
   grid2obs:
     global:
       platform: *platform
-      vx:
+      wxvx: # config for the EAGLE driver
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
-            rundir: '{{ vx.grid2obs.global.vx.rundir }}'
+            rundir: '{{ vx.grid2obs.global.wxvx.rundir }}'
           envcmds: !list '{{ vx.common.execution.envcmds }}'
-          executable: wxvx -c vx-grid2obs-global.yaml -t plots -f
+          executable: wxvx -c wxvx-grid2obs-global.yaml -t plots -f
         name: grid2obs-global
         rundir: '{{ val.vx.rundir }}/grid2obs/global'
-        wxvx:
+        wxvx: # config for the wxvx application
           <<: *wxvx-common
           truth:
             name: PREPBUFR
@@ -681,10 +681,10 @@ vx:
             url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
-            name: '{{ vx.grid2grid.global.vx.wxvx.forecast.name }}'
+            name: '{{ vx.grid2grid.global.wxvx.wxvx.forecast.name }}'
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
             path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
-            projection: !dict '{{ vx.grid2grid.global.vx.wxvx.forecast.projection }}'
+            projection: !dict '{{ vx.grid2grid.global.wxvx.wxvx.forecast.projection }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           regrid:
@@ -692,27 +692,27 @@ vx:
             to: G104
     lam:
       platform: *platform
-      vx:
+      wxvx: # config for the EAGLE driver
         execution:
           batchargs:
             <<: *wxvx-common-batchargs
-            rundir: '{{ vx.grid2obs.lam.vx.rundir }}'
+            rundir: '{{ vx.grid2obs.lam.wxvx.rundir }}'
           envcmds: !list '{{ vx.common.execution.envcmds }}'
-          executable: wxvx -c vx-grid2obs-lam.yaml -t plots -f
+          executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
         rundir: '{{ val.vx.rundir }}/grid2obs/lam'
-        wxvx:
+        wxvx: # config for the wxvx application
           <<: *wxvx-common
-          truth: !dict '{{ vx.grid2obs.global.vx.wxvx.truth }}'
+          truth: !dict '{{ vx.grid2obs.global.wxvx.wxvx.truth }}'
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
-            name: '{{ vx.grid2grid.lam.vx.wxvx.forecast.name }}'
+            name: '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.name }}'
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
             path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
-            projection: !dict '{{ vx.grid2grid.lam.vx.wxvx.forecast.projection }}'
+            projection: !dict '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.projection }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
-          regrid: !dict '{{ vx.grid2obs.global.vx.wxvx.regrid }}'
+          regrid: !dict '{{ vx.grid2obs.global.wxvx.wxvx.regrid }}'
 zarrs:
   common:
     execution: &zarrs-common-execution
