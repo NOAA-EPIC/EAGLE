@@ -12,7 +12,7 @@ UWTOOLS="uwtools=2.13.*"
 
 cachedir() {
   (
-    conda_activate $base
+    conda_activate base
     echo $CONDA_PREFIX/cache
   )
 }
