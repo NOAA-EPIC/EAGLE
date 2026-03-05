@@ -74,7 +74,7 @@ conda_create_data() {
     ufs2arco=0.18.*
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  if $(conda_env_exists $name); then
+  if [[ $(conda_env_exists $name) ]]; then
     conda_install $name ${pkgs[@]}
   else
     conda_create $name ${pkgs[@]}
@@ -98,18 +98,27 @@ if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
 fi
 EOF
     )
-    pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
   fi
+  pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
 }
 
 conda_create_inference() {
   local name=inference
-  conda_env_exists $name && return || true
-  (
-    CONDA_OVERRIDE_CUDA=$(cuda_release) conda_create $name flash-attn=2.8.* numpy=2.2.6 python=3.12
-    conda_activate $name
-    write_anemoi_activation_scripts
+  local pkgs=(
+    flash-attn=2.8.*
+    numpy=2.2.6
+    python=3.12
   )
+  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  if [[ $(conda_env_exists $name) ]]; then
+    conda_install $name ${pkgs[@]}
+  else
+    CONDA_OVERRIDE_CUDA=$(cuda_release) conda_create $name
+    (
+      conda_activate $name
+      write_anemoi_activation_scripts
+    )
+  fi
   pip_install $name anemoi-inference==0.7.* anemoi-models==0.9.* eagle-tools
 }
 
@@ -151,7 +160,7 @@ conda_env_exists() {
 
 conda_install() {
   local name=$1
-  msg Installing packages into environment: $name
+  msg Installing conda packages into environment: $name
   shift
   (
     conda_activate $name
@@ -218,6 +227,7 @@ parse_kvargs() {
 
 pip_install() {
   local name=$1
+  msg Installing pip packages into environment: $name
   shift
   (
     conda_activate $name
@@ -244,7 +254,8 @@ EOF
 
 parse_kvargs $@
 install_conda
-environments=( base data inference prewxvx training wxvx )
+# environments=( base data inference prewxvx training wxvx )
+environments=( base data inference )
 for name in ${environments[@]}; do
   conda_create_$name
 done
