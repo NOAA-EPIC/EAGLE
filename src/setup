@@ -2,7 +2,7 @@
 
 # shellcheck disable=1090,1091,2046,2048,2068,2086,2206,2207
 
-set -aeu
+set -aeuo pipefail
 
 INSTALLDIR=$PWD/conda
 UWTOOLS="uwtools=2.13.*"
@@ -32,9 +32,10 @@ conda_activate() {
 conda_create() {
   local name
   name=$1
+  shift
   conda_activate base
   msg Creating environment: $name
-  conda create -y -q -c ufs-community -n $* $UWTOOLS
+  conda create -y -q -c ufs-community -n $name $* $UWTOOLS
   (
     # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
     # files in the runtime area, rather than in the user's home directory, which might impact their
@@ -196,9 +197,10 @@ conda_env_exists() {
 }
 
 conda_install() {
-  local name=$1
-  msg Installing conda packages into environment: $name
+  local name
+  name=$1
   shift
+  msg Installing conda packages into environment: $name
   (
     conda_activate $name
     set +eu
@@ -264,9 +266,10 @@ parse_kvargs() {
 }
 
 pip_install() {
-  local name=$1
-  msg Installing pip packages into environment: $name
+  local name
+  name=$1
   shift
+  msg Installing pip packages into environment: $name
   (
     conda_activate $name
     pip install $@ | grep -v "^Requirement already satisfied: .*$"
