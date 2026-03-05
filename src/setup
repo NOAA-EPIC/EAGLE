@@ -75,7 +75,7 @@ conda_create_data() {
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
   local args=( $name ${pkgs[@]} )
-  if [[ $(conda_env_exists $name) ]]; then
+  if conda_env_exists $name; then
     conda_install ${args[@]}
   else
     conda_create ${args[@]}
@@ -111,13 +111,12 @@ conda_create_inference() {
     python=3.12
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  local pre=( CONDA_OVERRIDE_CUDA=$(cuda_release) )
   local args=( $name ${pkgs[@]} )
-  if [[ $(conda_env_exists $name) ]]; then
-    ${pre[@]} conda_install ${args[@]}
+  if conda_env_exists $name; then
+    conda_install ${args[@]}
   else
-    ${pre[@]} conda_create ${args[@]}
-    write_anemoi_activation_scripts
+    conda_create ${args[@]}
+    write_anemoi_activation_scripts $name
   fi
   pip_install $name anemoi-inference==0.7.* anemoi-models==0.9.* eagle-tools
 }
@@ -132,7 +131,7 @@ conda_create_prewxvx() {
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
   local args=( $name ${pkgs[@]} )
-  if [[ $(conda_env_exists $name) ]]; then
+  if conda_env_exists $name; then
     conda_install ${args[@]}
   else
     conda_create ${args[@]}
@@ -148,13 +147,12 @@ conda_create_training() {
     python=3.12
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  local pre=( CONDA_OVERRIDE_CUDA=$(cuda_release) )
   local args=( $name ${pkgs[@]} )
-  if [[ $(conda_env_exists $name) ]]; then
-    ${pre[@]} conda_install ${args[@]}
+  if conda_env_exists $name; then
+    conda_install ${args[@]}
   else
-    ${pre[@]} conda_create ${args[@]}
-    write_anemoi_activation_scripts
+    conda_create ${args[@]}
+    write_anemoi_activation_scripts $name
   fi
   pip_install $name anemoi-models==0.9.* anemoi-training==0.6.*
 }
@@ -166,7 +164,7 @@ conda_create_wxvx() {
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
   local args=( $name -c oar-gsl ${pkgs[@]} )
-  if [[ $(conda_env_exists $name) ]]; then
+  if conda_env_exists $name; then
     conda_install ${args[@]}
   else
     conda_create ${args[@]}
@@ -177,11 +175,8 @@ conda_env_exists() {
   name=$1
   (
     conda_activate base
-    if [[ conda env list --json | jq -r .envs_details[].name | grep -q "^$name$" ]]; then
-      msg Found existing conda environment: $name
-      exit 0
-    fi
-    exit 1
+    conda env list --json | jq -r .envs_details[].name | grep -q "^${name}$"
+    test $? -eq 0 && msg Found existing conda environment: $name
   )
 }
 
@@ -285,8 +280,9 @@ EOF
 
 parse_kvargs $@
 install_conda
-environments=( base data inference prewxvx training wxvx )
-for name in ${environments[@]}; do
+CONDA_OVERRIDE_CUDA=$(cuda_release)
+ENVIRONMENTS=( base data inference prewxvx training wxvx )
+for name in ${ENVIRONMENTS[@]}; do
   conda_create_$name
 done
 msg Done
