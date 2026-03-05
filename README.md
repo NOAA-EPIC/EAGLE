@@ -19,7 +19,7 @@ In the `src/` directory:
 
 This step creates the runtime software environment, comprising conda virtual environments to support data prep, training, inference, and verification. The `conda/` subdirectory it creates is self-contained and can be removed and recreated by running the `make env` command again, as long as pipeline steps are not currently running.
 
-Developers who will be modifying Python driver code should replace `make env` with `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, typechecking, and unit testing.
+Developers who will be modifying Python driver code should replace `make env` with `make devenv`, which will create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, typechecking, and YAML linting.
  
 **2. Run `make config compose=base:ursa >eagle.yaml` to create the EAGLE YAML config.**
 
@@ -256,9 +256,10 @@ After successful completion, the following `make` targets will be available:
 
 ``` bash
 make format     # format Python code
-make lint       # run the linter on Python code
-make shellcheck # run shellcheck on Bash scripts
-make typecheck  # run the typechecker on Python code
+make lint       # run a linter on Python code
+make shellcheck # run a checker on Bash scripts
+make typecheck  # run a typechecker on Python code
+make yamllint   # run a linter on YAML configs
 make test       # all of the above except formatting
 ```
 

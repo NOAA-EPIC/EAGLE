@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=1090,1091,2046,2048,2068,2086,2155,2206,2207
+# shellcheck disable=1090,1091,2046,2048,2068,2086,2206,2207
 
 set -aeu
 
@@ -18,7 +18,8 @@ cachedir() {
 }
 
 conda_activate() {
-  local env=$1
+  local env
+  env=$1
   source $INSTALLDIR/etc/profile.d/conda.sh
   # Activation scripts shipped with conda packages may contain statements either expanding undefined
   # variables or exiting with error status, so temporarily disable the checks for these conditions,
@@ -29,7 +30,8 @@ conda_activate() {
 }
 
 conda_create() {
-  local name=$1
+  local name
+  name=$1
   conda_activate base
   msg Creating environment: $name
   conda create -y -q -c ufs-community -n $* $UWTOOLS
@@ -59,8 +61,9 @@ EOF
 }
 
 conda_create_base() {
-  local name=base
-  local pkgs=(
+  local name pkgs
+  name=base
+  pkgs=(
     jq=1.8.*
     shellcheck=0.11.*
     $UWTOOLS
@@ -71,8 +74,9 @@ conda_create_base() {
 }
 
 conda_create_data() {
-  local name=data
-  local pkgs=(
+  local args name pkgs
+  name=data
+  pkgs=(
     impi_rt=2021.13.*
     mpi4py=4.1.*
     numpy=1.26.4
@@ -81,7 +85,7 @@ conda_create_data() {
     ufs2arco=0.18.*
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  local args=( $name ${pkgs[@]} )
+  args=( $name ${pkgs[@]} )
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -111,14 +115,15 @@ EOF
 }
 
 conda_create_inference() {
-  local name=inference
-  local pkgs=(
+  local args name pkgs
+  name=inference
+  pkgs=(
     flash-attn=2.8.*
     numpy=2.2.6.*
     python=3.12
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  local args=( $name ${pkgs[@]} )
+  args=( $name ${pkgs[@]} )
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -129,15 +134,16 @@ conda_create_inference() {
 }
 
 conda_create_prewxvx() {
-  local name=prewxvx
-  local pkgs=(
+  local args name pkgs
+  name=prewxvx
+  pkgs=(
     numpy=2.2.6.*
     pandas=2.3.3.*
     python=3.13
     xesmf=0.8.*
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  local args=( $name ${pkgs[@]} )
+  args=( $name ${pkgs[@]} )
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -147,14 +153,15 @@ conda_create_prewxvx() {
 }
 
 conda_create_training() {
-  local name=training
-  local pkgs=(
+  local args name pkgs
+  name=training
+  pkgs=(
     flash-attn=2.8.*
     numpy=1.26.4.*
     python=3.12
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  local args=( $name ${pkgs[@]} )
+  args=( $name ${pkgs[@]} )
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -165,12 +172,13 @@ conda_create_training() {
 }
 
 conda_create_wxvx() {
-  local name=wxvx
-  local pkgs=(
+  local args name pkgs
+  name=wxvx
+  pkgs=(
     wxvx=0.7.*
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  local args=( $name -c oar-gsl ${pkgs[@]} )
+  args=( $name -c oar-gsl ${pkgs[@]} )
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -223,13 +231,14 @@ devpkgs() {
 }
 
 install_conda() {
+  local installer url ver
   if [[ -d $INSTALLDIR ]]; then
     msg Found existing conda installation: $INSTALLDIR
     return
   fi
-  local ver=25.9.1-0
-  local installer=Miniforge3-$ver-$(uname -s)-$(uname -p).sh
-  local url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
+  ver=25.9.1-0
+  installer=Miniforge3-$ver-$(uname -s)-$(uname -p).sh
+  url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
   msg Installing conda
   wget -nv $url
   bash $installer -bfp $INSTALLDIR
@@ -287,8 +296,9 @@ EOF
 
 parse_kvargs $@
 install_conda
-export XDG_CACHE_HOME=$(cachedir)
-export CONDA_OVERRIDE_CUDA=$(cuda_release)
+CONDA_OVERRIDE_CUDA=$(cuda_release)
+XDG_CACHE_HOME=$(cachedir)
+export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
 environments=( base data inference prewxvx training wxvx )
 for name in ${environments[@]}; do
   conda_create_$name
