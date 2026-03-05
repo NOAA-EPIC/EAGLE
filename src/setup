@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=1090,1091,2046,2048,2068,2086,2206,2155
+# shellcheck disable=1090,1091,2046,2048,2068,2086,2155,2206,2207
 
 set -aeu
 
@@ -287,10 +287,10 @@ EOF
 
 parse_kvargs $@
 install_conda
-XDG_CACHE_HOME=$(cachedir)
-CONDA_OVERRIDE_CUDA=$(cuda_release)
-ENVIRONMENTS=( base data inference prewxvx training wxvx )
-for name in ${ENVIRONMENTS[@]}; do
+export XDG_CACHE_HOME=$(cachedir)
+export CONDA_OVERRIDE_CUDA=$(cuda_release)
+environments=( base data inference prewxvx training wxvx )
+for name in ${environments[@]}; do
   conda_create_$name
 done
 msg Done
