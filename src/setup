@@ -83,7 +83,7 @@ conda_create_data() {
     numpy=1.26.4
     pandas=2.3.3
     types-pyyaml
-    ufs2arco=0.18.*
+    ufs2arco=0.19.*
   )
   test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
   args=( $name ${pkgs[@]} )
@@ -112,7 +112,7 @@ fi
 EOF
     )
   fi
-  pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.6.*
+  pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.8.*
 }
 
 conda_create_inference() {
@@ -131,7 +131,7 @@ conda_create_inference() {
     conda_create ${args[@]}
     write_anemoi_activation_scripts $name
   fi
-  pip_install $name anemoi-inference==0.7.* anemoi-models==0.9.* eagle-tools
+  pip_install $name anemoi-inference==0.9.* anemoi-models==0.12.* eagle-tools
 }
 
 conda_create_prewxvx() {
@@ -169,7 +169,7 @@ conda_create_training() {
     conda_create ${args[@]}
     write_anemoi_activation_scripts $name
   fi
-  pip_install $name anemoi-models==0.9.* anemoi-training==0.6.*
+  pip_install $name anemoi-models==0.12.* anemoi-training==0.9.*
 }
 
 conda_create_wxvx() {
