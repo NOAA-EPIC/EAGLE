@@ -69,7 +69,7 @@ jobs:
           labels: ci-running
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bootstrap repo conda (if missing, retries, workspace cache, no plugins)
+      - name: Bootstrap repo conda (if missing, retries, workspace HOME, no plugins)
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}/src"
@@ -81,40 +81,35 @@ jobs:
 
           echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
 
-          # Put caches/temp under workspace to avoid HOME quota.
+          # Force conda to use a non-quota HOME (so ~/.conda is NOT /home/role.epic/.conda)
+          export HOME="${GITHUB_WORKSPACE}/.home"
+          mkdir -p "${HOME}"
+
+          # Disable conda plugins (helps avoid plugin crashes on some runners)
+          export CONDA_NO_PLUGINS=true
+
+          # Put caches/temp under workspace (extra safety; conda will follow HOME too)
           export XDG_CACHE_HOME="${GITHUB_WORKSPACE}/.cache"
           export TMPDIR="${GITHUB_WORKSPACE}/.tmp"
-          export CONDA_PKGS_DIRS="${GITHUB_WORKSPACE}/.conda/pkgs"
-          export CONDARC="${GITHUB_WORKSPACE}/.condarc"
-          export CONDA_NO_PLUGINS=true
-          mkdir -p "${XDG_CACHE_HOME}" "${TMPDIR}" "${CONDA_PKGS_DIRS}"
+          mkdir -p "${XDG_CACHE_HOME}" "${TMPDIR}"
 
-          # Force conda to use workspace package cache (not ~/.conda/pkgs)
-          cat > "${CONDARC}" <<'EOF'
-          pkgs_dirs:
-            - ./.conda/pkgs
-          EOF
-
-          echo "HOME=$HOME"
-          echo "XDG_CACHE_HOME=$XDG_CACHE_HOME"
-          echo "TMPDIR=$TMPDIR"
-          echo "CONDA_PKGS_DIRS=$CONDA_PKGS_DIRS"
-          echo "CONDARC=$CONDARC"
-          echo "CONDA_NO_PLUGINS=$CONDA_NO_PLUGINS"
-          ls -la "$CONDARC" || true
+          echo "Effective HOME=${HOME}"
+          echo "XDG_CACHE_HOME=${XDG_CACHE_HOME}"
+          echo "TMPDIR=${TMPDIR}"
+          echo "CONDA_NO_PLUGINS=${CONDA_NO_PLUGINS}"
 
           # Retry a few times for transient IO/network issues.
           for attempt in 1 2 3; do
             echo "Bootstrap attempt ${attempt}/3"
 
-            # Run setup directly so our env vars are definitely in scope.
             if ./setup cudascript=ursa; then
               echo "Bootstrap succeeded."
               exit 0
             fi
 
-            echo "Bootstrap failed (attempt ${attempt}). Clearing pkg cache and retrying after 60s..."
-            rm -rf "${CONDA_PKGS_DIRS}"/* || true
+            echo "Bootstrap failed (attempt ${attempt}). Cleaning workspace conda caches then retrying after 60s..."
+            rm -rf "${HOME}/.conda/pkgs" 2>/dev/null || true
+            rm -rf "${HOME}/.conda/envs" 2>/dev/null || true
             sleep 60
           done
 
