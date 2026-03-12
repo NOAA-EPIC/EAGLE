@@ -69,7 +69,7 @@ jobs:
           labels: ci-running
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bootstrap repo conda (if missing, with retries and workspace cache)
+      - name: Bootstrap repo conda (if missing, with retries, workspace cache, no plugins)
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}/src"
@@ -80,6 +80,10 @@ jobs:
           fi
 
           echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
+
+          # Disable conda plugins (some runner environments have buggy plugins)
+          export CONDA_NO_PLUGINS=true
+          export CONDA_VERBOSITY=1
 
           # Put ALL caches/temp under the workflow workspace to avoid HOME quota.
           export XDG_CACHE_HOME="${GITHUB_WORKSPACE}/.cache"
@@ -100,7 +104,8 @@ jobs:
               echo "Bootstrap succeeded."
               exit 0
             fi
-            echo "Bootstrap failed (attempt ${attempt}). Sleeping 60s then retrying..."
+            echo "Bootstrap failed (attempt ${attempt}). Clearing pkg cache and retrying after 60s..."
+            rm -rf "${CONDA_PKGS_DIRS}"/* || true
             sleep 60
           done
 
