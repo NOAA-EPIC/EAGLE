@@ -69,17 +69,36 @@ jobs:
           labels: ci-running
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bootstrap repo conda (if missing)
+      - name: Bootstrap repo conda (if missing, with retries)
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}/src"
 
           if [ -f conda/etc/profile.d/conda.sh ]; then
             echo "Found existing repo conda at src/conda; reusing."
-          else
-            echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
-            make env cudascript=ursa
+            exit 0
           fi
+
+          echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
+
+          # Reduce filesystem stress / transient I/O failures by using HOME for caches/temp.
+          export CONDA_PKGS_DIRS="${HOME}/.conda/pkgs"
+          export TMPDIR="${HOME}/tmp"
+          mkdir -p "${CONDA_PKGS_DIRS}" "${TMPDIR}"
+
+          # Retry a few times in case the shared filesystem has transient issues (Errno 5).
+          for attempt in 1 2 3; do
+            echo "Bootstrap attempt ${attempt}/3"
+            if make env cudascript=ursa; then
+              echo "Bootstrap succeeded."
+              exit 0
+            fi
+            echo "Bootstrap failed (attempt ${attempt}). Sleeping 60s then retrying..."
+            sleep 60
+          done
+
+          echo "Bootstrap failed after 3 attempts."
+          exit 1
 
       - name: Run pipeline via src/Makefile + uwtools
         env:
