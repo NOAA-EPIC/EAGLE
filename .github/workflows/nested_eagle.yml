@@ -69,6 +69,18 @@ jobs:
           labels: ci-running
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Bootstrap repo conda (if missing)
+        run: |
+          set -euo pipefail
+          cd "${GITHUB_WORKSPACE}/src"
+
+          if [ -f conda/etc/profile.d/conda.sh ]; then
+            echo "Found existing repo conda at src/conda; reusing."
+          else
+            echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
+            make env cudascript=ursa
+          fi
+
       - name: Run pipeline via src/Makefile + uwtools
         env:
           PR_NUM: ${{ github.event.pull_request.number }}
