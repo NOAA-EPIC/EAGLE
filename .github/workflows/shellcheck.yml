@@ -20,11 +20,11 @@ jobs:
       - name: Set up ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:
-          ignore_paths: ./global_eagle/**
+          ignore_paths: ./deprecated/**
 
       - name: Run ShellCheck
         run: |
-          scripts=$(find nested_eagle/ docs/ .github/ -type f -name "*.sh")
+          scripts=$(find src/ docs/ .github/ -type f -name "*.sh")
           if [ -z "$scripts" ]; then
             echo "No shell scripts found."
           else

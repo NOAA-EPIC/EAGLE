@@ -38,4 +38,4 @@ jobs:
 
       - name: Run mypy
         run: |
-          mypy . --ignore-missing-imports --show-error-codes --pretty --exclude 'global_eagle'
+          mypy . --ignore-missing-imports --show-error-codes --pretty --exclude 'deprecated'

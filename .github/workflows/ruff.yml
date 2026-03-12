@@ -29,4 +29,4 @@ jobs:
 
       - name: Run Ruff
         run: |
-          ruff check . --exclude 'global_eagle' --verbose
+          ruff check . --exclude 'deprecated' --verbose
