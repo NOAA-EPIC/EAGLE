@@ -81,35 +81,44 @@ jobs:
 
           echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
 
-          # Force conda to use a non-quota HOME (so ~/.conda is NOT /home/role.epic/.conda)
+          # Critical: move HOME off /home/role.epic to avoid quota-limited ~/.conda and ~/.condarc
           export HOME="${GITHUB_WORKSPACE}/.home"
           mkdir -p "${HOME}"
 
-          # Disable conda plugins (helps avoid plugin crashes on some runners)
-          export CONDA_NO_PLUGINS=true
-
-          # Put caches/temp under workspace (extra safety; conda will follow HOME too)
+          # Keep all caches/temp off /home as well
           export XDG_CACHE_HOME="${GITHUB_WORKSPACE}/.cache"
           export TMPDIR="${GITHUB_WORKSPACE}/.tmp"
           mkdir -p "${XDG_CACHE_HOME}" "${TMPDIR}"
 
+          # Force conda package cache into workspace (not ~/.conda/pkgs under /home)
+          export CONDA_PKGS_DIRS="${GITHUB_WORKSPACE}/.conda/pkgs"
+          mkdir -p "${CONDA_PKGS_DIRS}"
+
+          # Disable plugins to avoid plugin-related conda crashes
+          export CONDA_NO_PLUGINS=true
+
+          # Provide a HOME-based .condarc so conda doesn't inherit /home/role.epic/.condarc policy
+          cat > "${HOME}/.condarc" <<'EOF'
+          pkgs_dirs:
+            - /scratch4/NAGAPE/epic/role-epic/actions-runner/_work/EAGLE/EAGLE/.conda/pkgs
+          EOF
+
           echo "Effective HOME=${HOME}"
+          echo "CONDA_PKGS_DIRS=${CONDA_PKGS_DIRS}"
           echo "XDG_CACHE_HOME=${XDG_CACHE_HOME}"
           echo "TMPDIR=${TMPDIR}"
           echo "CONDA_NO_PLUGINS=${CONDA_NO_PLUGINS}"
+          ls -la "${HOME}/.condarc" || true
 
-          # Retry a few times for transient IO/network issues.
           for attempt in 1 2 3; do
             echo "Bootstrap attempt ${attempt}/3"
-
             if ./setup cudascript=ursa; then
               echo "Bootstrap succeeded."
               exit 0
             fi
-
-            echo "Bootstrap failed (attempt ${attempt}). Cleaning workspace conda caches then retrying after 60s..."
-            rm -rf "${HOME}/.conda/pkgs" 2>/dev/null || true
-            rm -rf "${HOME}/.conda/envs" 2>/dev/null || true
+            echo "Bootstrap failed (attempt ${attempt}). Clearing caches then retrying after 60s..."
+            rm -rf "${CONDA_PKGS_DIRS}"/* || true
+            rm -rf "${HOME}/.conda" || true
             sleep 60
           done
 
