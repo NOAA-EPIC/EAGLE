@@ -69,7 +69,7 @@ jobs:
           labels: ci-running
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bootstrap repo conda (if missing, with retries)
+      - name: Bootstrap repo conda (if missing, with retries and workspace cache)
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}/src"
@@ -81,12 +81,19 @@ jobs:
 
           echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
 
-          # Reduce filesystem stress / transient I/O failures by using HOME for caches/temp.
-          export CONDA_PKGS_DIRS="${HOME}/.conda/pkgs"
-          export TMPDIR="${HOME}/tmp"
-          mkdir -p "${CONDA_PKGS_DIRS}" "${TMPDIR}"
+          # Put ALL caches/temp under the workflow workspace to avoid HOME quota.
+          export XDG_CACHE_HOME="${GITHUB_WORKSPACE}/.cache"
+          export TMPDIR="${GITHUB_WORKSPACE}/.tmp"
+          export CONDA_PKGS_DIRS="${GITHUB_WORKSPACE}/.conda/pkgs"
+          export CONDARC="${GITHUB_WORKSPACE}/.condarc"
+          mkdir -p "${XDG_CACHE_HOME}" "${TMPDIR}" "${CONDA_PKGS_DIRS}"
 
-          # Retry a few times in case the shared filesystem has transient issues (Errno 5).
+          # Force conda to use workspace package cache (not ~/.conda/pkgs)
+          cat > "${CONDARC}" <<'EOF'
+          pkgs_dirs:
+            - ./.conda/pkgs
+          EOF
+
           for attempt in 1 2 3; do
             echo "Bootstrap attempt ${attempt}/3"
             if make env cudascript=ursa; then
