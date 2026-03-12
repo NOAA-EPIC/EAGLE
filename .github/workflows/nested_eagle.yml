@@ -69,7 +69,7 @@ jobs:
           labels: ci-running
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bootstrap repo conda (if missing, with retries, workspace cache, no plugins)
+      - name: Bootstrap repo conda (if missing, retries, workspace cache, no plugins)
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}/src"
@@ -81,15 +81,12 @@ jobs:
 
           echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
 
-          # Disable conda plugins (some runner environments have buggy plugins)
-          export CONDA_NO_PLUGINS=true
-          export CONDA_VERBOSITY=1
-
-          # Put ALL caches/temp under the workflow workspace to avoid HOME quota.
+          # Put caches/temp under workspace to avoid HOME quota.
           export XDG_CACHE_HOME="${GITHUB_WORKSPACE}/.cache"
           export TMPDIR="${GITHUB_WORKSPACE}/.tmp"
           export CONDA_PKGS_DIRS="${GITHUB_WORKSPACE}/.conda/pkgs"
           export CONDARC="${GITHUB_WORKSPACE}/.condarc"
+          export CONDA_NO_PLUGINS=true
           mkdir -p "${XDG_CACHE_HOME}" "${TMPDIR}" "${CONDA_PKGS_DIRS}"
 
           # Force conda to use workspace package cache (not ~/.conda/pkgs)
@@ -98,12 +95,24 @@ jobs:
             - ./.conda/pkgs
           EOF
 
+          echo "HOME=$HOME"
+          echo "XDG_CACHE_HOME=$XDG_CACHE_HOME"
+          echo "TMPDIR=$TMPDIR"
+          echo "CONDA_PKGS_DIRS=$CONDA_PKGS_DIRS"
+          echo "CONDARC=$CONDARC"
+          echo "CONDA_NO_PLUGINS=$CONDA_NO_PLUGINS"
+          ls -la "$CONDARC" || true
+
+          # Retry a few times for transient IO/network issues.
           for attempt in 1 2 3; do
             echo "Bootstrap attempt ${attempt}/3"
-            if make env cudascript=ursa; then
+
+            # Run setup directly so our env vars are definitely in scope.
+            if ./setup cudascript=ursa; then
               echo "Bootstrap succeeded."
               exit 0
             fi
+
             echo "Bootstrap failed (attempt ${attempt}). Clearing pkg cache and retrying after 60s..."
             rm -rf "${CONDA_PKGS_DIRS}"/* || true
             sleep 60
