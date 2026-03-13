@@ -18,20 +18,27 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 1
-   :caption: A ML Pipeline for Weather Prediction
+   :caption: User Guide
 
-   environment_setup
-   data_creation
-   train_a_model
-   inference
-   verification
-   visualize_results
+   quickstart
+   runtime_environment
+   configuration
+   drivers
 
 .. toctree::
    :maxdepth: 1
-   :caption: Modeling Options
+   :caption: ML Pipeline Overview
 
-   getting_started
+   data_creation
+   train_a_model
+   inference
+   postprocessing
+   verification
+
+.. toctree::
+   :maxdepth: 1
+   :caption: EAGLE Models
+
    nested_eagle
 
 .. toctree::
