@@ -14,3 +14,18 @@ app:
   platform: &platform
     account: epic
     scheduler: slurm
+
+zarrs:
+  common:
+    execution:
+      batchargs:
+        cores: 1
+      mpicmd: "srun --mpi=pmix -n 1"
+  gfs:
+    zarr:
+      execution:
+        mpicmd: "srun --mpi=pmix -n 1"
+  hrrr:
+    zarr:
+      execution:
+        mpicmd: "srun --mpi=pmix -n 1"
