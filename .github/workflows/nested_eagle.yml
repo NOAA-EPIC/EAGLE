@@ -69,7 +69,7 @@ jobs:
           labels: ci-running
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bootstrap repo conda (if missing, retries, workspace HOME, no plugins)
+      - name: Bootstrap repo conda (if missing, retries, override conda cache away from /home)
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}/src"
@@ -81,44 +81,39 @@ jobs:
 
           echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
 
-          # Critical: move HOME off /home/role.epic to avoid quota-limited ~/.conda and ~/.condarc
-          export HOME="${GITHUB_WORKSPACE}/.home"
-          mkdir -p "${HOME}"
+          # Workspace locations (avoid /home quota)
+          WS_HOME="${GITHUB_WORKSPACE}/.home"
+          WS_PKGS="${GITHUB_WORKSPACE}/.conda/pkgs"
+          WS_TMP="${GITHUB_WORKSPACE}/.tmp"
+          WS_CACHE="${GITHUB_WORKSPACE}/.cache"
+          WS_CONDARC="${GITHUB_WORKSPACE}/.condarc"
 
-          # Keep all caches/temp off /home as well
-          export XDG_CACHE_HOME="${GITHUB_WORKSPACE}/.cache"
-          export TMPDIR="${GITHUB_WORKSPACE}/.tmp"
-          mkdir -p "${XDG_CACHE_HOME}" "${TMPDIR}"
+          mkdir -p "${WS_HOME}" "${WS_PKGS}" "${WS_TMP}" "${WS_CACHE}"
 
-          # Force conda package cache into workspace (not ~/.conda/pkgs under /home)
-          export CONDA_PKGS_DIRS="${GITHUB_WORKSPACE}/.conda/pkgs"
-          mkdir -p "${CONDA_PKGS_DIRS}"
-
-          # Disable plugins to avoid plugin-related conda crashes
-          export CONDA_NO_PLUGINS=true
-
-          # Provide a HOME-based .condarc so conda doesn't inherit /home/role.epic/.condarc policy
-          cat > "${HOME}/.condarc" <<'EOF'
+          cat > "${WS_CONDARC}" <<EOF
           pkgs_dirs:
-            - /scratch4/NAGAPE/epic/role-epic/actions-runner/_work/EAGLE/EAGLE/.conda/pkgs
+            - ${WS_PKGS}
+          envs_dirs:
+            - ${GITHUB_WORKSPACE}/src/conda/envs
           EOF
 
-          echo "Effective HOME=${HOME}"
-          echo "CONDA_PKGS_DIRS=${CONDA_PKGS_DIRS}"
-          echo "XDG_CACHE_HOME=${XDG_CACHE_HOME}"
-          echo "TMPDIR=${TMPDIR}"
-          echo "CONDA_NO_PLUGINS=${CONDA_NO_PLUGINS}"
-          ls -la "${HOME}/.condarc" || true
-
+          # Retry for transient failures
           for attempt in 1 2 3; do
             echo "Bootstrap attempt ${attempt}/3"
-            if ./setup cudascript=ursa; then
-              echo "Bootstrap succeeded."
-              exit 0
-            fi
-            echo "Bootstrap failed (attempt ${attempt}). Clearing caches then retrying after 60s..."
-            rm -rf "${CONDA_PKGS_DIRS}"/* || true
-            rm -rf "${HOME}/.conda" || true
+
+            # IMPORTANT: override runner-provided vars by setting them inline on the command.
+            # Also disable plugins to reduce flakiness.
+            HOME="${WS_HOME}" \
+            CONDARC="${WS_CONDARC}" \
+            CONDA_PKGS_DIRS="${WS_PKGS}" \
+            TMPDIR="${WS_TMP}" \
+            XDG_CACHE_HOME="${WS_CACHE}" \
+            CONDA_NO_PLUGINS=true \
+            ./setup cudascript=ursa && { echo "Bootstrap succeeded."; exit 0; }
+
+            echo "Bootstrap failed (attempt ${attempt}). Clearing workspace caches then retrying after 60s..."
+            rm -rf "${WS_PKGS}"/* || true
+            rm -rf "${WS_HOME}/.conda" || true
             sleep 60
           done
 
