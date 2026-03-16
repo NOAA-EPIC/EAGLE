@@ -6,6 +6,7 @@ set -aeuo pipefail
 
 INSTALLDIR=${INSTALLDIR:-$PWD/conda}
 UWTOOLS="uwtools=2.13.*"
+CHANNELS=(-c ufs-community -c conda-forge)
 
 # In all functions, make variables local unless they are either intended for global use, or set in
 # a subshell that exits at the end of the function.
@@ -42,7 +43,7 @@ conda_create() {
 	shift
 	conda_activate_root
 	msg Creating environment: $name
-	conda create -y -q -c ufs-community -n $name $* $UWTOOLS
+	conda create -y -q "${CHANNELS[@]}" -n $name $* $UWTOOLS	
 	(
 		# When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
 		# files in the runtime area, rather than in the user's home directory, which might impact their
@@ -78,7 +79,7 @@ conda_create_base() {
 		yamllint=1.38.*
 	)
 	test -v EAGLE_DEV && pkgs+=($(devpkgs))
-	conda_install $name -c ufs-community ${pkgs[@]}
+	conda_install $name "${CHANNELS[@]}" ${pkgs[@]}	
 }
 
 conda_create_data() {
@@ -186,7 +187,7 @@ conda_create_wxvx() {
 		wxvx=0.7.*
 	)
 	test -v EAGLE_DEV && pkgs+=($(devpkgs))
-	args=($name -c oar-gsl ${pkgs[@]})
+	args=($name -c oar-gsl -c conda-forge ${pkgs[@]})	
 	if conda_env_exists $name; then
 		conda_install ${args[@]}
 	else
