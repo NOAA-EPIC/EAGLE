@@ -90,25 +90,23 @@ jobs:
 
           mkdir -p "${WS_HOME}" "${WS_PKGS}" "${WS_TMP}" "${WS_CACHE}"
 
+          # Force classic solver during bootstrap (libmamba may not be available early / if plugins blocked)
           cat > "${WS_CONDARC}" <<EOF
+          solver: classic
           pkgs_dirs:
             - ${WS_PKGS}
           envs_dirs:
             - ${GITHUB_WORKSPACE}/src/conda/envs
           EOF
 
-          # Retry for transient failures
           for attempt in 1 2 3; do
             echo "Bootstrap attempt ${attempt}/3"
 
-            # IMPORTANT: override runner-provided vars by setting them inline on the command.
-            # Also disable plugins to reduce flakiness.
             HOME="${WS_HOME}" \
             CONDARC="${WS_CONDARC}" \
             CONDA_PKGS_DIRS="${WS_PKGS}" \
             TMPDIR="${WS_TMP}" \
             XDG_CACHE_HOME="${WS_CACHE}" \
-            CONDA_NO_PLUGINS=true \
             ./setup cudascript=ursa && { echo "Bootstrap succeeded."; exit 0; }
 
             echo "Bootstrap failed (attempt ${attempt}). Clearing workspace caches then retrying after 60s..."
