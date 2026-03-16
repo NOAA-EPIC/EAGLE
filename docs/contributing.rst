@@ -9,17 +9,6 @@ First you will want clone the main repository, and create a branch on the machin
 do the development work. We want any contribution in the form of a pull request that is on a 
 separate branch from the main branch.
 
-If you are adding to the documentation, then please verify that the documentation builds locally::
-    
-    cd EAGLE/docs
-    make html
-
-After that, you can open the generated html files to view in your web browser::
-
-    open _build/html/index.html
-
-Review your changes and make any updates as needed.
-
 To build the runtime virtual environments **and** install all required development packages in each environment::
 
     make devenv cudascript=<name-or-path> # alternatively: EAGLE_DEV=1 ./setup cudascript=<name-or-path>
@@ -55,3 +44,19 @@ Pull Requests
 
 Submit pull requests through this repository's `PR page <https://github.com/NOAA-EPIC/EAGLE/pulls>`_, as outlined in 
 this `GitHub documentation <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_.
+
+Documentation
+------------------
+
+If you are adding to the documentation and wish to build and review changes locally::
+    
+    conda create -y -n docs sphinx sphinx_rtd_theme
+    conda activate docs
+    cd EAGLE/docs
+    make html
+
+After that, you can open the generated html files to view in your web browser::
+
+    open _build/html/index.html
+
+After you submit the changes as a PR the changes will build automatically.
