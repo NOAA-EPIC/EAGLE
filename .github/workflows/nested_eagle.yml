@@ -79,20 +79,28 @@ jobs:
 
           PERSIST="/scratch4/NAGAPE/epic/role-epic/miniconda"
 
-          if [ -f "${PERSIST}/etc/profile.d/conda.sh" ]; then
-            echo "Persistent conda found at ${PERSIST}; reusing."
-          else
+          if [ ! -f "${PERSIST}/etc/profile.d/conda.sh" ]; then
             echo "Persistent conda not found at ${PERSIST}."
-            echo "Please provision it once on the runner with:"
+            echo "Provision it once on the runner with:"
             echo "  cd src && make env cudascript=ursa INSTALLDIR=${PERSIST}"
             exit 1
           fi
 
           rm -rf conda
           ln -s "${PERSIST}" conda
-
           test -f conda/etc/profile.d/conda.sh
           echo "Linked src/conda -> ${PERSIST}"
+
+          # Fail fast if uwtools isn't installed in base env
+          source conda/etc/profile.d/conda.sh
+          conda activate base
+          command -v uw >/dev/null || {
+            echo "ERROR: 'uw' not found in the base environment of ${PERSIST}."
+            echo "Run once on the runner:"
+            echo "  cd src && make env cudascript=ursa INSTALLDIR=${PERSIST}"
+            exit 1
+          }
+          uw --version || true
 
       - name: Run pipeline via src/Makefile + uwtools
         env:
