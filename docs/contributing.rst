@@ -54,4 +54,4 @@ Pull Requests
 ------------------
 
 Submit pull requests through this repository's `PR page <https://github.com/NOAA-EPIC/EAGLE/pulls>`_, as outlined in 
-this `github documentation <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_.
+this `GitHub documentation <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_.
