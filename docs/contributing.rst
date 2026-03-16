@@ -39,16 +39,13 @@ The `lint` and `typecheck` targets accept an optional `env=<name>` key-value pai
 restrict the tool to the code associated with a particular virtual environment. For example, `make lint env=data` 
 will lint only the code associated with the `data` environment. If no `env` value is provided, all code will be tested.
 
-Additional notes:
-- For each `make` target that executes an EAGLE driver, the following files will be created in the appropriate run directory:
-    - `runscript.<target>`: The script to run the core component of the pipeline step. A runscript that submits a batch 
-    job will contain batch-system directives. These scripts are self-contained and can also be manually executed 
-    (or passed to e.g. `sbatch` if they contain batch directives) to force re-execution, potentially after manual 
-    edits for debugging or experimentation purposes.
-    - `runscript.<target>.out`: The captured `stdout` and `stderr` of the batch job.
-    - `runscript.<target>.submit`: A file containing the job ID of the submitted batch job, if applicable.
-    - `runscript.<target>.done`: Created if the core component completes successfully (i.e. exits with status code 0).
-- EAGLE drivers are idempotent and, as such, will not take further action if run again unless the output they previously 
+For each `make` target that executes an EAGLE driver, the following files will be created in the appropriate run directory:
+- `runscript.<target>`: The script to run the core component of the pipeline step. A runscript that submits a batch job will contain batch-system directives. These scripts are self-contained and can also be manually executed (or passed to e.g. `sbatch` if they contain batch directives) to force re-execution, potentially after manual edits for debugging or experimentation purposes.
+- `runscript.<target>.out`: The captured `stdout` and `stderr` of the batch job.
+- `runscript.<target>.submit`: A file containing the job ID of the submitted batch job, if applicable.
+- `runscript.<target>.done`: Created if the core component completes successfully (i.e. exits with status code 0).
+
+EAGLE drivers are idempotent and, as such, will not take further action if run again unless the output they previously 
 created is removed. In general, removing `.done` (and, when present, `.submit`) files in the appropriate run directory 
 should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or 
 renaming the entire run directory also works.
