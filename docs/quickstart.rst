@@ -2,7 +2,7 @@
 Quickstart Guide
 =================
 
-This section provides a recipe for an end-to-end run of Nested EAGLE on Ursa. As of right now the only supported 
+This section provides a recipe for an end-to-end run of nested-EAGLE on Ursa. As of right now the only supported 
 platform is Ursa. Future development will include additional platforms. Stay tuned! 
 
 GNU `make` version 3.82 or higher is required.
