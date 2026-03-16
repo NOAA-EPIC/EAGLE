@@ -18,10 +18,10 @@ cachedir() {
 }
 
 conda_activate_root() {
-        source $INSTALLDIR/etc/profile.d/conda.sh
-        set +eu
-        conda activate
-        set -eu
+	source $INSTALLDIR/etc/profile.d/conda.sh
+	set +eu
+	conda activate
+	set -eu
 }
 
 conda_activate() {
