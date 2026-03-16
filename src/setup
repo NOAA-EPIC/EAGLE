@@ -4,7 +4,7 @@
 
 set -aeuo pipefail
 
-INSTALLDIR=$PWD/conda
+INSTALLDIR=${INSTALLDIR:-$PWD/conda}
 UWTOOLS="uwtools=2.13.*"
 
 # In all functions, make variables local unless they are either intended for global use, or set in

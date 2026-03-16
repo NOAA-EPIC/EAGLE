@@ -32,6 +32,7 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
 
+      # pull_request_review does not reliably support paths filters, so gate explicitly.
       - name: Gate on nested_eagle/ or src/ changes
         id: gate
         uses: actions/github-script@v7
@@ -69,62 +70,37 @@ jobs:
           labels: ci-running
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bootstrap repo conda (if missing, retries, override conda cache away from /home)
+      # NOTE: actions/checkout cleans src/conda, so we recreate it as a symlink to a
+      # persistent install on scratch. This avoids rebuilding conda/envs per CI run.
+      - name: Ensure persistent conda and link src/conda
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}/src"
 
-          if [ -f conda/etc/profile.d/conda.sh ]; then
-            echo "Found existing repo conda at src/conda; reusing."
-            exit 0
+          PERSIST="/scratch4/NAGAPE/epic/role-epic/miniconda"
+
+          if [ -f "${PERSIST}/etc/profile.d/conda.sh" ]; then
+            echo "Persistent conda found at ${PERSIST}; reusing."
+          else
+            echo "Persistent conda not found at ${PERSIST}."
+            echo "Please provision it once on the runner with:"
+            echo "  cd src && make env cudascript=ursa INSTALLDIR=${PERSIST}"
+            exit 1
           fi
 
-          echo "src/conda not found; bootstrapping Miniforge + envs (may take a while)..."
+          rm -rf conda
+          ln -s "${PERSIST}" conda
 
-          # Workspace locations (avoid /home quota)
-          WS_HOME="${GITHUB_WORKSPACE}/.home"
-          WS_PKGS="${GITHUB_WORKSPACE}/.conda/pkgs"
-          WS_TMP="${GITHUB_WORKSPACE}/.tmp"
-          WS_CACHE="${GITHUB_WORKSPACE}/.cache"
-          WS_CONDARC="${GITHUB_WORKSPACE}/.condarc"
-
-          mkdir -p "${WS_HOME}" "${WS_PKGS}" "${WS_TMP}" "${WS_CACHE}"
-
-          # Force classic solver during bootstrap (libmamba may not be available early / if plugins blocked)
-          cat > "${WS_CONDARC}" <<EOF
-          solver: classic
-          pkgs_dirs:
-            - ${WS_PKGS}
-          envs_dirs:
-            - ${GITHUB_WORKSPACE}/src/conda/envs
-          EOF
-
-          for attempt in 1 2 3; do
-            echo "Bootstrap attempt ${attempt}/3"
-
-            HOME="${WS_HOME}" \
-            CONDARC="${WS_CONDARC}" \
-            CONDA_PKGS_DIRS="${WS_PKGS}" \
-            TMPDIR="${WS_TMP}" \
-            XDG_CACHE_HOME="${WS_CACHE}" \
-            ./setup cudascript=ursa && { echo "Bootstrap succeeded."; exit 0; }
-
-            echo "Bootstrap failed (attempt ${attempt}). Clearing workspace caches then retrying after 60s..."
-            rm -rf "${WS_PKGS}"/* || true
-            rm -rf "${WS_HOME}/.conda" || true
-            sleep 60
-          done
-
-          echo "Bootstrap failed after 3 attempts."
-          exit 1
+          test -f conda/etc/profile.d/conda.sh
+          echo "Linked src/conda -> ${PERSIST}"
 
       - name: Run pipeline via src/Makefile + uwtools
         env:
           PR_NUM: ${{ github.event.pull_request.number }}
           SHA: ${{ github.event.pull_request.head.sha }}
+          INSTALLDIR: /scratch4/NAGAPE/epic/role-epic/miniconda
         run: |
           set -euo pipefail
-
           cd "${GITHUB_WORKSPACE}/src"
 
           # ---- helpers ----
@@ -133,7 +109,6 @@ jobs:
             local label="${2:-job}"
             local prev=""
             echo "Waiting for ${label} job ${job_id} ..."
-
             while true; do
               local state=""
               state="$(squeue -h -j "$job_id" -o "%T" 2>/dev/null || true)"
@@ -141,12 +116,10 @@ jobs:
                 state="$(sacct -j "$job_id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')"
                 state="${state:-UNKNOWN}"
               fi
-
               if [[ "$state" != "$prev" ]]; then
                 echo "${label} (${job_id}) state: ${state}"
                 prev="$state"
               fi
-
               case "$state" in
                 COMPLETED) echo "${label} (${job_id}) COMPLETED"; break ;;
                 FAILED*|CANCELLED*|TIMEOUT*|NODE_FAIL*|OUT_OF_MEMORY*)
@@ -159,13 +132,9 @@ jobs:
             return 0
           }
 
-          # Wait for a runscript marker set:
-          #   runscript.<t>.submit contains the job id (if batch)
-          #   runscript.<t>.done indicates success
-          #   runscript.<t>.out is stdout/stderr
           wait_runscript_batch() {
             local dir="$1"
-            local target="$2"   # e.g., training, inference, zarr, wxvx
+            local target="$2"
             local label="${3:-$target}"
 
             local submit="${dir}/runscript.${target}.submit"
@@ -174,28 +143,26 @@ jobs:
 
             if [[ ! -f "$submit" ]]; then
               echo "ERROR: Missing submit file: $submit"
-              echo "Tip: check directory contents: $dir"
               ls -la "$dir" || true
               exit 1
             fi
 
             local job_id
-            job_id="$(tr -d '[:space:]' < "$submit" | tail -n1)"
-            if [[ -z "$job_id" ]]; then
-              echo "ERROR: Empty job id in $submit"
+            job_id="$(grep -oE '[0-9]+' "$submit" | tail -n1)"
+            if [[ -z "${job_id:-}" ]]; then
+              echo "ERROR: Could not parse numeric job id from $submit"
+              cat "$submit" || true
               exit 1
             fi
 
             if ! slurm_wait "$job_id" "$label"; then
-              echo "----- ${label} failed; showing ${out} (if present) -----"
-              [[ -f "$out" ]] && tail -n 200 "$out" || echo "No out file at $out"
+              [[ -f "$out" ]] && tail -n 200 "$out" || true
               exit 1
             fi
 
             if [[ ! -f "$done" ]]; then
               echo "ERROR: Job completed but .done marker missing: $done"
-              echo "----- showing ${out} (if present) -----"
-              [[ -f "$out" ]] && tail -n 200 "$out" || echo "No out file at $out"
+              [[ -f "$out" ]] && tail -n 200 "$out" || true
               exit 1
             fi
           }
@@ -204,59 +171,62 @@ jobs:
           EXP="ci-pr${PR_NUM}-$(echo "$SHA" | cut -c1-7)"
           echo "Experiment name: $EXP"
 
-          make config compose=base:ursa > eagle.yaml
+          make config compose=base:ursa INSTALLDIR="${INSTALLDIR}" > eagle.yaml
 
-          # Set app.base and experiment_name for this CI run.
           SRC_ABS="${GITHUB_WORKSPACE}/src"
           sed -i "s|^\\(  base:\\s*\\).*|\\1${SRC_ABS}|" eagle.yaml
           sed -i "s|^\\(  experiment_name:\\s*\\).*|\\1${EXP}|" eagle.yaml
 
-          make validate config=eagle.yaml
+          make validate config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
 
           RUNROOT="${SRC_ABS}/run/${EXP}"
 
           # ---- pipeline steps ----
-          # local
-          make grids-and-meshes config=eagle.yaml
+          make grids-and-meshes config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
 
-          # batch: zarr-gfs and zarr-hrrr both use the Zarr driver (runscript.zarr.* markers)
-          make zarr-gfs  config=eagle.yaml
-          wait_runscript_batch "${RUNROOT}/data" "zarr" "Zarr GFS"
+          make zarr-gfs config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          wait_runscript_batch "${RUNROOT}/data" "zarr-gfs" "Zarr GFS"
 
-          make zarr-hrrr config=eagle.yaml
-          wait_runscript_batch "${RUNROOT}/data" "zarr" "Zarr HRRR"
+          make zarr-hrrr config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          wait_runscript_batch "${RUNROOT}/data" "zarr-hrrr" "Zarr HRRR"
 
-          # batch
-          make training config=eagle.yaml
+          test -d "${RUNROOT}/data/gfs.zarr"  || { echo "Missing ${RUNROOT}/data/gfs.zarr"; exit 1; }
+          test -d "${RUNROOT}/data/hrrr.zarr" || { echo "Missing ${RUNROOT}/data/hrrr.zarr"; exit 1; }
+
+          make training config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/training" "training" "Training"
 
-          make inference config=eagle.yaml
+          make inference config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/inference" "inference" "Inference"
 
-          # local postprocess
-          make prewxvx-global config=eagle.yaml
-          make prewxvx-lam    config=eagle.yaml
+          make prewxvx-global config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          make prewxvx-lam    config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
 
-          # batch: wxvx driver writes run/<exp>/vx/<truth>/<extent>/runscript.wxvx.*
-          make vx-grid-global config=eagle.yaml
+          make vx-grid-global config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/vx/grid2grid/global" "wxvx" "VX grid2grid global"
 
-          make vx-grid-lam config=eagle.yaml
+          make vx-grid-lam config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/vx/grid2grid/lam" "wxvx" "VX grid2grid lam"
 
-          make vx-obs-global config=eagle.yaml
+          make vx-obs-global config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/vx/grid2obs/global" "wxvx" "VX grid2obs global"
 
-          make vx-obs-lam config=eagle.yaml
+          make vx-obs-lam config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/vx/grid2obs/lam" "wxvx" "VX grid2obs lam"
 
-          # basic artifact checks (README documents .stat + .png locations)
+          # Artifact checks (minimal “golden signals”)
+          find "${RUNROOT}/inference" -type f -name "*.nc" -print -quit | grep -q . || {
+            echo "ERROR: No inference NetCDF outputs found under ${RUNROOT}/inference"
+            exit 1
+          }
+
           find "${RUNROOT}/vx" -type f -name "*.png" -print -quit | grep -q . || {
             echo "ERROR: No verification PNGs found under ${RUNROOT}/vx"
             exit 1
           }
+
           find "${RUNROOT}/vx" -type f -name "*.stat" -print -quit | grep -q . || {
-            echo "ERROR: No verification .stat files found under ${RUNROOT}/vx"
+            echo "ERROR: No verification .stat outputs found under ${RUNROOT}/vx"
             exit 1
           }
 
