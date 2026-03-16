@@ -3,7 +3,7 @@
 # yamllint disable rule:anchors rule:line-length
 
 app:
-  base: /path/to/eagle/src
+  base: /scratch3/BMC/wrfruc/elcarpenter/eagle/src
   experiment_name: default
   gpu: # set by platform config
   partitions: # set by platform config
@@ -53,6 +53,52 @@ inference:
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
 platform: *platform
+postwxvx:
+  common: 
+    execution: &postwxvx-common-execution
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate prewxvx
+        - set -ex
+    postwxvx: &postwxvx-common
+      start_date: !datetime '{{ app.time.inference_start }}'
+      end_date: !datetime '{{ app.time.inference_stop }}'
+      freq: '{{ app.time.freq }}'
+      leadtimes:
+        start: 0
+        end: 240
+        step: '{{ app.time.step }}'
+      variable_prefixes:
+        - 2t_heightAboveGround_0002
+        - u_10m_heightAboveGround_0010
+        - v_10m_heightAboveGround_0010
+        - gh_isobaricInhPa_0500
+        - t_isobaricInhPa_0850
+        - u_isobaricInhPa_0250
+        - v_isobaricInhPa_0250
+        - sp_surface
+  global:
+    postwxvx:
+      execution:
+        <<: *postwxvx-common-execution
+        executable: eagle-tools postwxvx postxvx-global.yaml
+      name: global
+      eagle_tools:
+        <<: *postwxvx-common
+        stat_prefix: point_stat_nested_global
+        work_path: '{{ postwxvx.global.rundir }}'
+      rundir: '{{ app.rundir }}/visualization/global'
+  lam:
+    postwxvx:
+      execution:
+        <<: *postwxvx-common-execution
+        executable: eagle-tools postwxvx postxvx-lam.yaml
+      name: lam
+      eagle_tools:
+        <<: *postwxvx-common
+        stat_prefix: point_stat_nested_lam
+        work_path: '{{ postwxvx.lam.rundir }}'
+      rundir: '{{ app.rundir }}/visualization/lam'
 prewxvx:
   common:
     execution: &prewxvx-common-execution

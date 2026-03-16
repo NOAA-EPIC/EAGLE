@@ -2,7 +2,7 @@ BASHSRCS = format setup
 ENVS     = data inference prewxvx training wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
-STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+STEPS    = data grids-and-meshes inference postwxvx-lam postwxvx-global prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck validate yamllint
 
 activate = @source conda/etc/profile.d/conda.sh && conda activate $(1)
@@ -71,6 +71,22 @@ ifdef env
 else
 	$(call envloop,lint)
 endif
+
+postwxvx:
+	$(call activate,prewxvx)
+ifeq ($(task),?)
+	$(call tasklist,postwxvx,postwxvx,PostWXVX)
+else
+	$(call check,$(config),config)
+	$(call check,$(extent),extent)
+	$(call exec,visualization,postwxvx,PostWXVX,$(or $(task),run) --key-path postwxvx.$(extent))
+endif
+
+postwxvx-global:
+	@$(make) postwxvx extent=global
+
+postwxvx-lam:
+	@$(make) postwxvx extent=lam
 
 prewxvx:
 	$(call activate,prewxvx)
