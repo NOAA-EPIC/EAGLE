@@ -134,6 +134,22 @@ conda_create_inference() {
   pip_install $name anemoi-inference==0.9.* anemoi-models==0.12.* eagle-tools
 }
 
+conda_create_postwxvx() {
+  local args name pkgs
+  name=postwxvx
+  pkgs=(
+    python=3.13
+  )
+  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  args=( $name ${pkgs[@]} )
+  if conda_env_exists $name; then
+    conda_install ${args[@]}
+  else
+    conda_create ${args[@]}
+  fi
+  pip_install $name eagle-tools
+}
+
 conda_create_prewxvx() {
   local args name pkgs
   name=prewxvx

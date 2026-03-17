@@ -54,7 +54,7 @@ inference:
   rundir: '{{ app.rundir }}/inference'
 platform: *platform
 postwxvx:
-  common: 
+  common:
     execution: &postwxvx-common-execution
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
