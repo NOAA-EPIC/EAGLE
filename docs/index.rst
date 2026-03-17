@@ -1,5 +1,5 @@
 ###################
-Welcome to Eagle!
+Welcome to EAGLE!
 ###################
 
 Welcome to the Github repository for Project EAGLE (Experimental AI Global and Limited-area Ensemble forecast system)! 
