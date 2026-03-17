@@ -28,4 +28,4 @@ jobs:
           pip install black
 
       - name: Run Black
-        run: black --check --diff --verbose . --exclude 'global_eagle'
+        run: black --check --diff --verbose . --exclude 'deprecated'

@@ -25,4 +25,4 @@ jobs:
 
       - name: Run shfmt
         run: |
-          ./shfmt -d nested_eagle/ .github/ docs/
+          ./shfmt -d src/ .github/ docs/

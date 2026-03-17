@@ -1,6 +1,6 @@
-=================
+=========================
 Create Training Data
-=================
+=========================
 
 ufs2arco Overview
 -------------------------
@@ -74,7 +74,7 @@ For further information see the ufs2arco `github <https://ufs2arco.readthedocs.i
 ufs2arco was created by Tim Smith at NOAA Physical Sciences Laboratory.
 
 Helpful quick tips for ufs2arco
-------------------
+--------------------------------------------
 
 Choosing Dates
 ~~~~~~~~~~~~~~~~~~~~~~
