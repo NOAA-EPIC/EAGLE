@@ -112,7 +112,7 @@ training:
       - data: zarr
       - dataloader: native_grid
       - diagnostics: evaluation
-      - system: slurm
+      - hardware: slurm
       - graph: encoder_decoder_only
       - model: transformer
       - training: stretched
