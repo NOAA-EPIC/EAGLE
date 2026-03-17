@@ -18,14 +18,12 @@ app:
 zarrs:
   common:
     execution:
-      batchargs:
-        cores: 1
-      mpicmd: "srun --mpi=pmix -n 1"
+      mpicmd: srun --mpi=pmix
   gfs:
     zarr:
       execution:
-        mpicmd: "srun --mpi=pmix -n 1"
+        mpicmd: srun --mpi=pmix
   hrrr:
     zarr:
       execution:
-        mpicmd: "srun --mpi=pmix -n 1"
+        mpicmd: srun --mpi=pmix
