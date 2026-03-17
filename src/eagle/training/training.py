@@ -32,7 +32,7 @@ class Training(DriverTimeInvariant):
         config = get_yaml_config(self.rundir / "config.yaml")
         if "defaults" in config:
             del config["defaults"]
-        config.update_from(self.config["anemoi"]) 
+        config.update_from(self.config["anemoi"])
         config.dump(path)
 
     @task
