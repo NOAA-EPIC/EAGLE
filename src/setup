@@ -4,9 +4,9 @@
 
 set -aeuo pipefail
 
+CHANNELS=(-c ufs-community -c conda-forge)
 INSTALLDIR=${INSTALLDIR:-$PWD/conda}
 UWTOOLS="uwtools=2.13.*"
-CHANNELS=(-c ufs-community -c conda-forge)
 
 # In all functions, make variables local unless they are either intended for global use, or set in
 # a subshell that exits at the end of the function.
