@@ -38,6 +38,7 @@ The run directories from subsequent steps, along with the output of those steps,
 subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
 
 **4. Verify the app.account value in eagle.yaml.**
+
 The default configuration sets ``app.account`` to ``epic``. If you do not have access to the epic account on Ursa, update this value to an account you are authorized to use.
 
 **5. Create training data**
@@ -107,4 +108,4 @@ Run:
     make vis-obs-global config=eagle.yaml
     make vis-obs-lam config=eagle.yaml
 
-These steps will first call ``eagle-tools``'s ``postwxvx`` tool which will create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of plots in the ``run/<expname>vx/grid2{grid,obs}/{global,lam}/`` directory. 
+These steps will first call ``eagle-tools``'s ``postwxvx`` tool which will create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of plots in the ``run/<expname>visualization/grid2{grid,obs}/{global,lam}/`` directory. 

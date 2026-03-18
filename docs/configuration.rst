@@ -99,17 +99,17 @@ visualization
 
 Configuration for the ``Visualization`` driver.
 
-- This driver executes the `eagle-tools postwxvx` component and plots its output.
+- This driver executes the ``eagle-tools postwxvx`` component and plots its output.
 - The ``common:`` block provides parameters shared by the ``grid2grid:`` and ``grid2obs:`` blocks, which provide configurations for running ``eagle-tools postwxvx`` to create netCDF files containing verification stattistics, which are then plotted by the driver. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
 
 vx
 -------------------------
 
-Configuration for the `VX` driver.
+Configuration for the ``WXVX`` driver.
 
 - This driver executes the `wxvx <https://github.com/NOAA-GSL/wxvx>`_ component.
 - The ``grid2grid:`` block provides configuration for running ``wxvx`` with MET's `grid_stat <https://metplus.readthedocs.io/projects/met/en/latest/Users_Guide/grid-stat.html>`_ tool to verify against gridded analyses. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
-- The ``grid2obs:``` block provides configuration for running ``wxvx`` with MET's `point_stat <https://metplus.readthedocs.io/projects/met/en/develop/Users_Guide/point-stat.html>`_ tool to verify against point observations. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
+- The ``grid2obs:`` block provides configuration for running ``wxvx`` with MET's `point_stat <https://metplus.readthedocs.io/projects/met/en/develop/Users_Guide/point-stat.html>`_ tool to verify against point observations. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
 
 zarrs
 -------------------------
@@ -138,7 +138,7 @@ component using a particular config block.
 Config Validation
 -------------------------
 
-To validate the EAGLE YAML config:
+To validate the EAGLE YAML config::
 
     make validate config=eagle.yaml
 
