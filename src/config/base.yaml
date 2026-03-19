@@ -319,8 +319,8 @@ training:
             lon_key: lon
       edges:
       # Encoder
-      - source_name: "data"
-        target_name: "hidden"
+      - source_name: data
+        target_name: hidden
         edge_builders:
         - _target_: anemoi.graphs.edges.KNNEdges
           num_nearest_neighbours: 12
