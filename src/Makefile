@@ -6,6 +6,7 @@ STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training v
 TOOLING  = config devenv env format lint realize shellcheck test typecheck validate yamllint
 
 INSTALLDIR ?= conda
+
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
 envloop  = @for env in $(ENVS); do $(make) env=$$env $(1); done
