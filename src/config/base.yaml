@@ -230,7 +230,7 @@ training:
           save_dir: ${system.output.logs.mlflow}
         wandb:
           enabled: false
-          entity: null+         
+          entity: null+
           _target_: pytorch_lightning.loggers.wandb.WandbLogger
           offline: False
           log_model: False
@@ -309,7 +309,7 @@ training:
         data:
           node_builder:
             _target_: anemoi.graphs.nodes.AnemoiDatasetNodes
-            dataset:  ${dataloader.training.datasets.data.dataset_config}
+            dataset: ${dataloader.training.datasets.data.dataset_config}
           attributes: ${graph.attributes.nodes}
         hidden:
           node_builder:
@@ -318,24 +318,24 @@ training:
             lat_key: lat
             lon_key: lon
       edges:
-      # Encoder
-      - source_name: data
-        target_name: hidden
-        edge_builders:
-        - _target_: anemoi.graphs.edges.KNNEdges
-          num_nearest_neighbours: 12
-          source_mask_attr_name: null
-          target_mask_attr_name: null
-        attributes: ${graph.attributes.edges}
-      # Decoder
-      - source_name: hidden
-        target_name: data
-        edge_builders:
-        - _target_: anemoi.graphs.edges.KNNEdges
-          num_nearest_neighbours: 3
-          source_mask_attr_name: null
-          target_mask_attr_name: null
-        attributes: ${graph.attributes.edges}
+        # Encoder
+        - source_name: data
+          target_name: hidden
+          edge_builders:
+            - _target_: anemoi.graphs.edges.KNNEdges
+              num_nearest_neighbours: 12
+              source_mask_attr_name: null
+              target_mask_attr_name: null
+          attributes: ${graph.attributes.edges}
+        # Decoder
+        - source_name: hidden
+          target_name: data
+          edge_builders:
+            - _target_: anemoi.graphs.edges.KNNEdges
+              num_nearest_neighbours: 3
+              source_mask_attr_name: null
+              target_mask_attr_name: null
+          attributes: ${graph.attributes.edges}
       attributes:
         nodes:
           # Attributes for data nodes
