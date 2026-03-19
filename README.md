@@ -13,6 +13,12 @@ This repository contains configuration and driver code for running an end-to-end
 
 To learn about EAGLE and how to use the provided workflows, please see our [documentation](https://epic-eagle.readthedocs.io/en/latest/).
 
+## Collaboration
+
+- If you encounter a problem using EAGLE that appears to be a bug, please open an [issue](https://github.com/NOAA-EPIC/EAGLE/issues) with us.
+- For free-form sharing of ideas, questions, tips and tricks, etc., please start or participate in a [discussion](https://github.com/NOAA-EPIC/EAGLE/discussions).
+- To contribute to the codebase, please see our [docs](https://epic-eagle.readthedocs.io/en/latest/contributing.html).
+
 ## Acknowledgments
 
 ufs2arco: Tim Smith (NOAA Physical Sciences Laboratory)
