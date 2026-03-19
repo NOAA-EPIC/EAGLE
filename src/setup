@@ -65,11 +65,7 @@ conda_create_base() {
   local name pkgs
   name=base
   pkgs=(
-    go-shfmt=3.13.*
-    jq=1.8.*
-    shellcheck=0.11.*
     $UWTOOLS
-    yamllint=1.38.*
   )
   test -v EAGLE_DEV && pkgs+=($(devpkgs))
   conda_install $name -c ufs-community ${pkgs[@]}
@@ -227,8 +223,12 @@ cuda_release() {
 
 devpkgs() {
   local pkgs=(
+    go-shfmt=3.13.*
+    jq=1.8.*
     mypy=1.19.*
     ruff=0.14.*
+    shellcheck=0.11.*
+    yamllint=1.38.*
   )
   echo ${pkgs[@]}
 }
