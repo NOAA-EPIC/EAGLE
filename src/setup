@@ -272,7 +272,7 @@ pip_install() {
   msg Installing pip packages into environment: $name
   (
     conda_activate $name
-    pip install $@ | grep -v "^Requirement already satisfied: .*$"
+    pip install $@ | { grep -v "already satisfied" || true; }
   )
 }
 
