@@ -52,7 +52,7 @@ inference:
       - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
-platform: *platform
+platform: !dict '{{ app.platform }}'
 prewxvx:
   common:
     execution: &prewxvx-common-execution
@@ -93,7 +93,7 @@ prewxvx:
             method: 'conservative_normed'
           target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}'
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
-    platform: *platform
+    platform: !dict '{{ app.platform }}'
   lam:
     prewxvx:
       execution:
@@ -105,7 +105,7 @@ prewxvx:
         output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
         model_type: nested-lam
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
-    platform: *platform
+    platform: !dict '{{ app.platform }}'
 training:
   anemoi:
     defaults:
@@ -623,7 +623,7 @@ vx:
           name: v_10m
   grid2grid:
     global:
-      platform: *platform
+      platform: !dict '{{ app.platform }}'
       wxvx: # config for the EAGLE driver
         execution:
           batchargs:
@@ -653,7 +653,7 @@ vx:
             method: NEAREST
             to: forecast
     lam:
-      platform: *platform
+      platform: !dict '{{ app.platform }}'
       wxvx: # config for the EAGLE driver
         execution:
           batchargs:
@@ -688,7 +688,7 @@ vx:
           regrid: !dict '{{ vx.grid2grid.global.wxvx.wxvx.regrid }}'
   grid2obs:
     global:
-      platform: *platform
+      platform: !dict '{{ app.platform }}'
       wxvx: # config for the EAGLE driver
         execution:
           batchargs:
@@ -716,7 +716,7 @@ vx:
             method: BILIN
             to: G104
     lam:
-      platform: *platform
+      platform: !dict '{{ app.platform }}'
       wxvx: # config for the EAGLE driver
         execution:
           batchargs:
@@ -771,7 +771,7 @@ zarrs:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
             target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
       rundir: '{{ val.data.rundir }}'
-    platform: *platform
+    platform: !dict '{{ app.platform }}'
   hrrr:
     zarr:
       execution:
@@ -796,4 +796,4 @@ zarrs:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
             target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
       rundir: '{{ val.data.rundir }}'
-    platform: *platform
+    platform: !dict '{{ app.platform }}'
