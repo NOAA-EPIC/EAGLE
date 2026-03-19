@@ -1,6 +1,6 @@
-=================
+=============================
 Train a Graph-Based Model
-=================
+=============================
 
 anemoi-core Overview
 -------------------------
@@ -16,13 +16,13 @@ See Anemoi documentation for further information:
 Anemoi was created by the European Center for Medium-Range Weather Forecasting.
 
 Helpful quick tips for using anemoi-core
-------------------
+----------------------------------------------
 
 Throughout this repository, all anemoi configs are typically provided for you and should work out of the box. 
 See below for various tips and explanations if you wish to learn more about the configs or want to change the configurations.
 
 Brief Config Overview
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The configs used by anemoi-training contain a lot of information. At the top of a main config you will see something like
 
@@ -48,7 +48,7 @@ This makes it so the main config.yaml contains most model configurations that ar
 configurations easy to change.
 
 Generating Configs Yourself
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you wish to use brand new configs and configure a model yourself, run the following command while within 
 a conda environemnt that contains all of the anemoi-core modules:

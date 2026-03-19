@@ -1,6 +1,6 @@
-=================
+=========================
 Verify Model Performance
-=================
+=========================
 
 wxvx Overview
 ----------------------------------------------------
@@ -20,7 +20,7 @@ See the `wxvx repository <https://github.com/maddenp-cu/wxvx>`_ for further info
 **wxvx** was created by Paul Madden at NOAA/CIRES.
 
 Helpful Quick Tips for Using wxvx
----------------------------------
+----------------------------------------------------
 
 * Use the provided conda environment for a fully configured MET setup.
 * Ensure forecast and baseline data follow CF-Conventions for best compatibility.
