@@ -29,7 +29,7 @@ jobs:
       - name: Submit Initial Grids
         run: |
           set -euo pipefail
-          cd "${GITHUB_WORKSPACE}/nested_eagle/ursa/scientific_workflow/data" 
+          cd "${GITHUB_WORKSPACE}/src/eagle/data" 
 
           submit_and_wait() {
             local submit_script="$1"
