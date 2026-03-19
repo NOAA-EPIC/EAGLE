@@ -112,7 +112,7 @@ fi
 EOF
     )
   fi
-  pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.8.*
+  pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.9.*
 }
 
 conda_create_inference() {
@@ -131,7 +131,7 @@ conda_create_inference() {
     conda_create ${args[@]}
     write_anemoi_activation_scripts $name
   fi
-  pip_install $name anemoi-inference==0.9.* anemoi-models==0.12.* eagle-tools
+  pip_install $name anemoi-inference==0.10.* anemoi-models==0.13.* eagle-tools
 }
 
 conda_create_postwxvx() {
@@ -185,7 +185,7 @@ conda_create_training() {
     conda_create ${args[@]}
     write_anemoi_activation_scripts $name
   fi
-  pip_install $name anemoi-models==0.12.* anemoi-training==0.9.*
+  pip_install $name anemoi-models==0.13.* anemoi-training==0.10.*
 }
 
 conda_create_wxvx() {
@@ -288,7 +288,7 @@ pip_install() {
   msg Installing pip packages into environment: $name
   (
     conda_activate $name
-    pip install $@ | grep -v "^Requirement already satisfied: .*$"
+    pip install $@ | { grep -v "already satisfied" || true; }
   )
 }
 
