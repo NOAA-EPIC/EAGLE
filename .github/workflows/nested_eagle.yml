@@ -248,5 +248,5 @@ jobs:
     steps:
       - name: Remove ci-running label
         uses: mondeja/remove-labels-gh-action@v2.0.0
-         with:
+        with:
           token: ${{ secrets.GITHUB_TOKEN }}
