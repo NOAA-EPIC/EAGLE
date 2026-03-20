@@ -19,10 +19,10 @@ jobs:
 
       - name: Install shfmt
         run: |
-          SHFMT_VERSION="v3.7.0"
+          SHFMT_VERSION="v3.13.0"
           curl -sSL "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64" -o shfmt
           chmod +x shfmt
 
       - name: Run shfmt
         run: |
-          ./shfmt -d src/ .github/ docs/
+          ./shfmt --diff --indent 2 src/ .github/ docs/
