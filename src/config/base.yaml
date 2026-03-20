@@ -227,7 +227,7 @@ training:
           run_name: null
           system: False
           terminal: True
-          save_dir: '{{ training.rundir }}/outputs/logs/mlflow'
+          save_dir: ${system.output.logs.mlflow}
         wandb:
           enabled: false
           entity: null+         
