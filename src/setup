@@ -134,22 +134,6 @@ conda_create_inference() {
   pip_install $name anemoi-inference==0.10.* anemoi-models==0.13.* eagle-tools
 }
 
-conda_create_postwxvx() {
-  local args name pkgs
-  name=postwxvx
-  pkgs=(
-    python=3.13
-  )
-  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  args=( $name ${pkgs[@]} )
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-  fi
-  pip_install $name eagle-tools
-}
-
 conda_create_prewxvx() {
   local args name pkgs
   name=prewxvx
@@ -186,6 +170,23 @@ conda_create_training() {
     write_anemoi_activation_scripts $name
   fi
   pip_install $name anemoi-models==0.13.* anemoi-training==0.10.*
+}
+
+conda_create_visualization() {
+  local args name pkgs
+  name=visualization
+  pkgs=(
+    python=3.13
+    xarray=2026.2.0
+  )
+  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  args=( $name ${pkgs[@]} )
+  if conda_env_exists $name; then
+    conda_install ${args[@]}
+  else
+    conda_create ${args[@]}
+  fi
+  pip_install $name eagle-tools
 }
 
 conda_create_wxvx() {
@@ -318,7 +319,7 @@ install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
-environments=( base data inference prewxvx training wxvx )
+environments=( base data inference prewxvx training visualization wxvx )
 for name in ${environments[@]}; do
   conda_create_$name
 done

@@ -14,7 +14,19 @@ class PostWXVX(DriverTimeInvariant):
     # Public tasks
 
     @task
-    def eagle_tools_config(self):
+    def nc_files(self):
+        """
+        Run eagle-tools' postwxvx
+        """
+        yield self.taskname(f"{self.driver_name()} {self._name} config")
+        path = self.rundir / f"{self.driver_name()}-{self._name}.yaml"
+        yield Asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        get_yaml_config(self.config["eagle_tools"]).dump(path)
+
+    @task
+    def postwxvx_config(self):
         """
         Postwxvx config for this run, provisioned to the rundir.
         """
@@ -32,7 +44,7 @@ class PostWXVX(DriverTimeInvariant):
         """
         yield self.taskname(f"{self._name} provisioned run directory")
         yield [
-            self.eagle_tools_config(),
+            self.postwxvx_config(),
             self.runscript(),
         ]
 

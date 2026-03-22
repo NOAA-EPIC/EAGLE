@@ -46,7 +46,7 @@
                   "type": "integer"
                 },
                 "step": {
-                  "$ref": "#/$defs/timedelta"
+                  "type": "integer"
                 }
               },
               "type": "object"

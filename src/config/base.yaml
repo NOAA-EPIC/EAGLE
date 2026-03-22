@@ -53,6 +53,45 @@ inference:
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
 platform: *platform
+plots:
+  common: &plots-common
+    stats:
+      - RMSE
+    variables:
+      - 2m_temperature
+      - 10m_zonal_wind
+      - 10m_meridional_wind
+      - 500hpa_geopotential_height
+      - 850hpa_temperature
+      - 250hpa_zonal_wind
+      - 250hpa_meridional_wind
+      - surface_pressure
+  grid2grid:
+    global:
+      plots:
+        <<: *plots-common
+        name: plots-grid-global
+        netcdfs: '{{ val.vx.rundir }}/grid2grid/global'
+        rundir: '{{ app.rundir }}/visualization/grid2grid/global'
+    lam:
+      plots:
+        <<: *plots-common
+        name: postwxvx-grid-lam
+        netcdfs: '{{ val.vx.rundir }}/grid2grid/lam'
+        rundir: '{{ app.rundir }}/visualization/grid2grid/lam'
+  grid2obs:
+    global:
+      plots:
+        <<: *plots-common
+        name: plots-obs-global
+        netcdfs: '{{ val.vx.rundir }}/grid2obs/global'
+        rundir: '{{ app.rundir }}/visualization/grid2obs/global'
+    lam:
+      plots:
+        <<: *plots-common
+        name: postwxvx-obs-lam
+        netcdfs: '{{ val.vx.rundir }}/grid2obs/lam'
+        rundir: '{{ app.rundir }}/visualization/grid2obs/lam'
 postwxvx:
   common:
     execution: &postwxvx-common-execution
@@ -65,9 +104,9 @@ postwxvx:
       end_date: !datetime '{{ app.time.inference_stop }}'
       freq: '{{ app.time.freq }}'
       leadtimes:
-        start: 0
-        end: 240
-        step: '{{ app.time.step }}'
+        start: !int 0
+        end: !int 24
+        step: !int '{{ val.step }}'
       variable_prefixes:
         - 2t_heightAboveGround_0002
         - u_10m_heightAboveGround_0010
@@ -77,28 +116,52 @@ postwxvx:
         - u_isobaricInhPa_0250
         - v_isobaricInhPa_0250
         - sp_surface
-  global:
-    postwxvx:
-      execution:
-        <<: *postwxvx-common-execution
-        executable: eagle-tools postwxvx postxvx-global.yaml
-      name: global
-      eagle_tools:
-        <<: *postwxvx-common
-        stat_prefix: point_stat_nested_global
-        work_path: '{{ postwxvx.global.rundir }}'
-      rundir: '{{ app.rundir }}/visualization/global'
-  lam:
-    postwxvx:
-      execution:
-        <<: *postwxvx-common-execution
-        executable: eagle-tools postwxvx postxvx-lam.yaml
-      name: lam
-      eagle_tools:
-        <<: *postwxvx-common
-        stat_prefix: point_stat_nested_lam
-        work_path: '{{ postwxvx.lam.rundir }}'
-      rundir: '{{ app.rundir }}/visualization/lam'
+  grid2grid:
+    global:
+      postwxvx:
+        execution:
+          <<: *postwxvx-common-execution
+          executable: eagle-tools postwxvx postwxvx-grid-global.yaml
+        name: grid-global
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: grid_stat_nested_global
+          work_path: '{{ val.vx.rundir }}/grid2grid/global/'
+        rundir: '{{ app.rundir }}/visualization/grid2grid/global'
+    lam:
+      postwxvx:
+        execution:
+          <<: *postwxvx-common-execution
+          executable: eagle-tools postwxvx postwxvx-grid-lam.yaml
+        name: grid-lam
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: grid_stat_nested_lam
+          work_path: '{{ val.vx.rundir }}/grid2grid/lam'
+        rundir: '{{ app.rundir }}/visualization/grid2grid/lam'
+  grid2obs:
+    global:
+      postwxvx:
+        execution:
+          <<: *postwxvx-common-execution
+          executable: eagle-tools postwxvx postwxvx-obs-global.yaml
+        name: obs-global
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: point_stat_nested_global
+          work_path: '{{ val.vx.rundir }}/grid2obs/global/'
+        rundir: '{{ app.rundir }}/visualization/grid2obs/global'
+    lam:
+      postwxvx:
+        execution:
+          <<: *postwxvx-common-execution
+          executable: eagle-tools postwxvx postwxvx-obs-lam.yaml
+        name: obs-lam
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: point_stat_nested_lam
+          work_path: '{{ val.vx.rundir }}/grid2obs/lam'
+        rundir: '{{ app.rundir }}/visualization/grid2obs/lam'
 prewxvx:
   common:
     execution: &prewxvx-common-execution

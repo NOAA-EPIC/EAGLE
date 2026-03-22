@@ -72,21 +72,49 @@ else
 	$(call envloop,lint)
 endif
 
+plots:
+	$(call activate,visualization)
+ifeq ($(task),?)
+	$(call tasklist,visualization,plots,Plots)
+else
+	$(call check,$(config),config)
+	$(call exec,visualization,plots,Plots,$(or $(task),provisioned_rundir) --key-path plots.$(truth).$(extent))
+endif
+
+plots-grid-global:
+	@$(make) plots truth=grid2grid extent=global
+
+plots-grid-lam:
+	@$(make) plots truth=grid2grid extent=lam
+
+plots-obs-global:
+	@$(make) plots truth=grid2obs extent=global
+
+plots-obs-lam:
+	@$(make) plots truth=grid2obs extent=lam
+
+
 postwxvx:
-	$(call activate,prewxvx)
+	$(call activate,visualization)
 ifeq ($(task),?)
 	$(call tasklist,postwxvx,postwxvx,PostWXVX)
 else
 	$(call check,$(config),config)
 	$(call check,$(extent),extent)
-	$(call exec,visualization,postwxvx,PostWXVX,$(or $(task),run) --key-path postwxvx.$(extent))
+	$(call exec,visualization,postwxvx,PostWXVX,$(or $(task),run) --key-path postwxvx.$(truth).$(extent))
 endif
 
-postwxvx-global:
-	@$(make) postwxvx extent=global
+postwxvx-grid-global:
+	@$(make) postwxvx truth=grid2grid extent=global
 
-postwxvx-lam:
-	@$(make) postwxvx extent=lam
+postwxvx-grid-lam:
+	@$(make) postwxvx truth=grid2grid extent=lam
+
+postwxvx-obs-global:
+	@$(make) postwxvx truth=grid2obs extent=global
+
+postwxvx-obs-lam:
+	@$(make) postwxvx truth=grid2obs extent=lam
 
 prewxvx:
 	$(call activate,prewxvx)
