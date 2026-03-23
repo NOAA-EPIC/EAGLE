@@ -449,6 +449,7 @@ training:
       - conda activate training
       - set -ex
       - export SLURM_GPUS_PER_NODE=1
+      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: anemoi-training train --config-name=training
   remove:
     # Dot-separated config keys paths to delete from the composed runtime config.
