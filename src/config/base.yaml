@@ -447,9 +447,7 @@ training:
       walltime: '00:10:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate training 
-      - which anemoi-training
-      - anemoi-training --version || true
+      - conda activate anemoi
       - module list
       - set -ex
       - export SLURM_GPUS_PER_NODE=1
