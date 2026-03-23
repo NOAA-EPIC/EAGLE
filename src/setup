@@ -65,12 +65,9 @@ conda_create_base() {
   local name pkgs
   name=base
   pkgs=(
-    jq=1.8.*
-    shellcheck=0.11.*
     $UWTOOLS
-    yamllint=1.38.*
   )
-  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
+  test -v EAGLE_DEV && pkgs+=($(devpkgs))
   conda_install $name -c ufs-community ${pkgs[@]}
 }
 
@@ -85,8 +82,8 @@ conda_create_data() {
     types-pyyaml
     ufs2arco=0.19.*
   )
-  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  args=( $name ${pkgs[@]} )
+  test -v EAGLE_DEV && pkgs+=($(devpkgs))
+  args=($name ${pkgs[@]})
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -123,8 +120,8 @@ conda_create_inference() {
     numpy=2.2.6.*
     python=3.12
   )
-  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  args=( $name ${pkgs[@]} )
+  test -v EAGLE_DEV && pkgs+=($(devpkgs))
+  args=($name ${pkgs[@]})
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -143,8 +140,8 @@ conda_create_prewxvx() {
     python=3.13
     xesmf=0.8.*
   )
-  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  args=( $name ${pkgs[@]} )
+  test -v EAGLE_DEV && pkgs+=($(devpkgs))
+  args=($name ${pkgs[@]})
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -161,8 +158,8 @@ conda_create_training() {
     numpy=1.26.4.*
     python=3.12
   )
-  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  args=( $name ${pkgs[@]} )
+  test -v EAGLE_DEV && pkgs+=($(devpkgs))
+  args=($name ${pkgs[@]})
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -195,8 +192,8 @@ conda_create_wxvx() {
   pkgs=(
     wxvx=0.7.*
   )
-  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  args=( $name -c oar-gsl ${pkgs[@]} )
+  test -v EAGLE_DEV && pkgs+=($(devpkgs))
+  args=($name -c oar-gsl ${pkgs[@]})
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else
@@ -243,8 +240,12 @@ cuda_release() {
 
 devpkgs() {
   local pkgs=(
+    go-shfmt=3.13.*
+    jq=1.8.*
     mypy=1.19.*
     ruff=0.14.*
+    shellcheck=0.11.*
+    yamllint=1.38.*
   )
   echo ${pkgs[@]}
 }
@@ -272,7 +273,7 @@ parse_kvargs() {
   local arg key required val
   declare -g -A ARGS
   for arg in $@; do
-    IFS="=" read -r key val <<< $arg
+    IFS="=" read -r key val <<<$arg
     ARGS[$key]=$val
   done
   required="cudascript"
@@ -319,7 +320,7 @@ install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
-environments=( base data inference prewxvx training visualization wxvx )
+environments=(base data inference prewxvx training visualization wxvx)
 for name in ${environments[@]}; do
   conda_create_$name
 done
