@@ -94,6 +94,14 @@ This block provides both static and derived values that are referenced by other 
 place to define values that need to be shared and kept in-sync across pipeline steps, but less likely to be manually 
 modified by users like values in the ``app:`` block.
 
+visualization
+-------------------------
+
+Configuration for the ``Visualization`` driver.
+
+- This driver executes the `eagle-tools postwxvx` component and plots its output.
+- The ``common:`` block provides parameters shared by the ``grid2grid:`` and ``grid2obs:`` blocks, which provide configurations for running ``eagle-tools postwxvx`` to create netCDF files containing verification stattistics, which are then plotted by the driver. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
+
 vx
 -------------------------
 

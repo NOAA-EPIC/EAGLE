@@ -37,7 +37,10 @@ and ``config/ursa.yaml`` and redirects the composed config into ``eagle.yaml``.
 The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` 
 subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
 
-**4. Create training data**
+**4. Verify the app.account value in eagle.yaml.**
+The default configuration sets ``app.account`` to ``epic``. If you do not have access to the epic account on Ursa, update this value to an account you are authorized to use.
+
+**5. Create training data**
 
 Run::
     
@@ -46,7 +49,7 @@ Run::
 This step provisions data required for training and inference. The ``data`` target delegates to targets 
 ``grids-and-meshes``, ``zarr-gfs``, and ``zarr-hrrr``, which can also be run individually (e.g. ``make grids-and-meshes config=eagle.yaml``), but note that ``grids-and-meshes``, which runs locally, must be run first. The ``zarr-gfs`` and ``zarr-hrrr`` targets can be run in quick succession, as they submit batch jobs: Do not proceed until their batch jobs complete successfully (see the files ``run/<expname>/data/*.out``).
 
-**5. Train the ML model.**
+**6. Train the ML model.**
 
 Run::
     
@@ -55,7 +58,7 @@ Run::
 This step trains a model using data provisioned by the previous step. It submits a batch job: Do not proceed until 
 the batch job completes successfully (see the file ``run/<expname>training/runscript.training.out``).
 
-**6. Run inference**
+**7. Run inference**
 
 Run::
     
@@ -64,7 +67,7 @@ Run::
 This step performs inference, producing a forecast. It submits a batch job: Do not proceed until the batch job 
 completes successfully (see the file ``run/<expname>inference/runscript.inference.out``.)
 
-**7. Postprocess model output**
+**8. Postprocess model output**
 
 Run:
 
@@ -76,7 +79,7 @@ Run:
 These steps prepare forecast output from the previous step for verification by ``wxvx``. They run locally, so it is 
 safe to proceed when the commands return. See the files ``run/<expname>vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
 
-**8. Model verification**
+**9. Model verification**
 
 Run:
 
@@ -92,3 +95,16 @@ prepbufr observations (``*-obs-*``) as truth. Each submits a batch job, so the f
 succession to get all the batch jobs running in parallel. When each batch job completes, MET ``.stat`` files and ``.png`` 
 plot files can be found under the ``stats/`` and ``plots/`` subdirectories of ``run/<expname>vx/grid2{grid,obs}/{global,lam}/run/``. 
 The files ``run/<expname>vx/*.log`` contain the logs from each verification run.
+
+**10. Make additional visualizations**
+
+Run:
+
+.. code-block:: text
+    
+    make vis-grid-global config=eagle.yaml
+    make vis-grid-lam config=eagle.yaml
+    make vis-obs-global config=eagle.yaml
+    make vis-obs-lam config=eagle.yaml
+
+These steps will first call ``eagle-tools``'s ``postwxvx`` tool which will create and save a series of netdcf files with all relevant statistics in the corresponding wxvx directory for each variable. It will then create a series of plots in the ``run/<expname>vx/grid2{grid,obs}/{global,lam}/`` directory. 

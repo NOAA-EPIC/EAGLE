@@ -552,6 +552,8 @@ val:
     forecast:
       # Diagnostic
       - accum_tp
+  visualization:
+    rundir: '{{ app.rundir }}/visualization'
   vx:
     rundir: '{{ app.rundir }}/vx'
 visualization:
@@ -592,7 +594,7 @@ visualization:
           stat_prefix: grid_stat_nested_global
           work_path: '{{ val.vx.rundir }}/grid2grid/global'
         name: grid-global
-        rundir: '{{ app.rundir }}/visualization/grid2grid/global'
+        rundir: '{{ val.visualization.rundir }}/grid2grid/global'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
     lam:
@@ -602,7 +604,7 @@ visualization:
           stat_prefix: grid_stat_nested_lam
           work_path: '{{ val.vx.rundir }}/grid2grid/lam'
         name: grid-lam
-        rundir: '{{ app.rundir }}/visualization/grid2grid/lam'
+        rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
   grid2obs:
@@ -613,7 +615,7 @@ visualization:
           stat_prefix: point_stat_nested_global
           work_path: '{{ val.vx.rundir }}/grid2obs/global/'
         name: obs-global
-        rundir: '{{ app.rundir }}/visualization/grid2obs/global'
+        rundir: '{{ val.visualization.rundir }}/grid2obs/global'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
     lam:
@@ -623,7 +625,7 @@ visualization:
           stat_prefix: point_stat_nested_lam
           work_path: '{{ val.vx.rundir }}/grid2obs/lam/'
         name: obs-lam
-        rundir: '{{ app.rundir }}/visualization/grid2obs/lam'
+        rundir: '{{ val.visualization.rundir }}/grid2obs/lam'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
 vx:

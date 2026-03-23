@@ -29,7 +29,7 @@ class Visualization(AssetsTimeInvariant):
             for var in self.config["variables"]
             for stat in self.config["stats"]
         ]
-    
+
     @task
     def postwxvx(self):
         """
@@ -48,7 +48,6 @@ class Visualization(AssetsTimeInvariant):
             cwd=self.rundir,
             shell=True,
         )
-
 
     @collection
     def provisioned_rundir(self):
