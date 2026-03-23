@@ -9,7 +9,7 @@ CONDAFLAGS=(
   --yes
   --channel conda-forge
   --channel ufs-community
-  --overrite-channels
+  --override-channels
 )
 INSTALLDIR=${INSTALLDIR:-$PWD/conda}
 UWTOOLS="uwtools=2.13.*"
