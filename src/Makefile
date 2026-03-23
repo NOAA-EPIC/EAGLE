@@ -2,7 +2,7 @@ BASHSRCS = format setup
 ENVS     = data inference prewxvx training wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
-STEPS    = data grids-and-meshes inference postwxvx-lam postwxvx-global prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck validate yamllint
 
 activate = @source conda/etc/profile.d/conda.sh && conda activate $(1)
@@ -71,50 +71,6 @@ ifdef env
 else
 	$(call envloop,lint)
 endif
-
-plots:
-	$(call activate,visualization)
-ifeq ($(task),?)
-	$(call tasklist,visualization,plots,Plots)
-else
-	$(call check,$(config),config)
-	$(call exec,visualization,plots,Plots,$(or $(task),provisioned_rundir) --key-path plots.$(truth).$(extent))
-endif
-
-plots-grid-global:
-	@$(make) plots truth=grid2grid extent=global
-
-plots-grid-lam:
-	@$(make) plots truth=grid2grid extent=lam
-
-plots-obs-global:
-	@$(make) plots truth=grid2obs extent=global
-
-plots-obs-lam:
-	@$(make) plots truth=grid2obs extent=lam
-
-
-postwxvx:
-	$(call activate,visualization)
-ifeq ($(task),?)
-	$(call tasklist,postwxvx,postwxvx,PostWXVX)
-else
-	$(call check,$(config),config)
-	$(call check,$(extent),extent)
-	$(call exec,visualization,postwxvx,PostWXVX,$(or $(task),run) --key-path postwxvx.$(truth).$(extent))
-endif
-
-postwxvx-grid-global:
-	@$(make) postwxvx truth=grid2grid extent=global
-
-postwxvx-grid-lam:
-	@$(make) postwxvx truth=grid2grid extent=lam
-
-postwxvx-obs-global:
-	@$(make) postwxvx truth=grid2obs extent=global
-
-postwxvx-obs-lam:
-	@$(make) postwxvx truth=grid2obs extent=lam
 
 prewxvx:
 	$(call activate,prewxvx)
