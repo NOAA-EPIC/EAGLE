@@ -747,11 +747,10 @@ zarrs:
   common:
     execution: &zarrs-common-execution
       batchargs:
-        cores: 15
-        memory: 128G
+        cores: 1
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
-        walltime: '00:30:00'
+        walltime: '00:20:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate data
@@ -762,6 +761,7 @@ zarrs:
     zarr:
       execution:
         <<: *zarrs-common-execution
+        batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
       name: gfs
       ufs2arco:
@@ -781,6 +781,7 @@ zarrs:
     zarr:
       execution:
         <<: *zarrs-common-execution
+        batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
         executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
       name: hrrr
       ufs2arco:
