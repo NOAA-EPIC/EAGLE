@@ -79,7 +79,7 @@ conda_create_data() {
     mpi4py=4.1.*
     numpy=1.26.4
     pandas=2.3.3
-    setuptools=81.0.* # required by pip package(s) below
+    setuptools=81.0.*
     types-pyyaml
     ufs2arco=0.19.*
   )
@@ -158,7 +158,7 @@ conda_create_training() {
     flash-attn=2.8.*
     numpy=1.26.4.*
     python=3.12
-    setuptools=81.0.* # required by pip package(s) below
+    setuptools=81.0.*
   )
   test -v EAGLE_DEV && pkgs+=($(devpkgs))
   args=($name ${pkgs[@]})
