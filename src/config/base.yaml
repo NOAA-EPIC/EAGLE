@@ -49,7 +49,6 @@ inference:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
       - set -ex
-      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
 platform: !dict '{{ app.platform }}'
@@ -451,7 +450,6 @@ training:
       - module list
       - set -ex
       - export SLURM_GPUS_PER_NODE=1
-      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: anemoi-training train --config-name=training
   remove:
     # Dot-separated config keys paths to delete from the composed runtime config.
