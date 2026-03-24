@@ -34,7 +34,7 @@ and ``config/ursa.yaml`` and redirects the composed config into ``eagle.yaml``.
 
 **3. Edit eagle.yaml**
 
-* Set the app.base value to the absolute path to the current (src/) directory. The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
+* Set the app.base value to the absolute path to the current (``src/``) directory. The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
 
 * Verify the ``app.account`` value. The default configuration sets ``app.account`` to ``epic``. If you do not have access to the ``epic`` account on Ursa, update this value to an account you are authorized to use.
 
