@@ -32,16 +32,13 @@ Run::
 The ``config`` target operates on ``.yaml`` files in the ``config/`` directory, so this command composes ``config/base.yaml`` 
 and ``config/ursa.yaml`` and redirects the composed config into ``eagle.yaml``.
 
-**3. Set the app.base value in eagle.yaml to the absolute path to the current (src/) directory.**
+**3. Edit eagle.yaml**
 
-The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` 
-subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
+* Set the app.base value to the absolute path to the current (src/) directory. The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
 
-**4. Verify the app.account value in eagle.yaml.**
+* Verify the ``app.account`` value. The default configuration sets ``app.account`` to ``epic``. If you do not have access to the ``epic`` account on Ursa, update this value to an account you are authorized to use.
 
-The default configuration sets ``app.account`` to ``epic``. If you do not have access to the ``epic`` account on Ursa, update this value to an account you are authorized to use.
-
-**5. Create training data**
+**4. Create training data**
 
 Run::
     
@@ -50,7 +47,7 @@ Run::
 This step provisions data required for training and inference. The ``data`` target delegates to targets 
 ``grids-and-meshes``, ``zarr-gfs``, and ``zarr-hrrr``, which can also be run individually (e.g. ``make grids-and-meshes config=eagle.yaml``), but note that ``grids-and-meshes``, which runs locally, must be run first. The ``zarr-gfs`` and ``zarr-hrrr`` targets can be run in quick succession, as they submit batch jobs: Do not proceed until their batch jobs complete successfully (see the files ``run/<expname>/data/*.out``).
 
-**6. Train the ML model.**
+**5. Train the ML model.**
 
 Run::
     
@@ -59,7 +56,7 @@ Run::
 This step trains a model using data provisioned by the previous step. It submits a batch job: Do not proceed until 
 the batch job completes successfully (see the file ``run/<expname>training/runscript.training.out``).
 
-**7. Run inference**
+**6. Run inference**
 
 Run::
     
@@ -68,7 +65,7 @@ Run::
 This step performs inference, producing a forecast. It submits a batch job: Do not proceed until the batch job 
 completes successfully (see the file ``run/<expname>inference/runscript.inference.out``.)
 
-**8. Postprocess model output**
+**7. Postprocess model output**
 
 Run:
 
@@ -80,7 +77,7 @@ Run:
 These steps prepare forecast output from the previous step for verification by ``wxvx``. They run locally, so it is 
 safe to proceed when the commands return. See the files ``run/<expname>vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
 
-**9. Model verification**
+**8. Model verification**
 
 Run:
 
@@ -97,7 +94,7 @@ succession to get all the batch jobs running in parallel. When each batch job co
 plot files can be found under the ``stats/`` and ``plots/`` subdirectories of ``run/<expname>vx/grid2{grid,obs}/{global,lam}/run/``. 
 The files ``run/<expname>vx/*.log`` contain the logs from each verification run.
 
-**10. Make additional visualizations**
+**9. Make additional visualizations**
 
 Run:
 
