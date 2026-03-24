@@ -176,8 +176,8 @@ conda_create_visualization() {
     python=3.13
     xarray=2026.2.0
   )
-  test -v EAGLE_DEV && pkgs+=( $(devpkgs) )
-  args=( $name ${pkgs[@]} )
+  test -v EAGLE_DEV && pkgs+=($(devpkgs))
+  args=($name ${pkgs[@]})
   if conda_env_exists $name; then
     conda_install ${args[@]}
   else

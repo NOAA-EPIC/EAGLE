@@ -30,16 +30,29 @@
     "visualization": {
       "properties": {
         "eagle_tools": {
-          "type": "object",
           "properties": {
-            "start_date": {
-              "$ref": "#/$defs/datetime"
-            },
             "end_date": {
               "$ref": "#/$defs/datetime"
             },
             "freq": {
               "type": "string"
+            },
+            "leadtimes": {
+              "properties": {
+                "end": {
+                  "type": "integer"
+                },
+                "start": {
+                  "type": "integer"
+                },
+                "step": {
+                  "$ref": "#/$defs/timedelta"
+                }
+              },
+              "type": "object"
+            },
+            "start_date": {
+              "$ref": "#/$defs/datetime"
             },
             "stat_prefix": {
               "type": "string"
@@ -49,23 +62,9 @@
             },
             "work_path": {
               "type": "string"
-            },
-            "leadtimes": {
-              "type": "object",
-              "properties": {
-                "start": {
-                  "type": "integer"
-                },
-                "end": {
-                  "type": "integer"
-                },
-                "step": {
-                  "$ref": "#/$defs/timedelta"
-                }
-              }
             }
-          }
-        },
+          },
+          "type": "object"
         },
         "name": {
           "type": "string"
@@ -74,7 +73,7 @@
           "type": "string"
         },
         "stats": {
-        "type": "array"
+          "type": "array"
         },
         "variables": {
           "type": "array"
