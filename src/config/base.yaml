@@ -3,7 +3,7 @@
 # yamllint disable rule:anchors rule:line-length
 
 app:
-  base: /scratch3/BMC/wrfruc/elcarpenter/eagle/src
+  base: /path/to/eagle/src
   experiment_name: default
   gpu: # set by platform config
   partitions: # set by platform config
@@ -558,7 +558,7 @@ visualization:
   common:
     stats:
       - RMSE
-    variables:
+    variables: # These names are from the postwxvx output.
       - 2m_temperature
       - 10m_zonal_wind
       - 10m_meridional_wind
@@ -575,7 +575,7 @@ visualization:
         start: !int 0
         end: !int 24
         step: !int '{{ val.step }}'
-      variable_prefixes:
+      variable_prefixes: # These names are from the wxvx output.
         - 2t_heightAboveGround_0002
         - u_10m_heightAboveGround_0010
         - v_10m_heightAboveGround_0010

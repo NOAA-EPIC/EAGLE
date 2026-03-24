@@ -154,9 +154,6 @@
     "platform": {
       "type": "object"
     },
-    "postwxvx": {
-      "type": "object"
-    },
     "prewxvx": {
       "type": "object"
     },
@@ -184,7 +181,6 @@
     "grids_and_meshes",
     "inference",
     "platform",
-    "postwxvx",
     "prewxvx",
     "training",
     "ufs2arco",
