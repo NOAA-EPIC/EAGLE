@@ -2,15 +2,14 @@ from pathlib import Path
 from subprocess import run
 from typing import cast
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import xarray as xr
 from iotaa import Asset, collection, task
 from uwtools.api.config import get_yaml_config
 from uwtools.api.driver import AssetsTimeInvariant
-from xarray import Dataset
 
-matplotlib.use("Agg")
+mpl.use("Agg")
 
 
 class Visualization(AssetsTimeInvariant):
@@ -69,12 +68,13 @@ class Visualization(AssetsTimeInvariant):
         yield self.taskname(f"{self._name} {var} {stat} plot")
         path = self.rundir / f"{var}_{stat}.png"
         yield Asset(path, path.is_file)
-        nc = self.postwxvx()
-        yield nc
+        req = self.postwxvx()
+        yield req
         self.rundir.mkdir(parents=True, exist_ok=True)
         nc = Path(self.config["eagle_tools"]["work_path"]) / f"{var}.nc"
         ds = xr.open_dataset(nc)
-        ds[stat].plot()
+        var_stat = cast("xr.DataArray", ds[stat])
+        var_stat.plot()  # type: ignore[call-arg]
         plt.savefig(path)
         plt.close()
 

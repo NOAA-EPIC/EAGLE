@@ -1,5 +1,5 @@
 BASHSRCS = format setup
-ENVS     = data inference prewxvx training wxvx
+ENVS     = data inference prewxvx training visualization wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
