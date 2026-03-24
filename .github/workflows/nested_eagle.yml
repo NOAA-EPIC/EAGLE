@@ -169,7 +169,7 @@ jobs:
           EXP="ci-pr${PR_NUM}-$(echo "$SHA" | cut -c1-7)"
           echo "Experiment name: $EXP"
 
-          make config compose=base:ursa:ci INSTALLDIR="${INSTALLDIR}" > eagle.yaml
+          make config compose=base:ursa INSTALLDIR="${INSTALLDIR}" > eagle.yaml
 
           SRC_ABS="${GITHUB_WORKSPACE}/src"
           sed -i "s|^\\(  base:\\s*\\).*|\\1${SRC_ABS}|" eagle.yaml
@@ -182,11 +182,10 @@ jobs:
 
           # ---- pipeline steps ----
           make grids-and-meshes config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
-
           make zarr-gfs config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
-          wait_runscript_batch "${RUNROOT}/data" "zarr-gfs" "Zarr GFS"
-
           make zarr-hrrr config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+
+          wait_runscript_batch "${RUNROOT}/data" "zarr-gfs" "Zarr GFS"
           wait_runscript_batch "${RUNROOT}/data" "zarr-hrrr" "Zarr HRRR"
 
           test -d "${RUNROOT}/data/gfs.zarr"  || { echo "Missing ${RUNROOT}/data/gfs.zarr"; exit 1; }
@@ -201,16 +200,15 @@ jobs:
           make prewxvx-global config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           make prewxvx-lam    config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
 
-          make vx-grid-global config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          for truth in grid obs; do
+            for extent in global lam; do
+              make vx-$truth-$extent config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+            done
+          done
+
           wait_runscript_batch "${RUNROOT}/vx/grid2grid/global" "wxvx-grid2grid-global" "VX grid2grid global"
-
-          make vx-grid-lam config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/vx/grid2grid/lam" "wxvx-grid2grid-lam" "VX grid2grid lam"
-
-          make vx-obs-global config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/vx/grid2obs/global" "wxvx-grid2obs-global" "VX grid2obs global"
-
-          make vx-obs-lam config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/vx/grid2obs/lam" "wxvx-grid2obs-lam" "VX grid2obs lam"
 
           # Artifact checks
