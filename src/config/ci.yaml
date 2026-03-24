@@ -1,0 +1,5 @@
+zarrs:
+  common:
+    execution:
+      batchargs:
+        cores: 1
