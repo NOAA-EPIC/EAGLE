@@ -35,7 +35,7 @@ class Visualization(AssetsTimeInvariant):
     @task
     def postwxvx(self):
         """
-        Postwxvx config for this run, provisioned to the rundir.
+        Creates postwxvx config and runs eagle-tools.
         """
         yield self.taskname(f"{self.driver_name()} {self._name} config")
         path = self.rundir / f"postwxvx-{self._name}.yaml"
