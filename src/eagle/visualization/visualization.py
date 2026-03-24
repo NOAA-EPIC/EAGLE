@@ -15,14 +15,16 @@ matplotlib.use("Agg")
 
 class Visualization(AssetsTimeInvariant):
     """
-    Plots wxvx output from postwxvx's netcdf files.
+    Plots wxvx output from postwxvx's netCDF files.
     """
 
     # Public tasks
 
     @collection
     def plots(self):
-        """Plots for all variables and stats."""
+        """
+        Plots for all variables and stats.
+        """
         yield self.taskname(f"{self._name} plots")
         yield [
             self._plot(var, stat)
@@ -41,7 +43,7 @@ class Visualization(AssetsTimeInvariant):
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
         get_yaml_config(self.config["eagle_tools"]).dump(path)
-        logfile = self.rundir / "config.log"
+        logfile = self.rundir / "postwxvx.log"
         run(
             "eagle-tools postwxvx postwxvx-%s.yaml >%s 2>&1" % (self._name, logfile),
             check=False,
