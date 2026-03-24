@@ -39,7 +39,7 @@ subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experime
 
 **4. Verify the app.account value in eagle.yaml.**
 
-The default configuration sets ``app.account`` to ``epic``. If you do not have access to the epic account on Ursa, update this value to an account you are authorized to use.
+The default configuration sets ``app.account`` to ``epic``. If you do not have access to the ``epic`` account on Ursa, update this value to an account you are authorized to use.
 
 **5. Create training data**
 

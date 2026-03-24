@@ -132,20 +132,20 @@ else
 	$(call check,$(config),config)
 	$(call check,$(extent),extent)
 	$(call check,$(truth),truth)
-	$(call exec,visualization,visualization,Visualization,$(or $(task),provisioned_rundir) --key-path visualization.$(truth).$(extent))
+	$(call exec,visualization,visualization,Visualization,$(or $(task),provisioned_rundir) --key-path visualization.grid2$(truth).$(extent))
 endif
 
 vis-grid-global:
-	@$(make) vis truth=grid2grid extent=global
+	@$(make) vis truth=grid extent=global
 
 vis-grid-lam:
-	@$(make) vis truth=grid2grid extent=lam
+	@$(make) vis truth=grid extent=lam
 
 vis-obs-global:
-	@$(make) vis truth=grid2obs extent=global
+	@$(make) vis truth=obs extent=global
 
 vis-obs-lam:
-	@$(make) vis truth=grid2obs extent=lam
+	@$(make) vis truth=obs extent=lam
 
 vx:
 	$(call activate,wxvx)

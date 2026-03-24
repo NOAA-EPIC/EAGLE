@@ -100,7 +100,7 @@ visualization
 Configuration for the ``Visualization`` driver.
 
 - This driver executes the ``eagle-tools postwxvx`` component and plots its output.
-- The ``common:`` block provides parameters shared by the ``grid2grid:`` and ``grid2obs:`` blocks, which provide configurations for running ``eagle-tools postwxvx`` to create netCDF files containing verification stattistics, which are then plotted by the driver. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
+- The ``common:`` block provides parameters shared by the ``grid2grid:`` and ``grid2obs:`` blocks, which provide configurations for running ``eagle-tools postwxvx`` to create netCDF files containing verification statistics, which are then plotted by the driver. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
 
 vx
 -------------------------
@@ -138,7 +138,9 @@ component using a particular config block.
 Config Validation
 -------------------------
 
-To validate the EAGLE YAML config::
+To validate the EAGLE YAML config:
+
+.. code-block:: text
 
     make validate config=eagle.yaml
 
