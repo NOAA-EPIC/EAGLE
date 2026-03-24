@@ -81,7 +81,6 @@
       },
       "required": [
         "eagle_tools",
-        "execution",
         "name",
         "rundir",
         "stats",

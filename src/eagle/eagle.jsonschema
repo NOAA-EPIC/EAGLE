@@ -169,6 +169,9 @@
     "val": {
       "type": "object"
     },
+    "visualization": {
+      "type": "object"
+    },
     "vx": {
       "type": "object"
     },
