@@ -747,10 +747,10 @@ zarrs:
   common:
     execution: &zarrs-common-execution
       batchargs:
-        cores: 2
+        cores: 4
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
-        walltime: '00:20:00'
+        walltime: '00:10:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate data
