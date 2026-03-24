@@ -3,3 +3,4 @@ zarrs:
     execution:
       batchargs:
         cores: 1
+      mpicmd: srun --mpi=none

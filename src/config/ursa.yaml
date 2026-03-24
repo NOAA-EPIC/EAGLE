@@ -19,5 +19,3 @@ zarrs:
     execution:
       batchargs:
         --mem-per-cpu: 3G
-        cores: 1
-      mpicmd: srun --mpi=none

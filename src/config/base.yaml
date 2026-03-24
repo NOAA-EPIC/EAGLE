@@ -747,7 +747,7 @@ zarrs:
   common:
     execution: &zarrs-common-execution
       batchargs:
-        cores: 1
+        cores: 2
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:20:00'
@@ -763,6 +763,7 @@ zarrs:
         <<: *zarrs-common-execution
         batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+        mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: gfs
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
@@ -783,6 +784,7 @@ zarrs:
         <<: *zarrs-common-execution
         batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
         executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
+        mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: hrrr
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
