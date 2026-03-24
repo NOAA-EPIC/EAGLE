@@ -47,9 +47,8 @@ inference:
       walltime: '00:10:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate anemoi
+      - conda activate inference
       - set -ex
-      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
 platform: !dict '{{ app.platform }}'
@@ -447,8 +446,7 @@ training:
       walltime: '00:10:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate anemoi
-      - module list
+      - conda activate training
       - set -ex
       - export SLURM_GPUS_PER_NODE=1
       - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
@@ -823,11 +821,10 @@ zarrs:
   common:
     execution: &zarrs-common-execution
       batchargs:
-        cores: 15
-        memory: 128G
+        cores: 2
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
-        walltime: '00:30:00'
+        walltime: '00:20:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate data
@@ -838,7 +835,9 @@ zarrs:
     zarr:
       execution:
         <<: *zarrs-common-execution
+        batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+        mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: gfs
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
@@ -857,7 +856,9 @@ zarrs:
     zarr:
       execution:
         <<: *zarrs-common-execution
+        batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
         executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
+        mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: hrrr
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'

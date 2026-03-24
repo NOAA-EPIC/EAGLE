@@ -14,19 +14,8 @@ app:
   platform: &platform
     account: epic
     scheduler: slurm
-
-
 zarrs:
   common:
     execution:
       batchargs:
-        cores: 1
-      mpicmd: srun --mpi=none
-  gfs:
-    zarr:
-      execution:
-        mpicmd: srun --mpi=none
-  hrrr:
-    zarr:
-      execution:
-        mpicmd: srun --mpi=none
+        --mem-per-cpu: 3G
