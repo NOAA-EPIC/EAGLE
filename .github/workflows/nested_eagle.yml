@@ -1,4 +1,4 @@
-name: Nested Eagle CI Pipeline (uwtools)
+name: Nested EAGLE CI Pipeline (uwtools)
 
 on:
   pull_request_review:
