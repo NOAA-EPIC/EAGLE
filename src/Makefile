@@ -132,7 +132,7 @@ else
 	$(call check,$(config),config)
 	$(call check,$(extent),extent)
 	$(call check,$(truth),truth)
-	$(call exec,visualization,visualization,Visualization,$(or $(task),provisioned_rundir) --key-path visualization.grid2$(truth).$(extent))
+	$(call exec,visualization,visualization,Visualization,$(or $(task),plots) --key-path visualization.grid2$(truth).$(extent))
 endif
 
 vis-grid-global:
@@ -155,20 +155,20 @@ else
 	$(call check,$(config),config)
 	$(call check,$(extent),extent)
 	$(call check,$(truth),truth)
-	$(call exec,wxvx,wxvx,WXVX,$(or $(task),run) --key-path vx.$(truth).$(extent) --batch)
+	$(call exec,wxvx,wxvx,WXVX,$(or $(task),run) --key-path vx.grid2$(truth).$(extent) --batch)
 endif
 
 vx-grid-global:
-	@$(make) vx truth=grid2grid extent=global
+	@$(make) vx truth=grid extent=global
 
 vx-grid-lam:
-	@$(make) vx truth=grid2grid extent=lam
+	@$(make) vx truth=grid extent=lam
 
 vx-obs-global:
-	@$(make) vx truth=grid2obs extent=global
+	@$(make) vx truth=obs extent=global
 
 vx-obs-lam:
-	@$(make) vx truth=grid2obs extent=lam
+	@$(make) vx truth=obs extent=lam
 
 yamllint:
 	$(call activate,base)

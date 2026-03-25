@@ -34,11 +34,17 @@ class Visualization(AssetsTimeInvariant):
     @task
     def postwxvx(self):
         """
-        Creates postwxvx config and runs eagle-tools.
+        Prepares postwxvx config, runs eagle-tools, and produces one netCDF file per
+        output variable.
         """
-        yield self.taskname(f"{self.driver_name()} {self._name} config")
+        yield self.taskname(f"{self.driver_name()} {self._name}")
         path = self.rundir / f"postwxvx-{self._name}.yaml"
-        yield Asset(path, path.is_file)
+        vx_dir = Path(self.config["eagle_tools"]["work_path"])
+        ncfiles = {var: vx_dir / f"{var}.nc" for var in self.config["variables"]}
+        yield {
+            "config": Asset(path, path.is_file),
+            **{var: Asset(ncpath, ncpath.is_file) for var, ncpath in ncfiles.items()},
+        }
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
         get_yaml_config(self.config["eagle_tools"]).dump(path)
@@ -50,17 +56,6 @@ class Visualization(AssetsTimeInvariant):
             shell=True,
         )
 
-    @collection
-    def provisioned_rundir(self):
-        """
-        Run directory provisioned with all required content.
-        """
-        yield self.taskname("provisioned run directory")
-        yield [
-            self.plots(),
-            self.postwxvx(),
-        ]
-
     # Private tasks
 
     @task
@@ -70,9 +65,7 @@ class Visualization(AssetsTimeInvariant):
         yield Asset(path, path.is_file)
         req = self.postwxvx()
         yield req
-        self.rundir.mkdir(parents=True, exist_ok=True)
-        nc = Path(self.config["eagle_tools"]["work_path"]) / f"{var}.nc"
-        ds = xr.open_dataset(nc)
+        ds = xr.open_dataset(req.ref[var])
         var_stat = cast("xr.DataArray", ds[stat])
         var_stat.plot()  # type: ignore[call-arg]
         plt.savefig(path)
