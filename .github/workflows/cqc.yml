@@ -16,12 +16,14 @@ jobs:
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
-      - name: Cache Conda
-        uses: actions/cache@v5
+      - name: Restore Cache
+        id: restore
+        uses: actions/cache/restore@v5
         with:
+          key: ${{ runner.os }}-${{ hashFiles('src/setup') }}
           path: src/conda
-          key: ${{ runner.os }}-conda-${{ hashFiles('src/setup') }}
       - name: Build Runtime Environment
+        id: build
         run: |
           time make -C src devenv cudascript=dummy
           . src/conda/etc/profile.d/conda.sh
@@ -43,3 +45,10 @@ jobs:
         run: make -C src typecheck
       - name: Run YAML Linter
         run: make -C src yamllint
+      - name: Save Cache
+        if: always() && steps.restore.outputs.cache-hit != 'true'
+        needs: build
+        uses: actions/cache/restore@v5
+        with:
+          key: ${{ steps.restore.outputs.cache-primary-key }}
+          path: src/conda
