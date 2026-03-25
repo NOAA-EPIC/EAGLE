@@ -80,7 +80,7 @@ jobs:
           cd "${GITHUB_WORKSPACE}/src"
 
           # Build the local dev env instead of linking to a shared runner install.
-          make devenv cudascript=ursa INSTALLDIR="${INSTALLDIR}"
+          time make devenv cudascript=ursa INSTALLDIR="${INSTALLDIR}"
 
           # Sanity checks
           source conda/etc/profile.d/conda.sh
