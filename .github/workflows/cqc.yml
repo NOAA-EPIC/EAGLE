@@ -3,9 +3,9 @@ on:
   pull_request:
     branches:
       - '**'
-  push:
-    branches:
-      - '**'
+    types:
+      - opened
+      - synchronize
   workflow_dispatch:
     branches:
       - '**'
@@ -20,14 +20,14 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: src/conda
-          key: ${{ runner.os }}-conda-${{ github.ref_name }}
+          key: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
       - name: Build Runtime Environment
         run: time make -C src devenv cudascript=dummy
       - name: Cache Conda
         uses: actions/cache/save@v5
         with:
           path: src/conda
-          key: ${{ runner.os }}-conda-${{ github.ref_name }}
+          key: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
       - name: Check Formatting
         run: |
           make -C src format
