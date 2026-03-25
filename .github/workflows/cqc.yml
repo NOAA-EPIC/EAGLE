@@ -11,8 +11,6 @@ on:
       - '**'
 jobs:
   code-quality-checks:
-    env:
-      CONDA_CACHE_KEY: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
     name: Code Quality Checks
     runs-on: ubuntu-latest
     steps:
@@ -22,14 +20,14 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: src/conda
-          key: $CONDA_CACHE_KEY
+          key: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
       - name: Build Runtime Environment
         run: time make -C src devenv cudascript=dummy
       - name: Cache Conda
         uses: actions/cache/save@v5
         with:
           path: src/conda
-          key: $CONDA_CACHE_KEY
+          key: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
       - name: Check Formatting
         run: |
           make -C src format
@@ -39,3 +37,11 @@ jobs:
             exit 1
           fi
           echo NO FORMATTING ISSUES DETECTED
+      - name: Run Python Linter
+        run: make -C src lint
+      - name: Run Shell Checker
+        run: make -C src shellcheck
+      - name: Run Python Typechecker
+        run: make -C src typecheck
+      - name: Run YAML Linter
+        run: make -C src yamllint
