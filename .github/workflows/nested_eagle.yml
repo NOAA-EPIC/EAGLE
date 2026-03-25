@@ -25,12 +25,19 @@ jobs:
     timeout-minutes: 1440
 
     steps:
+      - name: Perform cleanup and preserve conda directory 
+        run: |
+          set -euo pipefail
+          cd ${GITHUB_WORKSPACE}
+          git clean -ffdx -e conda
+        
       - name: Checkout PR head
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
+          clean: false 
 
       - name: Gate on nested_eagle/ or src/ changes
         id: gate
