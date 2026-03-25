@@ -312,7 +312,7 @@ install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
-environments=(base data inference prewxvx training wxvx)
+environments=(base) # data inference prewxvx training wxvx)
 for name in ${environments[@]}; do
   conda_create_$name
 done
