@@ -1,0 +1,92 @@
+"dev": {
+  "conda": [
+    "go-shfmt=3.13.*",
+    "jq=1.8.*",
+    "mypy=1.19.*",
+    "ruff=0.14.*",
+    "shellcheck=0.11.*",
+    "yamllint=1.38.*"
+  ]
+},
+"env": {
+  "base": {
+    "conda": [
+      "jq=1.8.*",
+      "uwtools=2.13.*"
+    ],
+    "pip": [
+    ]
+  },
+  "data": {
+    "conda": [
+      "impi_rt=2021.13.*",
+      "mpi4py=4.1.*",
+      "numpy=1.26.4",
+      "pandas=2.3.3",
+      "setuptools=81.0.*",
+      "types-pyyaml",
+      "ufs2arco=0.19.*",
+      "uwtools=2.13.*"
+    ],
+    "pip": [
+      "anemoi-datasets==0.5.*",
+      "anemoi-graphs==0.9.*"
+    ]
+  },
+  "inference": {
+    "conda": [
+      "flash-attn=2.8.*",
+      "numpy=2.2.6.*",
+      "python=3.12",
+      "uwtools=2.13.*"
+    ],
+    "pip": [
+      "anemoi-inference==0.10.*",
+      "anemoi-models==0.13.*",
+      "eagle-tools"
+    ]
+  },
+  "prewxvx": {
+    "conda": [
+      "numpy=2.2.6.*",
+      "pandas=2.3.3.*",
+      "python=3.13",
+      "uwtools=2.13.*"
+      "xesmf=0.8.*",
+    ],
+    "pip": [
+      "eagle-tools"
+    ]
+  },
+  "training": {
+    "conda": [
+      "flash-attn=2.8.*",
+      "numpy=1.26.4.*",
+      "python=3.12",
+      "setuptools=81.0.*",
+      "uwtools=2.13.*"
+    ],
+    "pip": [
+      "anemoi-models==0.13.*",
+      "anemoi-training==0.10.*"
+    ]
+  },
+  "visualization": {
+    "conda": [
+      "python=3.13",
+      "uwtools=2.13.*",
+      "xarray=2026.2.0"
+    ],
+    "pip": [
+      "eagle-tools"
+    ]
+  },
+  "wxvx": {
+    "conda": [
+      "uwtools=2.13.*",
+      "wxvx=0.7.*"
+    ],
+    "pip": [
+    ]
+  }
+}
