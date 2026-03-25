@@ -29,7 +29,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: src/conda
-          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+          key: ${{ runner.os }}-pr-${{ github.event.pull_request.number }}
       - name: Check Formatting
         run: |
           make -C src format
@@ -38,3 +38,4 @@ jobs:
             echo UNFORMATTED CODE DETECTED
             exit 1
           fi
+          echo NO FORMATTING ISSUES DETECTED
