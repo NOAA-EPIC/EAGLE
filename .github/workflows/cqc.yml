@@ -23,17 +23,16 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('src/setup') }}
           path: src/conda
       - name: Build Runtime Environment
-        id: build
         run: |
           set -euo pipefail
           time make -C src devenv cudascript=dummy
           . src/conda/etc/profile.d/conda.sh
           conda clean --all --yes
-          touch built
+          touch ok
       - name: Check Formatting
         run: |
           make -C src format
-          if [[ -n "$(git status --porcelain)" ]]; then
+          if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
             git --no-pager diff
             echo UNFORMATTED CODE DETECTED
             exit 1
@@ -48,7 +47,7 @@ jobs:
       - name: Run YAML Linter
         run: make -C src yamllint
       - name: Save Cache
-        if: always() && steps.restore.outputs.cache-hit != 'true' && hashFiles('built') != ''
+        if: always() && steps.restore.outputs.cache-hit != 'true' && hashFiles('ok') != ''
         uses: actions/cache/save@v5
         with:
           key: ${{ steps.restore.outputs.cache-primary-key }}
