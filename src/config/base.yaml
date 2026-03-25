@@ -550,8 +550,82 @@ val:
     forecast:
       # Diagnostic
       - accum_tp
+  visualization:
+    rundir: '{{ app.rundir }}/visualization'
   vx:
     rundir: '{{ app.rundir }}/vx'
+visualization:
+  common:
+    stats:
+      - RMSE
+    variables: # These names are from the postwxvx output.
+      - 2m_temperature
+      - 10m_zonal_wind
+      - 10m_meridional_wind
+      - 500hpa_geopotential_height
+      - 850hpa_temperature
+      - 250hpa_zonal_wind
+      - 250hpa_meridional_wind
+      - surface_pressure
+    postwxvx: &postwxvx-common
+      start_date: !datetime '{{ app.time.inference_start }}'
+      end_date: !datetime '{{ app.time.inference_stop }}'
+      freq: '{{ app.time.freq }}'
+      leadtimes:
+        start: 0
+        end: 24
+        step: !int '{{ val.step }}'
+      variable_prefixes: # These names are from the wxvx output.
+        - 2t_heightAboveGround_0002
+        - u_10m_heightAboveGround_0010
+        - v_10m_heightAboveGround_0010
+        - gh_isobaricInhPa_0500
+        - t_isobaricInhPa_0850
+        - u_isobaricInhPa_0250
+        - v_isobaricInhPa_0250
+        - sp_surface
+  grid2grid:
+    global:
+      visualization:
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: grid_stat_nested_global
+          work_path: '{{ val.vx.rundir }}/grid2grid/global'
+        name: grid-global
+        rundir: '{{ val.visualization.rundir }}/grid2grid/global'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
+    lam:
+      visualization:
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: grid_stat_nested_lam
+          work_path: '{{ val.vx.rundir }}/grid2grid/lam'
+        name: grid-lam
+        rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
+  grid2obs:
+    global:
+      visualization:
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: point_stat_nested_global
+          work_path: '{{ val.vx.rundir }}/grid2obs/global/'
+        name: obs-global
+        rundir: '{{ val.visualization.rundir }}/grid2obs/global'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
+    lam:
+      visualization:
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: point_stat_nested_lam
+          work_path: '{{ val.vx.rundir }}/grid2obs/lam/'
+        name: obs-lam
+        rundir: '{{ val.visualization.rundir }}/grid2obs/lam'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
 vx:
   common:
     execution:

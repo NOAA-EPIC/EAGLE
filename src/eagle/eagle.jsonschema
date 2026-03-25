@@ -166,6 +166,9 @@
     "val": {
       "type": "object"
     },
+    "visualization": {
+      "type": "object"
+    },
     "vx": {
       "type": "object"
     },
@@ -182,6 +185,7 @@
     "training",
     "ufs2arco",
     "val",
+    "visualization",
     "vx",
     "zarrs"
   ],

@@ -32,10 +32,11 @@ Run::
 The ``config`` target operates on ``.yaml`` files in the ``config/`` directory, so this command composes ``config/base.yaml`` 
 and ``config/ursa.yaml`` and redirects the composed config into ``eagle.yaml``.
 
-**3. Set the app.base value in eagle.yaml to the absolute path to the current (src/) directory.**
+**3. Edit eagle.yaml**
 
-The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` 
-subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
+* Set the app.base value to the absolute path to the current (``src/``) directory. The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
+
+* Verify the ``app.account`` value. The default configuration sets ``app.account`` to ``epic``. If you do not have access to the ``epic`` account on Ursa, update this value to an account you are authorized to use.
 
 **4. Create training data**
 
@@ -92,3 +93,16 @@ prepbufr observations (``*-obs-*``) as truth. Each submits a batch job, so the f
 succession to get all the batch jobs running in parallel. When each batch job completes, MET ``.stat`` files and ``.png`` 
 plot files can be found under the ``stats/`` and ``plots/`` subdirectories of ``run/<expname>vx/grid2{grid,obs}/{global,lam}/run/``. 
 The files ``run/<expname>vx/*.log`` contain the logs from each verification run.
+
+**9. Make additional visualizations**
+
+Run:
+
+.. code-block:: text
+    
+    make vis-grid-global config=eagle.yaml
+    make vis-grid-lam config=eagle.yaml
+    make vis-obs-global config=eagle.yaml
+    make vis-obs-lam config=eagle.yaml
+
+These steps will first call ``eagle-tools``'s ``postwxvx`` tool which will create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of plots in the ``run/<expname>visualization/grid2{grid,obs}/{global,lam}/`` directory. 

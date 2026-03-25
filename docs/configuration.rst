@@ -94,14 +94,22 @@ This block provides both static and derived values that are referenced by other 
 place to define values that need to be shared and kept in-sync across pipeline steps, but less likely to be manually 
 modified by users like values in the ``app:`` block.
 
+visualization
+-------------------------
+
+Configuration for the ``Visualization`` driver.
+
+- This driver executes the ``eagle-tools postwxvx`` component and plots its output.
+- The ``common:`` block provides parameters shared by the ``grid2grid:`` and ``grid2obs:`` blocks, which provide configurations for running ``eagle-tools postwxvx`` to create netCDF files containing verification statistics, which are then plotted by the driver. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
+
 vx
 -------------------------
 
-Configuration for the `VX` driver.
+Configuration for the ``WXVX`` driver.
 
 - This driver executes the `wxvx <https://github.com/NOAA-GSL/wxvx>`_ component.
 - The ``grid2grid:`` block provides configuration for running ``wxvx`` with MET's `grid_stat <https://metplus.readthedocs.io/projects/met/en/latest/Users_Guide/grid-stat.html>`_ tool to verify against gridded analyses. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
-- The ``grid2obs:``` block provides configuration for running ``wxvx`` with MET's `point_stat <https://metplus.readthedocs.io/projects/met/en/develop/Users_Guide/point-stat.html>`_ tool to verify against point observations. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
+- The ``grid2obs:`` block provides configuration for running ``wxvx`` with MET's `point_stat <https://metplus.readthedocs.io/projects/met/en/develop/Users_Guide/point-stat.html>`_ tool to verify against point observations. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
 
 zarrs
 -------------------------
@@ -131,6 +139,8 @@ Config Validation
 -------------------------
 
 To validate the EAGLE YAML config:
+
+.. code-block:: text
 
     make validate config=eagle.yaml
 

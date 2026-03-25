@@ -1,8 +1,8 @@
 BASHSRCS = format setup
-ENVS     = data inference prewxvx training wxvx
+ENVS     = data inference prewxvx training visualization wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
-STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck validate yamllint
 
 INSTALLDIR ?= conda
@@ -125,6 +125,29 @@ validate:
 	$(call activate,base)
 	@(set -x && uw config validate --input-file $(config) --schema-file eagle/eagle.jsonschema)
 
+vis:
+	$(call activate,visualization)
+ifeq ($(task),?)
+	$(call tasklist,visualization,visualization,Visualization)
+else
+	$(call check,$(config),config)
+	$(call check,$(extent),extent)
+	$(call check,$(truth),truth)
+	$(call exec,visualization,visualization,Visualization,$(or $(task),plots) --key-path visualization.grid2$(truth).$(extent))
+endif
+
+vis-grid-global:
+	@$(make) vis truth=grid extent=global
+
+vis-grid-lam:
+	@$(make) vis truth=grid extent=lam
+
+vis-obs-global:
+	@$(make) vis truth=obs extent=global
+
+vis-obs-lam:
+	@$(make) vis truth=obs extent=lam
+
 vx:
 	$(call activate,wxvx)
 ifeq ($(task),?)
@@ -133,20 +156,20 @@ else
 	$(call check,$(config),config)
 	$(call check,$(extent),extent)
 	$(call check,$(truth),truth)
-	$(call exec,wxvx,wxvx,WXVX,$(or $(task),run) --key-path vx.$(truth).$(extent) --batch)
+	$(call exec,wxvx,wxvx,WXVX,$(or $(task),run) --key-path vx.grid2$(truth).$(extent) --batch)
 endif
 
 vx-grid-global:
-	@$(make) vx truth=grid2grid extent=global
+	@$(make) vx truth=grid extent=global
 
 vx-grid-lam:
-	@$(make) vx truth=grid2grid extent=lam
+	@$(make) vx truth=grid extent=lam
 
 vx-obs-global:
-	@$(make) vx truth=grid2obs extent=global
+	@$(make) vx truth=obs extent=global
 
 vx-obs-lam:
-	@$(make) vx truth=grid2obs extent=lam
+	@$(make) vx truth=obs extent=lam
 
 yamllint:
 	$(call activate,base)

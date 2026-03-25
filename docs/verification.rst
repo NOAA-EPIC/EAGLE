@@ -17,7 +17,7 @@ It has already been used to verify global and regional AI forecasts and is equal
 
 See the `wxvx repository <https://github.com/maddenp-cu/wxvx>`_ for further information.
 
-**wxvx** was created by Paul Madden at NOAA/CIRES.
+**wxvx** was created by Paul Madden and Emily Carpenter at CIRES/NOAA GSL.
 
 Helpful Quick Tips for Using wxvx
 ----------------------------------------------------
