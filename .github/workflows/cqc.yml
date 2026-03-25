@@ -16,18 +16,16 @@ jobs:
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
-      - name: Restore Conda
-        uses: actions/cache/restore@v5
-        with:
-          path: src/conda
-          key: ${{ runner.os }}-conda-${{ hashFiles('src/packages.json') }}
-      - name: Build Runtime Environment
-        run: time make -C src devenv cudascript=dummy
       - name: Cache Conda
-        uses: actions/cache/save@v5
+        uses: actions/cache@v5
         with:
           path: src/conda
-          key: ${{ runner.os }}-conda-${{ hashFiles('src/packages.json') }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('src/setup') }}
+      - name: Build Runtime Environment
+        run: |
+          time make -C src devenv cudascript=dummy
+          . src/conda/etc/profile.d/conda.sh
+          conda clean --all --yes
       - name: Check Formatting
         run: |
           make -C src format
