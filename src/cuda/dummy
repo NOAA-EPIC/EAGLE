@@ -3,7 +3,6 @@ path=$tmpdir/nvcc
 cat <<EOF >$path
 #!/usr/bin/env bash
 echo Cuda compilation tools, release 12.8, V12.8.93
-echo $tmpdir >~/tmpdir # PM FIXME
 rm -rf $tmpdir
 EOF
 chmod +x $path
