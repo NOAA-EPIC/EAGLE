@@ -1,3 +1,5 @@
+.. _TrainGraphBasedModel:
+
 =============================
 Train a Graph-Based Model
 =============================
@@ -46,6 +48,8 @@ which then provides the training process with information on the training data s
 Throughout this repository, we have consolidated a lot of very useful information within the main config.yaml. 
 This makes it so the main config.yaml contains most model configurations that are worth noting, and additionally makes those 
 configurations easy to change.
+
+.. _GeneratingConfigsYourself:
 
 Generating Configs Yourself
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

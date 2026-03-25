@@ -17,48 +17,111 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "eagle"
-copyright = "2025, eagle contributors "
+project = "EAGLE"
+copyright = "2025, NOAA EPIC"
 author = "eagle contributors"
+
+version = "main"
+release = "Main Branch Documentation"
+
+numfig = True
 
 
 # -- General configuration ---------------------------------------------------
-# -- General configuration
 
 extensions = [
-    "sphinx.ext.duration",
-    "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
 ]
 
-intersphinx_mapping = {
-    "rtd": ("https://docs.readthedocs.io/en/stable/", None),
-    "python": ("https://docs.python.org/3/", None),
-    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
-}
-intersphinx_disabled_domains = ["std"]
+bibtex_bibfiles = []
 
 templates_path = ["_templates"]
 
-# -- Options for EPUB output
-epub_show_urls = "footnote"
+source_suffix = ".rst"
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
+master_doc = "index"
+
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# Documentation-wide substitutions
+rst_prolog = """
+.. |branch| replace:: ``main``
+"""
+
+
+# -- Options for intersphinx extension ---------------------------------------
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "uwtools": ("https://uwtools.readthedocs.io/en/stable/", None),
+    "anemoi-inference": ("https://anemoi.readthedocs.io/projects/inference/en/latest/", None),
+    "anemoi-training": ("https://anemoi.readthedocs.io/projects/training/en/latest/", None),
+    "ufs2arco": ("https://ufs2arco.readthedocs.io/en/latest/", None),
+    "met": ("https://metplus.readthedocs.io/projects/met/en/latest/", None),
+}
+
+
+# -- Options for extlinks extension ------------------------------------------
+
+extlinks_detect_hardcoded_links = True
+extlinks = {
+    "eagle-repo": ("https://github.com/NOAA-EPIC/EAGLE/%s", "%s"),
+    "uwtools": ("https://uwtools.readthedocs.io/en/stable/%s", "%s"),
+    "anemoi-inference": ("https://anemoi.readthedocs.io/projects/inference/en/latest/%s", "%s"),
+    "anemoi-training": ("https://anemoi.readthedocs.io/projects/training/en/latest/%s", "%s"),
+    "ufs2arco": ("https://ufs2arco.readthedocs.io/en/latest/%s", "%s"),
+    "met": ("https://metplus.readthedocs.io/projects/met/en/latest/%s", "%s"),
+}
+
+
+# -- Linkcheck options -------------------------------------------------------
+
+# Retry failed links before reporting broken (handles transient errors)
+linkcheck_retries = 3
+
+# Ignore links that return 403 or are otherwise known to be flaky
+linkcheck_ignore = []
+
+
 # -- Options for HTML output -------------------------------------------------
+
+html_theme = "sphinx_rtd_theme"
+
+html_logo = "https://github.com/ufs-community/ufs/wiki/images/ufs-epic-logo.png"
+
+html_theme_options = {
+    "navigation_depth": 8,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# commented out for right now as we do not have anything static (yet)
 # html_static_path = ["_static"]
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = "sphinx_rtd_theme"
+
+# -- Options for EPUB output -------------------------------------------------
+
+epub_show_urls = "footnote"
+
+
+# -- Options for napoleon extension ------------------------------------------
+
+napoleon_numpy_docstring = False
+napoleon_google_docstring = True
+
+
+# -- Options for autodoc extension -------------------------------------------
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+}
+
+add_module_names = False

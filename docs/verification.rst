@@ -1,3 +1,5 @@
+.. _VerifyModelPerformance:
+
 =========================
 Verify Model Performance
 =========================

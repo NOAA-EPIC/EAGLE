@@ -1,3 +1,5 @@
+.. _CreateTrainingData:
+
 =========================
 Create Training Data
 =========================

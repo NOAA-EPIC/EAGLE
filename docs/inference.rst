@@ -1,3 +1,5 @@
+.. _GenerateForecast:
+
 =========================
 Generate a Forecast
 =========================
