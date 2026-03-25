@@ -1,6 +1,4 @@
 name: Code Quality Checks
-env:
-  CONDA_CACHE_KEY: ${{ runner.os }}-conda-${{ github.ref_name }}
 on:
   pull_request:
     branches:
@@ -18,20 +16,18 @@ jobs:
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
-#         with:
-#           clean: false
       - name: Restore Conda
         uses: actions/cache/restore@v5
         with:
           path: src/conda
-          key: $CONDA_CACHE_KEY
+          key: ${{ runner.os }}-conda-${{ github.ref_name }}
       - name: Build Runtime Environment
         run: time make -C src devenv cudascript=dummy
       - name: Cache Conda
         uses: actions/cache/save@v5
         with:
           path: src/conda
-          key: $CONDA_CACHE_KEY
+          key: ${{ runner.os }}-conda-${{ github.ref_name }}
       - name: Check Formatting
         run: |
           make -C src format
