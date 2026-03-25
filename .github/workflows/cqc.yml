@@ -18,8 +18,18 @@ jobs:
         uses: actions/checkout@v3
         with:
           clean: false
+#       - name: Restore Caches Conda Installation
+#         uses: actions/cache@v4
+#         with:
+#           path: src/conda
+#           key: ${{ runner.os }}-conda-${{ github.event.pull_request.head.sha }}
       - name: Build Runtime Environment
         run: time make -C src devenv cudascript=dummy
+      - name: Cache Conda Installation
+        uses: actions/cache/save@v5
+        with:
+          path: src/conda
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
       - name: Check Formatting
         run: |
           make -C src format
