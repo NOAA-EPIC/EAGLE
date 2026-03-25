@@ -25,9 +25,11 @@ jobs:
       - name: Build Runtime Environment
         id: build
         run: |
+          set -euo pipefail
           time make -C src devenv cudascript=dummy
           . src/conda/etc/profile.d/conda.sh
           conda clean --all --yes
+          touch built
       - name: Check Formatting
         run: |
           make -C src format
@@ -46,8 +48,8 @@ jobs:
       - name: Run YAML Linter
         run: make -C src yamllint
       - name: Save Cache
-        if: always() && steps.restore.outputs.cache-hit != 'true'
-        uses: actions/cache/restore@v5
+        if: always() && steps.restore.outputs.cache-hit != 'true' && hashFiles('built') != ''
+        uses: actions/cache/save@v5
         with:
           key: ${{ steps.restore.outputs.cache-primary-key }}
           path: src/conda
