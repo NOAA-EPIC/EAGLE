@@ -47,7 +47,6 @@ jobs:
         run: make -C src yamllint
       - name: Save Cache
         if: always() && steps.restore.outputs.cache-hit != 'true'
-        needs: build
         uses: actions/cache/restore@v5
         with:
           key: ${{ steps.restore.outputs.cache-primary-key }}
