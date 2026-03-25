@@ -14,6 +14,17 @@ jobs:
     name: Code Quality Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Check Out Code
+        uses: actions/checkout@v3
+        with:
+          clean: false
       - name: Build Runtime Environment
         run: time make -C src devenv cudascript=dummy
+      - name: Check Formatting
+        run: |
+          make -C src format
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git --no-pager diff
+            echo UNFORMATTED CODE DETECTED
+            exit 1
+          fi
