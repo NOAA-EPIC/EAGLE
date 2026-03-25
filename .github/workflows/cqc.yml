@@ -20,14 +20,14 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: src/conda
-          key: ${{ runner.os }}-conda-${{ hashFiles('src/setup') }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('src/packages.json') }}
       - name: Build Runtime Environment
         run: time make -C src devenv cudascript=dummy
       - name: Cache Conda
         uses: actions/cache/save@v5
         with:
           path: src/conda
-          key: ${{ runner.os }}-conda-${{ hashFiles('src/setup') }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('src/packages.json') }}
       - name: Check Formatting
         run: |
           make -C src format
