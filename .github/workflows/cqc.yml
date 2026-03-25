@@ -16,4 +16,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build Runtime Environment
-        run: /bin/true
+        run: time make -C src devenv cudascript=dummy
