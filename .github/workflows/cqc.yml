@@ -20,14 +20,14 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: src/conda
-          key: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('src/setup') }}
       - name: Build Runtime Environment
         run: time make -C src devenv cudascript=dummy
       - name: Cache Conda
         uses: actions/cache/save@v5
         with:
           path: src/conda
-          key: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('src/setup') }}
       - name: Check Formatting
         run: |
           make -C src format
@@ -36,7 +36,7 @@ jobs:
             echo UNFORMATTED CODE DETECTED
             exit 1
           fi
-          echo NO FORMATTING ISSUES DETECTED
+          echo ALL GOOD
       - name: Run Python Linter
         run: make -C src lint
       - name: Run Shell Checker
