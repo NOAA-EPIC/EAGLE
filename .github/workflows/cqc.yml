@@ -1,6 +1,4 @@
 name: Code Quality Checks
-env:
-  CONDA_CACHE_KEY: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
 on:
   pull_request:
     branches:
@@ -13,6 +11,8 @@ on:
       - '**'
 jobs:
   code-quality-checks:
+    env:
+      CONDA_CACHE_KEY: ${{ runner.os }}-conda-${{ github.event.pull_request.number }}
     name: Code Quality Checks
     runs-on: ubuntu-latest
     steps:
