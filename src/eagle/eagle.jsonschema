@@ -185,6 +185,7 @@
     "training",
     "ufs2arco",
     "val",
+    "visualization",
     "vx",
     "zarrs"
   ],
