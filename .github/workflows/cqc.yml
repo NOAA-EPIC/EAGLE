@@ -16,20 +16,11 @@ jobs:
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
-      - name: Restore Cache
-        id: restore
-        uses: actions/cache/restore@v5
-        with:
-          key: ${{ runner.os }}-${{ hashFiles('src/setup') }}
-          path: src/conda
       - name: Build Runtime Environment
         run: |
           set -euo pipefail
           time make -C src devenv cudascript=dummy
           . src/conda/etc/profile.d/conda.sh
-          conda clean --all --yes
-          rm -rf src/conda/cache
-          touch ok
       - name: Check Formatting
         run: |
           make -C src format
@@ -41,15 +32,9 @@ jobs:
           echo ALL GOOD
       - name: Run Python Linter
         run: make -C src lint
-      - name: Run Shell Checker
-        run: make -C src shellcheck
       - name: Run Python Typechecker
         run: make -C src typecheck
+      - name: Run Shell Checker
+        run: make -C src shellcheck
       - name: Run YAML Linter
         run: make -C src yamllint
-      - name: Save Cache
-        if: always() && steps.restore.outputs.cache-hit != 'true' && hashFiles('ok') != ''
-        uses: actions/cache/save@v5
-        with:
-          key: ${{ steps.restore.outputs.cache-primary-key }}
-          path: src/conda
