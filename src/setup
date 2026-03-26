@@ -181,6 +181,8 @@ conda_create_visualization() {
   local args name pkgs
   name=visualization
   pkgs=(
+    numpy=2.4.3.*
+    pandas=3.0.1.*
     python=3.13
     xarray=2026.2.0
   )
