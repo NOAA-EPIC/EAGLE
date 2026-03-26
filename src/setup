@@ -214,8 +214,12 @@ conda_env_exists() {
   name=$1
   (
     conda_activate base
-    conda env list --json | jq -r .envs_details[].name | grep -q "^${name}$"
-    test $? -eq 0 && msg Found existing conda environment: $name
+    d=$CONDA_PREFIX/envs
+    mkdir -p $d
+    find $d -maxdepth 1 -mindepth 1 -type d | while read x; do
+      test $(basename $x) == $name && msg Found existing conda environment: $name && exit 0
+    done
+    exit 1
   )
 }
 
@@ -331,6 +335,6 @@ XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
 environments=(base data inference prewxvx training visualization wxvx)
 for name in ${environments[@]}; do
-  conda_create_$name
+  time conda_create_$name
 done
 msg Done
