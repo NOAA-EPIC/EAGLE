@@ -1,10 +1,15 @@
+.. _RuntimeEnvironment:
+
 =========================
 Runtime Environment
 =========================
 
+Build the Environment
+------------------------------------------------------------------------------
+
 To build the EAGLE runtime virtual environments:
 
-.. code-block:: text
+.. code-block:: bash
 
     make env cudascript=<name-or-path> # alternatively: ./setup cudascript=<name-or-path>
 
@@ -16,9 +21,12 @@ to be executed on the current system to make the CUDA ``nvcc`` program available
 to determine the CUDA release number, used to select a matching ``flash-attn`` package. For systems needing no special 
 setup to make ``nvcc`` available, ``cudascript=none`` may be specified.
 
+Available Make Targets
+------------------------------------------------------------------------------
+
 A variety of ``make`` targets are available to execute pipeline steps.
 
-Run ``make`` with no argument to list available targets.
+Run ``make`` with no arguments to list available targets.
 
 .. list-table:: Available make targets
    :widths: 20 20 20 20
@@ -61,19 +69,19 @@ Run ``make`` with no argument to list available targets.
      - inference
      - prewxvx
    * - vis-grid-global
-     - Visualize global vx results against grided analysis
+     - Visualize global VX results against gridded analysis
      - vx-grid-global
      - visualization
    * - vis-grid-lam
-     - Visualize LAM vx results against grided analysis
+     - Visualize LAM VX results against gridded analysis
      - vx-grid-lam
      - visualization
    * - vis-obs-global
-     - Visualize global vx results against obs
+     - Visualize global VX results against obs
      - vx-obs-global
      - visualization
    * - vis-obs-lam
-     - Visualize LAM vx results against obs
+     - Visualize LAM VX results against obs
      - vx-obs-lam
      - visualization
    * - vx-grid-global
@@ -89,6 +97,6 @@ Run ``make`` with no argument to list available targets.
      - prewxvx-global
      - wxvx
    * - vx-obs-lam
-     - Verify lam against obs
+     - Verify LAM against obs
      - prewxvx-lam
      - wxvx
