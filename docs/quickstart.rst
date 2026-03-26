@@ -46,6 +46,8 @@ Building and Running EAGLE
    The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` 
    subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
 
+   Verify the ``app.account`` value. The default configuration sets ``app.account`` to ``epic``. If you do not have access to the ``epic`` account on Ursa, update this value to an account you are authorized to use.
+
 #. Create training data
 
    .. code-block:: bash
@@ -70,7 +72,7 @@ Building and Running EAGLE
 
       make inference config=eagle.yaml
 
-   This step performs inference, producing a forecast. It submits a batch job; do not proceed until the batch job 
+   This step performs inference, producing a forecast. It submits a batch job. Do not proceed until the batch job 
    completes successfully (see the file ``run/<expname>inference/runscript.inference.out``.)
 
 #. Postprocess model output
@@ -83,9 +85,9 @@ Building and Running EAGLE
    These steps prepare forecast output from the previous step for verification by ``wxvx``. They run locally, so it is 
    safe to proceed when the commands return. See the files ``run/<expname>vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
 
-#. Model verification
-
 .. _QuickstartVerification:
+
+#. Model verification
 
    .. code-block:: bash
       
@@ -99,3 +101,14 @@ Building and Running EAGLE
    succession to get all the batch jobs running in parallel. When each batch job completes, MET ``.stat`` files and ``.png`` 
    plot files can be found under the ``stats/`` and ``plots/`` subdirectories of ``run/<expname>vx/grid2{grid,obs}/{global,lam}/run/``. 
    The files ``run/<expname>vx/*.log`` contain the logs from each verification run.
+
+#. Make additional visualizations
+
+   .. code-block:: bash
+
+      make vis-grid-global config=eagle.yaml
+      make vis-grid-lam config=eagle.yaml
+      make vis-obs-global config=eagle.yaml
+      make vis-obs-lam config=eagle.yaml
+
+   These steps will first call ``eagle-tools``'s ``postwxvx`` tool which will create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of plots in the ``run/<expname>visualization/grid2{grid,obs}/{global,lam}/`` directory.

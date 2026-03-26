@@ -47,12 +47,11 @@ inference:
       walltime: '00:10:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate anemoi
+      - conda activate inference
       - set -ex
-      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
-platform: *platform
+platform: !dict '{{ app.platform }}'
 prewxvx:
   common:
     execution: &prewxvx-common-execution
@@ -93,7 +92,7 @@ prewxvx:
             method: 'conservative_normed'
           target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}'
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
-    platform: *platform
+    platform: !dict '{{ app.platform }}'
   lam:
     prewxvx:
       execution:
@@ -105,7 +104,7 @@ prewxvx:
         output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
         model_type: nested-lam
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
-    platform: *platform
+    platform: !dict '{{ app.platform }}'
 training:
   anemoi:
     defaults:
@@ -230,7 +229,14 @@ training:
           save_dir: ${system.output.logs.mlflow}
         wandb:
           enabled: false
-          entity: null
+          entity: null+
+          _target_: pytorch_lightning.loggers.wandb.WandbLogger
+          offline: False
+          log_model: False
+          project: placeholder
+          gradients: False
+          parameters: False
+          interval: ${diagnostics.log.interval}
       plot:
         datasets_to_plot: ["data"]
         asynchronous: false
@@ -302,7 +308,7 @@ training:
         data:
           node_builder:
             _target_: anemoi.graphs.nodes.AnemoiDatasetNodes
-            dataset: "PLACEHOLDER_DATASET_WILL_BE_OVERRIDDEN"
+            dataset: ${dataloader.training.datasets.data.dataset_config}
           attributes: ${graph.attributes.nodes}
         hidden:
           node_builder:
@@ -311,24 +317,24 @@ training:
             lat_key: lat
             lon_key: lon
       edges:
-      # Encoder
-      - source_name: ${graph.data}
-        target_name: ${graph.hidden}
-        edge_builders:
-        - _target_: anemoi.graphs.edges.KNNEdges
-          num_nearest_neighbours: 12
-          source_mask_attr_name: null
-          target_mask_attr_name: null
-        attributes: ${graph.attributes.edges}
-      # Decoder
-      - source_name: ${graph.hidden}
-        target_name: ${graph.data}
-        edge_builders:
-        - _target_: anemoi.graphs.edges.KNNEdges
-          num_nearest_neighbours: 3
-          source_mask_attr_name: null
-          target_mask_attr_name: null
-        attributes: ${graph.attributes.edges}
+        # Encoder
+        - source_name: data
+          target_name: hidden
+          edge_builders:
+            - _target_: anemoi.graphs.edges.KNNEdges
+              num_nearest_neighbours: 12
+              source_mask_attr_name: null
+              target_mask_attr_name: null
+          attributes: ${graph.attributes.edges}
+        # Decoder
+        - source_name: hidden
+          target_name: data
+          edge_builders:
+            - _target_: anemoi.graphs.edges.KNNEdges
+              num_nearest_neighbours: 3
+              source_mask_attr_name: null
+              target_mask_attr_name: null
+          attributes: ${graph.attributes.edges}
       attributes:
         nodes:
           # Attributes for data nodes
@@ -440,8 +446,7 @@ training:
       walltime: '00:10:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate anemoi
-      - module list
+      - conda activate training
       - set -ex
       - export SLURM_GPUS_PER_NODE=1
       - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
@@ -545,8 +550,82 @@ val:
     forecast:
       # Diagnostic
       - accum_tp
+  visualization:
+    rundir: '{{ app.rundir }}/visualization'
   vx:
     rundir: '{{ app.rundir }}/vx'
+visualization:
+  common:
+    stats:
+      - RMSE
+    variables: # These names are from the postwxvx output.
+      - 2m_temperature
+      - 10m_zonal_wind
+      - 10m_meridional_wind
+      - 500hpa_geopotential_height
+      - 850hpa_temperature
+      - 250hpa_zonal_wind
+      - 250hpa_meridional_wind
+      - surface_pressure
+    postwxvx: &postwxvx-common
+      start_date: !datetime '{{ app.time.inference_start }}'
+      end_date: !datetime '{{ app.time.inference_stop }}'
+      freq: '{{ app.time.freq }}'
+      leadtimes:
+        start: 0
+        end: 24
+        step: !int '{{ val.step }}'
+      variable_prefixes: # These names are from the wxvx output.
+        - 2t_heightAboveGround_0002
+        - u_10m_heightAboveGround_0010
+        - v_10m_heightAboveGround_0010
+        - gh_isobaricInhPa_0500
+        - t_isobaricInhPa_0850
+        - u_isobaricInhPa_0250
+        - v_isobaricInhPa_0250
+        - sp_surface
+  grid2grid:
+    global:
+      visualization:
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: grid_stat_nested_global
+          work_path: '{{ val.vx.rundir }}/grid2grid/global'
+        name: grid-global
+        rundir: '{{ val.visualization.rundir }}/grid2grid/global'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
+    lam:
+      visualization:
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: grid_stat_nested_lam
+          work_path: '{{ val.vx.rundir }}/grid2grid/lam'
+        name: grid-lam
+        rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
+  grid2obs:
+    global:
+      visualization:
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: point_stat_nested_global
+          work_path: '{{ val.vx.rundir }}/grid2obs/global/'
+        name: obs-global
+        rundir: '{{ val.visualization.rundir }}/grid2obs/global'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
+    lam:
+      visualization:
+        eagle_tools:
+          <<: *postwxvx-common
+          stat_prefix: point_stat_nested_lam
+          work_path: '{{ val.vx.rundir }}/grid2obs/lam/'
+        name: obs-lam
+        rundir: '{{ val.visualization.rundir }}/grid2obs/lam'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
 vx:
   common:
     execution:
@@ -623,7 +702,7 @@ vx:
           name: v_10m
   grid2grid:
     global:
-      platform: *platform
+      platform: !dict '{{ app.platform }}'
       wxvx: # config for the EAGLE driver
         execution:
           batchargs:
@@ -653,7 +732,7 @@ vx:
             method: NEAREST
             to: forecast
     lam:
-      platform: *platform
+      platform: !dict '{{ app.platform }}'
       wxvx: # config for the EAGLE driver
         execution:
           batchargs:
@@ -688,7 +767,7 @@ vx:
           regrid: !dict '{{ vx.grid2grid.global.wxvx.wxvx.regrid }}'
   grid2obs:
     global:
-      platform: *platform
+      platform: !dict '{{ app.platform }}'
       wxvx: # config for the EAGLE driver
         execution:
           batchargs:
@@ -716,7 +795,7 @@ vx:
             method: BILIN
             to: G104
     lam:
-      platform: *platform
+      platform: !dict '{{ app.platform }}'
       wxvx: # config for the EAGLE driver
         execution:
           batchargs:
@@ -742,11 +821,10 @@ zarrs:
   common:
     execution: &zarrs-common-execution
       batchargs:
-        cores: 15
-        memory: 128G
+        cores: 4
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
-        walltime: '00:30:00'
+        walltime: '00:10:00'
       envcmds:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate data
@@ -757,7 +835,9 @@ zarrs:
     zarr:
       execution:
         <<: *zarrs-common-execution
+        batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+        mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: gfs
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
@@ -771,12 +851,14 @@ zarrs:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
             target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
       rundir: '{{ val.data.rundir }}'
-    platform: *platform
+    platform: !dict '{{ app.platform }}'
   hrrr:
     zarr:
       execution:
         <<: *zarrs-common-execution
+        batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
         executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
+        mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: hrrr
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
@@ -796,4 +878,4 @@ zarrs:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
             target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
       rundir: '{{ val.data.rundir }}'
-    platform: *platform
+    platform: !dict '{{ app.platform }}'
