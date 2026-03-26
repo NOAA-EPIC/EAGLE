@@ -1,14 +1,10 @@
 name: Code Quality Checks
 on:
   pull_request:
-    branches:
-      - '**'
     types:
       - opened
       - synchronize
   workflow_dispatch:
-    branches:
-      - '**'
 jobs:
   code-quality-checks:
     name: Code Quality Checks
