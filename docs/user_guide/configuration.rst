@@ -14,7 +14,7 @@ begin with the ``base`` config (i.e. ``config/base.yaml``), which provides gener
 EAGLE runs (see the Quickstart Guide for an example.) The composed config can then be manually 
 edited for experiment-specific requirements.
 
-For advanced use cases, for example for composing configs in arbitrary locations, the underlying ``uwtools`` 
+For advanced use cases, for example for composing configs in arbitrary locations, the underlying :term:`uwtools` 
 command can be used. In the ``src/`` directory:
 
 .. code-block:: bash
@@ -68,7 +68,7 @@ inference
 Configuration for the ``Inference`` driver.
 
 ``anemoi``
-   The ``anemoi:`` block provides the YAML config for the :ref:`anemoi-inference <anemoi-inference:index-page>` component.
+   The ``anemoi:`` block provides the YAML config for the :ref:`anemoi-inference <anemoi-inference:index-page>` :term:`Anemoi` component.
 
 ``checkpoint_dir``
    The ``checkpoint_dir:`` parameter specifies the location of the checkpoints created by the training step.
@@ -87,7 +87,7 @@ Configuration for the ``PreWXVX`` driver.
    This driver executes the :ref:`Postprocessing <Postprocessing>` component.
 
 ``global`` and ``lam``
-   The ``global:`` and ``lam:`` blocks provide configurations for global and limited-area extents, respectively, each borrowing from ``common:``. Their ``prewxvx:`` sub-blocks are ultimately passed to the ``PreWXVX`` driver as its runtime configuration.
+   The ``global:`` and ``lam:`` blocks provide configurations for global and :term:`LAM` extents, respectively, each borrowing from ``common:``. Their ``prewxvx:`` sub-blocks are ultimately passed to the ``PreWXVX`` driver as its runtime configuration.
 
 training
 ------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ ufs2arco
 
 This block provides general configuration parameters for the :ufs2arco:`ufs2arco <>` component.
 
-This configuration is used as a source for default and common configuration parameters, which are supplemented by the ``Zarr`` 
+This configuration is used as a source for default and common configuration parameters, which are supplemented by the :term:`Zarr` 
 driver when it executes ``ufs2arco`` for specific use cases.
 
 val
@@ -135,7 +135,7 @@ Configuration for the ``VX`` driver.
    This driver executes the :ref:`Verify Model Performance <VerifyModelPerformance>` component.
 
 ``grid2grid``
-   The ``grid2grid:`` block provides configuration for running ``wxvx`` with MET's :ref:`grid_stat <met:grid-stat>` tool to verify against gridded analyses. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
+   The ``grid2grid:`` block provides configuration for running :term:`wxvx` with MET's :ref:`grid_stat <met:grid-stat>` tool to verify against gridded analyses. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
 
 ``grid2obs``
    The ``grid2obs:`` block provides configuration for running ``wxvx`` with MET's :ref:`point_stat <met:point-stat>` tool to verify against point observations. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.

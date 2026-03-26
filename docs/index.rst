@@ -17,6 +17,11 @@ Table of Contents
 ###################
 
 .. toctree::
+   :maxdepth: 1
+
+   glossary
+
+.. toctree::
    :maxdepth: 2
    :caption: User Guide
    :numbered:
