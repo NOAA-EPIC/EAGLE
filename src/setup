@@ -212,16 +212,17 @@ conda_create_wxvx() {
 }
 
 conda_env_exists() {
+  local d name x
   name=$1
-  (
-    conda_activate base
-    d=$CONDA_PREFIX/envs
-    mkdir -p $d
-    find $d -maxdepth 1 -mindepth 1 -type d | while read -r x; do
-      test $(basename $x) == $name && msg Found existing conda environment: $name && exit 0
-    done
-    exit 1
-  )
+  d=$INSTALLDIR/envs
+  mkdir -p $d
+  for x in $(find $d -maxdepth 1 -mindepth 1 -type d | sort); do
+    if [[ $(basename $x) == "$name" ]]; then
+      msg Found existing conda environment: $name
+      return 0
+    fi
+  done
+  return 1
 }
 
 conda_install() {
