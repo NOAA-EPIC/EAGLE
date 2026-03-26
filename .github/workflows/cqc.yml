@@ -28,6 +28,7 @@ jobs:
           time make -C src devenv cudascript=dummy
           . src/conda/etc/profile.d/conda.sh
           conda clean --all --yes
+          rm -rf $CONDA_PREFIX/cache
           touch ok
       - name: Check Formatting
         run: |
