@@ -5,13 +5,12 @@
 set -aeuo pipefail
 
 CONDAFLAGS=(
-  --quiet
   --yes
   --channel conda-forge
   --channel ufs-community
   --override-channels
 )
-INSTALLDIR=${INSTALLDIR:-$PWD/conda}
+INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 UWTOOLS="uwtools=2.13.*"
 
 # In all functions, make variables local unless they are either intended for global use, or set in
@@ -27,12 +26,12 @@ cachedir() {
 conda_activate() {
   local env
   env=$1
-  source $INSTALLDIR/etc/profile.d/conda.sh
+  source $INSTALLDIR/etc/profile.d/mamba.sh
   # Activation scripts shipped with conda packages may contain statements either expanding undefined
   # variables or exiting with error status, so temporarily disable the checks for these conditions,
   # then enable again.
   set +eu
-  conda activate $env
+  mamba activate $env
   set -eu
 }
 
@@ -42,7 +41,7 @@ conda_create() {
   shift
   conda_activate base
   msg Creating environment: $name
-  conda create ${CONDAFLAGS[@]} --name $name $* $UWTOOLS
+  mamba create ${CONDAFLAGS[@]} --name $name $* $UWTOOLS
   (
     # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
     # files in the runtime area, rather than in the user's home directory, which might impact their
@@ -231,7 +230,7 @@ conda_install() {
   (
     conda_activate $name
     set +eu
-    conda install ${CONDAFLAGS[@]} "$@"
+    mamba install ${CONDAFLAGS[@]} "$@"
     set -eu
   )
 }
@@ -331,8 +330,9 @@ EOF
 parse_kvargs $@
 install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
+MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
-export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
+export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
 environments=(base data inference prewxvx training visualization wxvx)
 for name in ${environments[@]}; do
   time conda_create_$name
