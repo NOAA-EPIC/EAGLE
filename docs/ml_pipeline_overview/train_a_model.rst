@@ -9,13 +9,13 @@ anemoi-core Overview
 
 We deploy the anemoi-core modules to train a graph-based model.
 
-See Anemoi documentation for further information:
+See anemoi documentation for further information:
 
 - `anemoi-graphs <https://anemoi.readthedocs.io/projects/graphs/en/latest/>`_
 - `anemoi-training <https://anemoi.readthedocs.io/projects/training/en/latest/>`_
 - `anemoi-models <https://anemoi.readthedocs.io/projects/models/en/latest/index.html>`_
 
-Anemoi was created by the European Center for Medium-Range Weather Forecasting.
+anemoi was created by the European Center for Medium-Range Weather Forecasting.
 
 Helpful quick tips for using anemoi-core
 ----------------------------------------------

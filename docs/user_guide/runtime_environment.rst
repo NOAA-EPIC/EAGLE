@@ -53,11 +53,11 @@ Run ``make`` with no arguments to list available targets.
      - grids-and-meshes
      - data
    * - training
-     - Performs Anemoi training
+     - Performs anemoi training
      - data
      - training
    * - inference
-     - Performs Anemoi inference
+     - Performs anemoi inference
      - training
      - inference
    * - prewxvx-global
