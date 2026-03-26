@@ -17,11 +17,6 @@ Table of Contents
 ###################
 
 .. toctree::
-   :maxdepth: 1
-
-   glossary
-
-.. toctree::
    :maxdepth: 2
    :caption: User Guide
    :numbered:
@@ -46,6 +41,13 @@ Table of Contents
    :caption: EAGLE Models
 
    eagle_models/nested_eagle
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Reference
+
+   reference/glossary
+   reference/faq
 
 .. toctree::
    :maxdepth: 1
