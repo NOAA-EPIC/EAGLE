@@ -269,7 +269,7 @@ install_conda() {
     msg Found existing conda installation: $INSTALLDIR
     return
   fi
-  ver=25.9.1-0
+  ver=26.1.1-3
   installer=Miniforge3-$ver-$(uname -s)-$(uname -p).sh
   url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
   msg Installing conda
