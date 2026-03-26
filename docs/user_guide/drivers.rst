@@ -13,6 +13,8 @@ than full execution of the driver, which can be useful during development and de
 To request a specific task, add a ``task=`` clause to the appropriate ``make`` target. To see a list of available 
 tasks, specify ``task=?``.
 
+.. _InspectAvailableTasks:
+
 Inspect Available Tasks
 ------------------------------------------------------------------------------
 
@@ -39,6 +41,8 @@ To list the tasks available for the ``Inference`` driver:
 The ``provisioned_rundir`` task would provision the run directory with all its required content, but 
 would not execute the ``anemoi-inference`` component. The ``run`` task would fully execute inference.
 
+.. _ProvisionRunscript:
+
 Provision a Runscript
 ------------------------------------------------------------------------------
 
@@ -63,6 +67,8 @@ The previously non-existent ``run/<expname>/inference/`` directory now contains:
     \--- runscript.inference
 
     1 directory, 1 file
+
+.. _EditingProvisionedRunscript:
 
 Editing a Provisioned Runscript
 ------------------------------------------------------------------------------
