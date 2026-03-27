@@ -94,7 +94,7 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_css_files = ["custom.css", "theme_overrides.css"]
+html_css_files = ["custom.css", "eagle_theme_overrides.css"]
 
 
 # -- Options for EPUB output -------------------------------------------------

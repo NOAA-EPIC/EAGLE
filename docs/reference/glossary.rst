@@ -28,6 +28,9 @@ Glossary
    Miniforge conda
       The Miniforge-based Conda installation used by EAGLE runtime environment setup. See the `Miniforge repository <https://github.com/conda-forge/miniforge>`__.
 
+   MPI
+      Message Passing Interface. A standard used for parallel computing across multiple processes.
+
    PreWXVX
       The EAGLE driver that prepares forecast output for downstream :term:`wxvx` verification steps.
 
@@ -45,6 +48,9 @@ Glossary
 
    wxvx
       The verification component used by EAGLE to run MET-based statistical verification tasks.
+
+   YAML
+      YAML Ain't Markup Language. A human-readable data serialization format commonly used for configuration files.
 
    Zarr
       A chunked, cloud-friendly array storage format used in EAGLE data preparation workflows.
