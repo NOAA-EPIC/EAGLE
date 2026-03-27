@@ -1,0 +1,9 @@
+tmpdir=$(mktemp -d)
+path=$tmpdir/nvcc
+cat <<EOF >$path
+#!/usr/bin/env bash
+echo Cuda compilation tools, release 12.8, V12.8.93
+rm -rf $tmpdir
+EOF
+chmod +x $path
+export PATH=$tmpdir:$PATH
