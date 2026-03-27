@@ -1,44 +1,40 @@
-=================
-nested-EAGLE
-=================
+==================================
+Nested-EAGLE
+==================================
 
-The nested-EAGLE model is a prototype model trained on global NOAA Global Forecast System (GFS) data 
+The Nested-EAGLE model is a prototype model trained on the global NOAA Global Forecast System (GFS) data 
 with High Resolution Rapid Refresh (HRRR) data over the Contiguous United States (CONUS). 
 This builds on previous work from Met Norway (Nipen et al., 2024, arXiv:2409.02891) by creating a 
 nested model with lower resolution global data and high resolution over an area of interest.
 
-TODO - Insert image of nested domain here.
+.. image:: images/nested-eagle-domain.jpg
+   :alt: Overview of the Nested-EAGLE domain
+   :width: 75%
+   :align: center
 
-nested-EAGLE configurations were provided by Tim Smith at NOAA Physical Sciences Laboratory.
+.. centered:: Overview of the Nested-EAGLE domain
 
-Training Data
-------------------
+Nested-EAGLE configurations were provided by Tim Smith at NOAA Physical Sciences Laboratory.
 
-Datasets:
+Version 1 of Nested-EAGLE was trained with the following configurations:
 
-- GFS convservatively regridded to 1-degree
-- HRRR conservatively regridded to 15-km 
+* Data
 
-Time period:
+   * GFS (0.25-degree)
+   * HRRR conservatively regridded to 6-km 
+   * Training: Feb 2015-Jan 2023
+   * Validation: Feb 2023 to Jan 2024
+   * Testing: Feb 2024 to Jan 2025
 
-- Training dataset: 2015-02-01T06 to 2023-01-31T18
-- Validation dataset: 2023-02-01T06 to 2024-01-31T18
+* Variables
 
-Variables:
+   * Prognostic: gh, u, v, w, t, q, sp, u10, v10, t2m, t_surface, sh2
+   * Diagnostic: u80, v80, accum_tp (use fhr 6)
+   * Forcing: lsm, orog, cos_latitude, sin_latitude, cos_longitude, sin_longitude, cos_julian_day, sin_julian_day, cos_local_time, sin_local_time, insolation
+   * Levels: 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000
 
-- Prognostic: gh, u, v, w, t, q, sp, u10, v10, t2m, t_surface, sh2
-- Diagnostic: u80, v80, accum_tp (use fhr 6)
-- Forcing: lsm, orog, cos_latitude, sin_latitude, cos_longitude, sin_longitude, cos_julian_day, sin_julian_day, cos_local_time, sin_local_time, insolation
-- Levels: 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000
+* Model Architecture
 
-Model Architecture
-------------------
-
-Encoder: Graph Transformer
-
-Processor: Shifted Window Transformer with 512 channels
-
-Decoder: Graph Transformer
-
-Graph: Used for the encoder and decoder to connect targets to nodes via nearest neighbors (encoder_knn=12, decode_knn=3).
-Latent mesh is 4 times more coarse than native data.
+   * Encoder and Decoder: Graph Transformer
+   * Processor: Sliding Window Transformer
+   * Latent space is a 4x coarsened data space

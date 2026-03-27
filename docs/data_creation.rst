@@ -1,13 +1,27 @@
-=========================
+==================================================
 Create Training Data
-=========================
+==================================================
 
 ufs2arco Overview
--------------------------
+--------------------------------------------------
 
-We use ufs2arco to generate training, validation, and test datasets. The ufs2arco library helps preprocess weather data and makes it ready to be used to train a machine learning model.
+We use ufs2arco to generate training, validation, and test datasets. The ufs2arco Python package preprocesses large-scale 
+atmospheric datasets for machine learning and scientific analysis. At a high level, the ufs2arco pipeline loads and transforms 
+raw meteorological data into an Analysis Ready, Cloud Optimized (ARCO) Zarr format.
 
-First, create a recipe.yaml. A simplified example of a `recipe.yaml` could be as follows:
+The workflow is built around three key components:
+
+    * Data Sources: Input datasets from systems such as NOAA GFS and HRRR or other forecast/reanalysis archives
+    * Transforms: User-defined processing steps such as regridding and subsetting, can be applied
+    * Targets: Output data stored in Zarr format
+        
+        * base: A general format for scientific analysis with clear variables and dimensions
+        * anemoi: A layout tailored for machine learning workflows, compatible with the Anemoi framework
+
+Overall, ufs2arco enables flexible, scalable, and fast preparation of large meteorological datasets for both research 
+and machine learning modeling purposes.
+
+To get started, create a ``recipe.yaml``. A simplified example of a ``recipe.yaml`` could be as follows:
 
 .. code-block:: yaml
 
@@ -63,7 +77,7 @@ First, create a recipe.yaml. A simplified example of a `recipe.yaml` could be as
         ensemble: 1
         cell: -1
 
-. Next, run the following:
+Next, run the following:
 
 ```
 ufs2arco recipe.yaml
@@ -77,7 +91,7 @@ Helpful quick tips for ufs2arco
 --------------------------------------------
 
 Choosing Dates
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Update the dates you wish to include in your dataset by changing the below section in your recipe. 
 These dates will include all data that you plan to use for training, validation, and testing.
 The full dataset will be split into these individual sets later on.
@@ -98,12 +112,12 @@ Then ensure that you have updated the statistics_period section to match:
 Note: it is best practice to ensure that your statistics period only includes dates you plan to include in your training dataset.
 
 Changing Variables
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To change variables or levels desired, simply add or remove variables or levels within the `source` section of a recipe.yaml. Please see ufs2arco documentation for further information on exactly what variables are available.
 
 MPI Usage
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ufs2arco uses MPI to parallelize data preprocessing. If you wish to not use MPI, change the top line of the yaml to say
 

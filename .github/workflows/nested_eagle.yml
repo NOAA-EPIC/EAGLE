@@ -1,8 +1,8 @@
 name: Nested EAGLE CI Pipeline (uwtools)
 
 on:
-  pull_request_review:
-    types: [submitted]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 concurrency:
   group: nested-eagle-ci-${{ github.event.pull_request.number }}
@@ -18,11 +18,13 @@ jobs:
     name: Run Nested EAGLE end-to-end on Ursa
     if: >-
       ${{
-        github.event.review.state == 'approved' &&
+        contains(github.event.pull_request.labels.*.name, 'eagle-ursa') &&
         !contains(github.event.pull_request.labels.*.name, 'ci-running')
       }}
     runs-on: ursa
     timeout-minutes: 1440
+    environment:
+      name: eagle-ursa
 
     steps:
       - name: Perform cleanup and preserve conda directory 
@@ -71,6 +73,7 @@ jobs:
           exit 0
 
       - name: Add ci-running label
+        continue-on-error: true
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: ci-running
@@ -241,6 +244,7 @@ jobs:
     needs: [run_pipeline]
     steps:
       - name: Remove ci-running label
+        continue-on-error: true
         uses: mondeja/remove-labels-gh-action@v2.0.0
         with:
           labels: "ci-running"

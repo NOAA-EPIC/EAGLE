@@ -40,6 +40,7 @@ Table of Contents
    :caption: EAGLE Models
 
    nested_eagle
+   global_eagle
 
 .. toctree::
    :maxdepth: 1
