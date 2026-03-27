@@ -4,6 +4,8 @@
 Contributing
 ==============================================================================
 
+.. _Dev:
+
 Development
 ------------------------------------------------------------------------------
 
@@ -55,8 +57,12 @@ created is removed. In general, removing ``.done`` (and, when present, ``.submit
 should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or 
 renaming the entire run directory also works.
 
+.. _PRs:
+
 Pull Requests
 ------------------------------------------------------------------------------
+
+.. _ForkPR:
 
 Fork and PR Overview
 ==============================================================================
@@ -73,6 +79,8 @@ Contributions to the ``EAGLE`` project are made through a fork and pull request 
 Open or review issues on the `EAGLE issues page <https://github.com/NOAA-EPIC/EAGLE/issues>`_.
 
 For future contributions, keep your fork current by syncing it with the upstream ``NOAA-EPIC/EAGLE`` repository.
+
+.. _DevTest:
 
 Development and Testing Process
 ==============================================================================
@@ -92,6 +100,8 @@ When your changes are ready, commit them on your feature branch and push the bra
     git push origin <branch-name>
 
 Then open a pull request through this repository's `PR page <https://github.com/NOAA-EPIC/EAGLE/pulls>`_. For general guidance on creating pull requests, see this `GitHub documentation <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_.
+
+.. _Docs:
 
 Documentation
 ------------------------------------------------------------------------------
