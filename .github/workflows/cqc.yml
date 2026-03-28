@@ -35,3 +35,5 @@ jobs:
         run: make -C src shellcheck
       - name: Run YAML Linter
         run: make -C src yamllint
+      - name: Show Disk Usage
+        run: set -x && df -h . && du -hs .
