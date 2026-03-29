@@ -54,7 +54,7 @@ else
     sudo rm -rf ${dirs[@]}
   )
   final=$(gigsfree)
-  reclaimed=$(( final - initial ))
+  reclaimed=$((final - initial))
   echo RECLAIMED $reclaimed GB
   if [[ $final -lt $GIGSREQD ]]; then
     msg $final STOPPING
