@@ -1,6 +1,7 @@
 channels:
-  - conda-forge
   - nodefaults
+  - conda-forge
+  - oar-gsl
   - ufs-community
 dependencies:
   - wxvx=0.7.*

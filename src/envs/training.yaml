@@ -1,6 +1,6 @@
 channels:
-  - conda-forge
   - nodefaults
+  - conda-forge
   - ufs-community
 dependencies:
   - flash-attn=2.8.*
