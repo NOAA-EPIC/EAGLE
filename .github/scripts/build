@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# shellcheck disable=1091
+
 set -euo pipefail
 time make -C src devenv cudascript=dummy
 . src/conda/etc/profile.d/conda.sh
