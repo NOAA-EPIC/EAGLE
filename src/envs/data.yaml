@@ -12,7 +12,7 @@ dependencies:
   - types-pyyaml
   - ufs2arco=0.19.*
   - uwtools=2.13.*
-  # PyPI packages:
+  # ---
   - pip
   - pip:
       - anemoi-datasets==0.5.*

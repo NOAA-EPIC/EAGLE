@@ -1,16 +1,15 @@
-name: inference
+name: prewxvx
 channels:
   - conda-forge
   - nodefaults
   - ufs-community
 dependencies:
-  - flash-attn=2.8.*
   - numpy=2.2.6.*
-  - python=3.12
+  - pandas=2.3.3.*
+  - python=3.13
   - uwtools=2.13.*
+  - xesmf=0.8.*
   # ---
   - pip
   - pip:
-      - anemoi-inference==0.10.*
-      - anemoi-models==0.13.*
       - eagle-tools
