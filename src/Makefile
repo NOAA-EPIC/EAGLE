@@ -37,7 +37,7 @@ data:
 
 devenv:
 	$(call check,$(cudascript),cudascript)
-	EAGLE_DEV=1 INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
+	EAGLEDEV=1 INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
 env:
 	$(call check,$(cudascript),cudascript)
 	INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
@@ -173,7 +173,7 @@ vx-obs-lam:
 yamllint:
 	$(call activate,base)
 	@echo "=> Linting YAML configs"
-	@(set -x && yamllint --no-warnings config/)
+	@(set -x && yamllint --no-warnings config/ envs/)
 
 zarr:
 	$(call activate,data)

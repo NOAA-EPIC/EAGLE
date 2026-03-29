@@ -11,7 +11,7 @@ separate branch from the main branch.
 
 To build the runtime virtual environments **and** install all required development packages in each environment::
 
-    make devenv cudascript=<name-or-path> # alternatively: EAGLE_DEV=1 ./setup cudascript=<name-or-path>
+    make devenv cudascript=<name-or-path> # alternatively: EAGLEDEV=1 ./setup cudascript=<name-or-path>
 
 See Runtime Environment above for a description of the ``cudascript=`` argument.
 
