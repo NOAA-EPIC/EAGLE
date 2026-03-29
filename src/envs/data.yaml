@@ -8,11 +8,12 @@ dependencies:
   - mpi4py=4.1.*
   - numpy=1.26.4
   - pandas=2.3.3
-  - pip
   - setuptools=81.0.*
   - types-pyyaml
   - ufs2arco=0.19.*
   - uwtools=2.13.*
+  # PyPI packages:
+  - pip
   - pip:
       - anemoi-datasets==0.5.*
       - anemoi-graphs==0.9.*
