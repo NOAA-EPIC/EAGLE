@@ -1,4 +1,4 @@
-BASHSRCS = format setup
+BASHSRCS = $(wildcard ../.github/scripts/*) format setup
 ENVS     = data inference prewxvx training visualization wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle

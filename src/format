@@ -6,7 +6,7 @@ echo "=> Formatting code"
 ruff format "$@"
 
 echo "=> Formatting scripts"
-shfmt --indent 2 --write cuda/ format setup
+shfmt --indent 2 --write ../.github/scripts cuda/ format setup
 
 echo "=> Sorting imports"
 ruff check --select I --fix "$@"
