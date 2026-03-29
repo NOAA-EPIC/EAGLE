@@ -133,6 +133,7 @@ conda_create_visualization() {
 
 conda_create_wxvx() {
   conda_prep_env wxvx
+}
 
 conda_env_exists() {
   name=$1
