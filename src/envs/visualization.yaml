@@ -3,4 +3,11 @@ channels:
   - nodefaults
   - ufs-community
 dependencies:
+  - python=3.13
+  - xarray=2026.2.0
   - uwtools=2.13.*
+  # ---
+  - pip
+  - pip:
+      - eagle-tools
+      

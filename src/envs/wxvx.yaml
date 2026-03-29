@@ -3,4 +3,5 @@ channels:
   - nodefaults
   - ufs-community
 dependencies:
+  - wxvx=0.7.*
   - uwtools=2.13.*

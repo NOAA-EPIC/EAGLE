@@ -4,6 +4,8 @@
 
 set -aeuo pipefail
 
+# PM FIXME
+
 CONDAFLAGS=(
   --quiet
   --yes
@@ -34,6 +36,8 @@ conda_activate() {
   conda activate $env
   set -eu
 }
+
+# PM FIXME
 
 conda_create() {
   local name
@@ -74,7 +78,7 @@ conda_create_base() {
     conda_activate $name
     msg Updating environment: $name
     conda env update -f envs/$name.yaml
-    maybe_install_devpkgs $name
+    install_devpkgs_maybe $name
   )
 }
 
@@ -82,7 +86,7 @@ conda_create_data() {
   local name
   name=data
   conda_prep_env $name
-  # Add some logic to the [de]activation scripts to silence a runtime complaint:
+  # Add logic to the [de]activation scripts to silence a run-time complaint:
   (
     conda_activate $name
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
@@ -106,7 +110,10 @@ EOF
 }
 
 conda_create_inference() {
-  conda_prep_env inference
+  local name
+  name=inference
+  conda_prep_env $name
+  write_anemoi_activation_scripts $name
 }
 
 conda_create_prewxvx() {
@@ -114,56 +121,18 @@ conda_create_prewxvx() {
 }
 
 conda_create_training() {
-  local args name pkgs
+  local name
   name=training
-  pkgs=(
-    flash-attn=2.8.*
-    numpy=1.26.4.*
-    python=3.12
-    setuptools=81.0.*
-  )
-  test -v EAGLEDEV && pkgs+=($(devpkgs))
-  args=($name ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-    write_anemoi_activation_scripts $name
-  fi
-  pip_install $name anemoi-models==0.13.* anemoi-training==0.10.*
+  conda_prep_env $name
+  write_anemoi_activation_scripts $name
 }
 
 conda_create_visualization() {
-  local args name pkgs
-  name=visualization
-  pkgs=(
-    python=3.13
-    xarray=2026.2.0
-  )
-  test -v EAGLEDEV && pkgs+=($(devpkgs))
-  args=($name ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-  fi
-  pip_install $name eagle-tools
+  conda_prep_env visualization
 }
 
 conda_create_wxvx() {
-  local args name pkgs
-  name=wxvx
-  pkgs=(
-    wxvx=0.7.*
-  )
-  test -v EAGLEDEV && pkgs+=($(devpkgs))
-  args=($name --channel oar-gsl ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-  fi
-}
+  conda_prep_env wxvx
 
 conda_env_exists() {
   name=$1
@@ -172,6 +141,8 @@ conda_env_exists() {
     conda env list --json | jq -r .envs_details[].name | grep -q "^${name}$"
   )
 }
+
+# PM FIXME
 
 conda_install() {
   local name
@@ -191,16 +162,17 @@ conda_prep_env() {
   name=$1
   args=(--file envs/$name.yaml)
   (
-    conda_activate base
     if conda_env_exists $name; then
       msg Updating environment: $name
+      conda_activate $name
       conda env update ${args[@]}
     else
       msg Creating environment: $name
-      conda env create ${args[@]}
+      conda_activate base
+      conda env create ${args[@]} --name $name
     fi
   ) | { grep --line-buffered -v "Requirement already satisfied" || true; }
-  maybe_install_devpkgs $name
+  install_devpkgs_maybe $name
   # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
   # files in the runtime area, rather than in the user's home directory, which might impact their
   # quota. When deactivated, environments should reset or unset this value, as appropriate.
@@ -241,6 +213,8 @@ cuda_release() {
   )
 }
 
+# PM FIXME
+
 devpkgs() {
   local pkgs=(
     go-shfmt=3.13.*
@@ -268,11 +242,7 @@ install_conda() {
   rm -v $installer
 }
 
-msg() {
-  echo -e "=> $*"
-}
-
-maybe_install_devpkgs() {
+install_devpkgs_maybe() {
   local name
   if [[ -v EAGLEDEV ]]; then
     name=$1
@@ -282,6 +252,10 @@ maybe_install_devpkgs() {
       conda env update --file envs/dev.yaml
     )
   fi
+}
+
+msg() {
+  echo -e "=> $*"
 }
 
 parse_kvargs() {
@@ -297,6 +271,8 @@ parse_kvargs() {
   done
   export ARGS
 }
+
+# PM FIXME
 
 pip_install() {
   local name
@@ -335,7 +311,7 @@ install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
-environments=(base data inference prewxvx) # training visualization wxvx)
+environments=(base data inference prewxvx training visualization wxvx)
 for name in ${environments[@]}; do
   conda_create_$name
 done

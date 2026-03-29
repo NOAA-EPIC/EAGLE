@@ -4,12 +4,12 @@ channels:
   - ufs-community
 dependencies:
   - flash-attn=2.8.*
-  - numpy=2.2.6.*
+  - numpy=1.26.4.*
   - python=3.12
+  - setuptools=81.0.*
   - uwtools=2.13.*
   # ---
   - pip
   - pip:
-      - anemoi-inference==0.10.*
       - anemoi-models==0.13.*
-      - eagle-tools
+      - anemoi-training==0.10.*
