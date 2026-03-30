@@ -32,14 +32,11 @@ jobs:
           set -euo pipefail
           cd $GITHUB_WORKSPACE
           echo Running in $PWD
-          old=src/conda
-          if [[ -d $old ]]; then
-            new=src/conda.$(date -u +%s)
-            mv -v $old $new
-            (set -x && git clean -ffdx -e $new)
-          else
-            (set -x && git clean -ffdx)
+          conda=src/conda
+          if [[ -d $conda ]]; then
+            mv -v $conda $conda.$(date +%s)
           fi
+          git clean -ffdx -e "conda.*"
         
       - name: Checkout PR head
         uses: actions/checkout@v4
