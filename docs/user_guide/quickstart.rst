@@ -85,9 +85,9 @@ Building and Running :term:`EAGLE`
    These :term:`PreWXVX` steps prepare forecast output from the previous step for verification by :term:`wxvx`. They run locally, so it is 
    safe to proceed when the commands return. See the files ``run/<expname>vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
 
-.. _QuickstartVerification:
-
 #. Model verification
+
+   .. _QuickstartVerification:
 
    .. code-block:: bash
       
