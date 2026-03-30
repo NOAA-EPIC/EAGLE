@@ -163,16 +163,15 @@ conda_install() {
 conda_prep_env_common() {
   local args name
   name=$1
-  args=(--file envs/$name.yaml)
+  args=(--file envs/$name.yaml --name $name)
   (
+    conda_activate base
     if conda_env_exists $name; then
       msg Updating environment: $name
-      conda_activate base
-      conda env update ${args[@]} --name $name | { grep --line-buffered -v "Requirement already satisfied" || true; }
+      conda env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
     else
       msg Creating environment: $name
-      conda_activate base
-      conda env create ${args[@]} --name $name
+      conda env create ${args[@]}
     fi
   )
   install_devpkgs_maybe $name
