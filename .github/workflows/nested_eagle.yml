@@ -32,10 +32,11 @@ jobs:
           set -euo pipefail
           cd $GITHUB_WORKSPACE
           echo Running in $PWD
-          if [[ -d conda ]]; then
-            old=conda.$(date -u +%s)
-            mv -v conda $old
-            (set -x && git clean -ffdx -e $old)
+          old=src/conda
+          if [[ -d $old ]]; then
+            new=src/conda.$(date -u +%s)
+            mv -v $old $new
+            (set -x && git clean -ffdx -e $new)
           else
             (set -x && git clean -ffdx)
           fi
