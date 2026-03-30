@@ -30,8 +30,16 @@ jobs:
       - name: Perform cleanup and preserve conda directory 
         run: |
           set -euo pipefail
-          cd ${GITHUB_WORKSPACE}
-          git clean -ffdx -e conda
+          cd $GITHUB_WORKSPACE
+          if [[ -d conda ]]; then
+            old=conda.$(date -u +%s)
+            mv -v conda $old
+            rm -rf $old &
+            disown
+            git clean -ffdx -e $old
+          else
+            git clean -ffdx
+          fi
         
       - name: Checkout PR head
         uses: actions/checkout@v4
