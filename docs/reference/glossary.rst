@@ -10,6 +10,9 @@ Glossary
    anemoi
       The ECMWF-led machine learning weather prediction software stack used by EAGLE for training and inference. See the `anemoi-core repository <https://github.com/ecmwf/anemoi-core>`__.
 
+   ECMWF
+      European Centre for Medium-Range Weather Forecasts.
+
    EAGLE
       Experimental AI Global and Limited-area Ensemble forecast system.
 

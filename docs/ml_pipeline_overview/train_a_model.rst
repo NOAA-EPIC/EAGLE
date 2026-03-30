@@ -1,64 +1,72 @@
 .. _TrainGraphBasedModel:
 
-=============================
+==============================================================================
 Train a Graph-Based Model
-=============================
+==============================================================================
 
 anemoi-core Overview
--------------------------
+------------------------------------------------------------------------------
 
-We deploy the anemoi-core modules to train a graph-based model.
+We use the :term:`anemoi` training stack to train a graph-based model.
 
-See anemoi documentation for further information:
+See the anemoi documentation for further information:
 
 - `anemoi-graphs <https://anemoi.readthedocs.io/projects/graphs/en/latest/>`_
 - `anemoi-training <https://anemoi.readthedocs.io/projects/training/en/latest/>`_
 - `anemoi-models <https://anemoi.readthedocs.io/projects/models/en/latest/index.html>`_
 
-anemoi was created by the European Center for Medium-Range Weather Forecasting.
+anemoi was created by the European Centre for Medium-Range Weather Forecasts
+(:term:`ECMWF`).
 
 anemoi-core Quick Tips
-----------------------------------------------
+------------------------------------------------------------------------------
 
-Throughout this repository, all anemoi configs are typically provided for you and should work out of the box. 
-See below for various tips and explanations if you wish to learn more about the configs or want to change the configurations.
+Throughout this repository, the anemoi configs are typically provided for you
+and should work out of the box. See below for tips and explanations if you
+want to learn more about the configs or modify them.
 
 Brief Config Overview
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The configs used by anemoi-training contain a lot of information. At the top of a main config you will see something like
+The configs used by ``anemoi-training`` contain a lot of information. At the
+top of a main config, you will see something like:
 
 .. code-block:: yaml
 
     defaults:
-    - data: zarr
-    - dataloader: native_grid
-    - datamodule: single
-    - diagnostics: evaluation
-    - hardware: slurm
-    - graph: encoder_decoder_only
-    - model: transformer
-    - training: stretched
-    - _self_
+      - data: zarr
+      - dataloader: native_grid
+      - datamodule: single
+      - diagnostics: evaluation
+      - hardware: slurm
+      - graph: encoder_decoder_only
+      - model: transformer
+      - training: stretched
+      - _self_
 
-This points the training process to the appropriate yaml file needed for various steps. 
-For example, the first line points to zarr.yaml within the data folder, 
-which then provides the training process with information on the training data such as variables used and temporal frequency. 
+This points the training process to the appropriate YAML file needed for
+various steps. For example, the first line points to ``zarr.yaml`` within the
+data folder, which then provides the training process with information on the
+training data such as variables used and temporal frequency.
 
-Throughout this repository, we have consolidated a lot of very useful information within the main config.yaml. 
-This makes it so the main config.yaml contains most model configurations that are worth noting, and additionally makes those 
-configurations easy to change.
+Throughout this repository, we have consolidated a lot of useful information in
+``src/config/base.yaml``, especially under the ``training.anemoi`` section.
+This means ``src/config/base.yaml`` contains many of the model configurations
+that are most useful to note, and it also makes those configurations easier to
+change.
 
-.. _GeneratingConfigsYourself:
+.. _GenerateConfigs:
 
 Generating Configs Yourself
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you wish to use brand new configs and configure a model yourself, run the following command while within 
-a conda environemnt that contains all of the anemoi-core modules:
+If you wish to use new configs and configure a model yourself, run the
+following command while in a conda environment that contains the anemoi
+packages:
 
-```
-anemoi-training config generate
-```
+.. code-block:: bash
 
-This will generate new anemoi configs for you. If you have any questions about the configs go see the anemoi-training documentation.
+    anemoi-training config generate
+
+This will generate new anemoi configs for you. If you have questions about the
+configs, see the `anemoi-training documentation <https://anemoi.readthedocs.io/projects/training/en/latest/>`_.
