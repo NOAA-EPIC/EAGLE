@@ -85,9 +85,7 @@ class Visualization(AssetsTimeInvariant):
             "global_plots_root": Asset(global_plots_root, global_plots_root.is_dir),
         }
 
-        req = self.postwxvx()
-        yield req
-        yield None
+        yield self.postwxvx()
 
         lam_plots_root.mkdir(parents=True, exist_ok=True)
         global_plots_root.mkdir(parents=True, exist_ok=True)
