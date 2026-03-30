@@ -221,6 +221,12 @@ jobs:
           wait_runscript_batch "${RUNROOT}/vx/grid2obs/global" "wxvx-grid2obs-global" "VX grid2obs global"
           wait_runscript_batch "${RUNROOT}/vx/grid2obs/lam" "wxvx-grid2obs-lam" "VX grid2obs lam"
 
+          for truth in grid obs; do
+            for extent in global lam; do
+              make vis-$truth-$extent config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+            done
+          done
+
           # Artifact checks
           find "${RUNROOT}/inference" -type f -name "*.nc" -print -quit | grep -q . || {
             echo "ERROR: No inference NetCDF outputs found under ${RUNROOT}/inference"
