@@ -69,7 +69,7 @@ the corresponding verification run directory:
 
 .. code-block:: text
 
-   run/<expname>vx/grid2{grid,obs}/{global,lam}/run/
+   run/<expname>/vx/grid2{grid,obs}/{global,lam}/run/
 
 The most useful outputs are:
 
