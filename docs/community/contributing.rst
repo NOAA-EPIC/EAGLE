@@ -13,12 +13,12 @@ First, clone the main :term:`EAGLE` repository and create a branch on the machin
 do the development work. Contributions should be submitted as pull requests from a 
 branch separate from the main branch.
 
-.. code-block:: bash
+.. code-block:: text
 
     git clone https://github.com/NOAA-EPIC/EAGLE.git
     cd EAGLE
 
-.. code-block:: bash
+.. code-block:: text
 
     git checkout -b <branch-name>
 

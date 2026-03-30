@@ -20,7 +20,7 @@ Inspect Available Tasks
 
 To list the tasks available for the ``Inference`` driver:
 
-.. code-block:: bash
+.. code-block:: text
 
     $ make inference config=eagle.yaml task=?
     + uw execute --module eagle/inference/inference.py --classname Inference
@@ -48,7 +48,7 @@ Provision a Runscript
 
 To invoke the ``Inference`` driver's ``runscript`` task, provisioning only the component's runscript:
 
-.. code-block:: bash
+.. code-block:: text
 
     $ make inference config=eagle.yaml task=runscript
     + uw execute --config-file eagle.yaml --module eagle/inference/inference.py --classname Inference --task runscript --batch
