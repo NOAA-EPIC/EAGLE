@@ -18,14 +18,16 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-from cartopy.mpl.geoaxes import GeoAxes
+
+if TYPE_CHECKING:
+    from cartopy.mpl.geoaxes import GeoAxes
 
 
 def choose_diff_var(ds: xr.Dataset) -> str | None:
@@ -62,7 +64,7 @@ def finite_min_max(da: xr.DataArray) -> tuple[float, float]:
     a = a[np.isfinite(a)]
     if a.size == 0:
         msg = "All values are NaN/inf after masking fill values."
-        raise ValueError(msg)  # noqa: TRY003
+        raise ValueError(msg)
     return float(a.min()), float(a.max())
 
 
@@ -74,10 +76,10 @@ def to_lon180(lon2d: np.ndarray) -> np.ndarray:
 def parse_figsize(s: str) -> tuple[float, float]:
     try:
         w, h = (float(x.strip()) for x in s.split(","))
-        return w, h
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         msg = 'figsize must look like "9.75,4.875"'
-        raise ValueError(msg) from e  # noqa: TRY003
+        raise ValueError(msg) from e
+    return w, h
 
 
 def infer_date_hour_from_path(nc_path: Path) -> tuple[str, str]:
