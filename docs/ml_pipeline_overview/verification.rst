@@ -69,13 +69,13 @@ the corresponding verification run directory:
 
 .. code-block:: text
 
-   run/<expname>vx/grid2{grid,obs}/{global,lam}/run/
+   run/<expname>/vx/grid2{grid,obs}/{global,lam}/run/
 
 The most useful outputs are:
 
 * ``stats/`` for MET ``.stat`` files
 * ``plots/`` for generated ``.png`` plots
-* ``run/<expname>vx/*.log`` for verification logs
+* ``run/<expname>/vx/*.log`` for verification logs
 
 
 Additional Visualization
