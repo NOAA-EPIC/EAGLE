@@ -73,7 +73,7 @@ Building and Running :term:`EAGLE`
       make inference config=eagle.yaml
 
    This step performs inference, producing a forecast. It submits a batch job. Do not proceed until the batch job 
-   completes successfully (see the file ``run/<expname>inference/runscript.inference.out``.)
+   completes successfully (see the file ``run/<expname>/inference/runscript.inference.out``.)
 
 #. Postprocess model output
 
