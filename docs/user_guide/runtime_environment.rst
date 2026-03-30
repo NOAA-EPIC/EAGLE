@@ -13,7 +13,7 @@ To build the EAGLE runtime virtual environments:
 
     make env cudascript=<name-or-path> # alternatively: ./setup cudascript=<name-or-path>
 
-This will install Miniforge conda in the current directory and create the various virtual environments.
+This will install :term:`Miniforge conda` in the current directory and create the various virtual environments.
 
 The value of the ``cudascript=`` argument should be either the name of a file under ``src/cuda/`` (e.g. ``cudascript=ursa``), 
 or an arbitrary path to a file (e.g. ``cudascript=/path/to/file``). The file should contain a list of commands that need 
@@ -45,11 +45,11 @@ Run ``make`` with no arguments to list available targets.
      - ---
      - data
    * - zarr-gfs
-     - Prepare Zarr-formatted GFS input data
+     - Prepare :term:`Zarr`-formatted :term:`GFS` input data
      - grids-and-meshes
      - data
    * - zarr-hrrr
-     - Prepare Zarr-formatted HRRR input data
+     - Prepare Zarr-formatted :term:`HRRR` input data
      - grids-and-meshes
      - data
    * - training
@@ -65,13 +65,13 @@ Run ``make`` with no arguments to list available targets.
      - inference
      - prewxvx
    * - prewxvx-lam
-     - Postprocesses LAM inference output
+     - Postprocesses :term:`LAM` inference output
      - inference
      - prewxvx
    * - vis-grid-global
      - Visualize global VX results against gridded analysis
      - vx-grid-global
-     - visualization
+     - :term:`visualization`
    * - vis-grid-lam
      - Visualize LAM VX results against gridded analysis
      - vx-grid-lam
@@ -99,4 +99,4 @@ Run ``make`` with no arguments to list available targets.
    * - vx-obs-lam
      - Verify LAM against obs
      - prewxvx-lam
-     - wxvx
+     - :term:`wxvx`

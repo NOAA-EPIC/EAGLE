@@ -4,7 +4,7 @@
 Quickstart Guide
 ====================
 
-This section provides a recipe for an end-to-end run of nested-EAGLE on Ursa. At present, Ursa is the only supported 
+This section provides a recipe for an end-to-end run of nested-EAGLE on :term:`Ursa`. At present, Ursa is the only supported 
 platform. Future development will include additional platforms.
 
 .. note::
@@ -15,7 +15,7 @@ platform. Future development will include additional platforms.
 
 .. _QuickstartWorkflow:
 
-Building and Running EAGLE
+Building and Running :term:`EAGLE`
 =========================================
 
 #. Create all environments
@@ -25,12 +25,12 @@ Building and Running EAGLE
       make env cudascript=ursa
 
    This step creates the runtime software environment, comprising conda virtual environments to support data preparation, 
-   training, inference, and verification. The ``conda/`` subdirectory it creates is self-contained and can be removed 
+   training, :term:`inference`, and verification. The ``conda/`` subdirectory it creates is self-contained and can be removed 
    and recreated by running the ``make env`` command again, as long as pipeline steps are not currently running.
 
    Developers who will be modifying Python driver code should replace ``make env`` with ``make devenv``, which will 
    create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, 
-   typechecking, and YAML linting.
+   typechecking, and :term:`YAML` linting.
 
 #. Create the EAGLE YAML config
 
@@ -82,7 +82,7 @@ Building and Running EAGLE
       make prewxvx-global config=eagle.yaml
       make prewxvx-lam config=eagle.yaml
 
-   These steps prepare forecast output from the previous step for verification by ``wxvx``. They run locally, so it is 
+   These :term:`PreWXVX` steps prepare forecast output from the previous step for verification by :term:`wxvx`. They run locally, so it is 
    safe to proceed when the commands return. See the files ``run/<expname>vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
 
 .. _QuickstartVerification:
@@ -96,13 +96,13 @@ Building and Running EAGLE
       make vx-obs-global config=eagle.yaml
       make vx-obs-lam config=eagle.yaml
 
-   These steps perform verification of the ``global`` or ``lam`` forecasts against gridded analyses (``*-grid-*``) or 
+   These steps perform verification of the ``global`` or :term:`LAM` forecasts against gridded analyses (``*-grid-*``) or 
    PrepBUFR observations (``*-obs-*``) as truth. Each submits a batch job, so the four ``make`` commands can be run in quick 
    succession to get all the batch jobs running in parallel. When each batch job completes, MET ``.stat`` files and ``.png`` 
    plot files can be found under the ``stats/`` and ``plots/`` subdirectories of ``run/<expname>vx/grid2{grid,obs}/{global,lam}/run/``. 
    The files ``run/<expname>vx/*.log`` contain the logs from each verification run.
 
-#. Make additional visualizations
+#. Make additional :term:`visualization` outputs
 
    .. code-block:: bash
 
@@ -111,4 +111,4 @@ Building and Running EAGLE
       make vis-obs-global config=eagle.yaml
       make vis-obs-lam config=eagle.yaml
 
-   These steps will first call ``eagle-tools``'s ``postwxvx`` tool which will create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of plots in the ``run/<expname>visualization/grid2{grid,obs}/{global,lam}/`` directory.
+   These steps will first call ``eagle-tools``'s ``postwxvx`` tool to create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of plots in the ``run/<expname>visualization/grid2{grid,obs}/{global,lam}/`` directory.
