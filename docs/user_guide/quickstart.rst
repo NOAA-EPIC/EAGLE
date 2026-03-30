@@ -99,7 +99,7 @@ Building and Running :term:`EAGLE`
    These steps perform verification of the ``global`` or :term:`LAM` forecasts against gridded analyses (``*-grid-*``) or 
    PrepBUFR observations (``*-obs-*``) as truth. Each submits a batch job, so the four ``make`` commands can be run in quick 
    succession to get all the batch jobs running in parallel. When each batch job completes, MET ``.stat`` files and ``.png`` 
-   plot files can be found under the ``stats/`` and ``plots/`` subdirectories of ``run/<expname>vx/grid2{grid,obs}/{global,lam}/run/``. 
+   plot files can be found under the ``stats/`` and ``plots/`` subdirectories of ``run/<expname>/vx/grid2{grid,obs}/{global,lam}/run/``. 
    The files ``run/<expname>vx/*.log`` contain the logs from each verification run.
 
 #. Make additional :term:`visualization` outputs
