@@ -277,6 +277,7 @@ install_conda() {
   msg Installing conda
   wget -nv $url
   bash $installer -bfp $INSTALLDIR
+  test $? -ne 0 && rm -rf $INSTALLDIR && exit 1
   rm -v $installer
 }
 
