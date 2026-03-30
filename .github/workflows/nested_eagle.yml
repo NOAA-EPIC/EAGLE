@@ -237,6 +237,16 @@ jobs:
             exit 1
           }
 
+          find "${RUNROOT}/vx/grid2grid/global/run/plots" -type f -name "*.png" -print -quit | grep -q . || {
+            echo "ERROR: No grid2grid global spatial plot PNG outputs found"
+            exit 1
+          }
+
+          find "${RUNROOT}/vx/grid2grid/lam/run/plots" -type f -name "*.png" -print -quit | grep -q . || {
+            echo "ERROR: No grid2grid lam spatial plot PNG outputs found"
+            exit 1
+          }
+
           echo "Nested EAGLE CI pipeline completed successfully."
 
   cleanup_label:
