@@ -64,7 +64,7 @@ Building and Running :term:`EAGLE`
       make training config=eagle.yaml
 
    This step trains a model using data provisioned by the previous step. It submits a batch job; do not proceed until 
-   the batch job completes successfully (see the file ``run/<expname>training/runscript.training.out``).
+   the batch job completes successfully (see the file ``run/<expname>/training/runscript.training.out``).
 
 #. Run inference
 
