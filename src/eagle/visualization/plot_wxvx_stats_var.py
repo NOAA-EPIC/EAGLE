@@ -22,10 +22,10 @@ from typing import Any, cast
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-from cartopy.mpl.geoaxes import GeoAxes
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from cartopy.mpl.geoaxes import GeoAxes
 
 
 def choose_diff_var(ds: xr.Dataset) -> str | None:
@@ -145,7 +145,9 @@ def process_one_target(
         return (0, 0)
 
     nc_files = [p for p in found if p.name.startswith(prefix)]
-    print(f"[{label}] Found {len(found)} files, keeping {len(nc_files)} with prefix '{prefix}'")
+    print(
+        f"[{label}] Found {len(found)} files, keeping {len(nc_files)} with prefix '{prefix}'"
+    )
 
     plotted = 0
     skipped = 0
@@ -369,8 +371,6 @@ def main() -> None:
         )
         total_plotted += p
         total_skipped += s
-
-    print(f"\nDone. Total plotted: {total_plotted}, total skipped: {total_skipped}")
 
 
 if __name__ == "__main__":

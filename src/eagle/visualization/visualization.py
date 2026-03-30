@@ -148,4 +148,6 @@ class Visualization(AssetsTimeInvariant):
         visualization.grid2grid.spatial_stat_plots in base.yaml.
         """
         root_cfg = get_yaml_config(self.config["config"])
-        return cast(dict, root_cfg["visualization"]["grid2grid"]["spatial_stat_plots"])
+        return cast(
+            "dict", root_cfg["visualization"]["grid2grid"]["spatial_stat_plots"]
+        )
