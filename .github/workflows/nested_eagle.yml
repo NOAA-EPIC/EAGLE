@@ -27,16 +27,17 @@ jobs:
       name: eagle-ursa
 
     steps:
-      - name: Perform cleanup and preserve conda directory 
+      - name: Perform cleanup
         run: |
           set -euo pipefail
           cd $GITHUB_WORKSPACE
+          echo Running in $PWD
           if [[ -d conda ]]; then
             old=conda.$(date -u +%s)
             mv -v conda $old
-            git clean -ffdx -e $old
+            (set -x && git clean -ffdx -e $old)
           else
-            git clean -ffdx
+            (set -x && git clean -ffdx)
           fi
         
       - name: Checkout PR head
