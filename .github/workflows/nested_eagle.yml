@@ -34,8 +34,6 @@ jobs:
           if [[ -d conda ]]; then
             old=conda.$(date -u +%s)
             mv -v conda $old
-            rm -rf $old &
-            disown
             git clean -ffdx -e $old
           else
             git clean -ffdx
