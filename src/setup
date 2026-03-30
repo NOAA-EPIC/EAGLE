@@ -167,8 +167,8 @@ conda_prep_env_common() {
   (
     if conda_env_exists $name; then
       msg Updating environment: $name
-      conda_activate $name
-      conda env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
+      conda_activate base
+      conda env update ${args[@]} --name $name | { grep --line-buffered -v "Requirement already satisfied" || true; }
     else
       msg Creating environment: $name
       conda_activate base
