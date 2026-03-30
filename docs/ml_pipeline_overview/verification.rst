@@ -96,4 +96,4 @@ additional plots under:
 
 .. code-block:: text
 
-   run/<expname>visualization/grid2{grid,obs}/{global,lam}/
+   run/<expname>/visualization/grid2{grid,obs}/{global,lam}/
