@@ -14,6 +14,21 @@ permissions:
   issues: write
 
 jobs:
+  cleanup:
+    name: Cleanup
+    if: >-
+      ${{
+        contains(github.event.pull_request.labels.*.name, 'eagle-ursa') &&
+        !contains(github.event.pull_request.labels.*.name, 'ci-running')
+      }}
+    runs-on: ursa
+    steps:
+      - name: Clean old conda installs
+        run: |
+          find $GITHUB_WORKSPACE/src -mindepth 1 -maxdepth 1 -regex "^.*/conda\.[0-9]+$" | sort | while read x; do
+            echo Removing $x
+            rm -rf $x
+          done
   run_pipeline:
     name: Run Nested EAGLE end-to-end on Ursa
     if: >-
