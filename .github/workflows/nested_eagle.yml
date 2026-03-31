@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   cleanup:
-    name: Cleanup
+    name: Clean old conda installs
     if: >-
       ${{
         contains(github.event.pull_request.labels.*.name, 'eagle-ursa') &&
