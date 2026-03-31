@@ -91,10 +91,13 @@ jobs:
           export SETVARS_CALL=${SETVARS_CALL:-0}
           cd "${GITHUB_WORKSPACE}/src"
 
-          # Build the local dev env instead of linking to a shared runner install.
+          if [ -e "${INSTALLDIR}" ] && [ ! -f "${INSTALLDIR}/etc/profile.d/conda.sh" ]; then
+            echo "Removing stale/incomplete conda install at ${INSTALLDIR}"
+            rm -rf "${INSTALLDIR}"
+          fi
+
           make devenv cudascript=ursa INSTALLDIR="${INSTALLDIR}"
 
-          # Sanity checks
           source conda/etc/profile.d/conda.sh
           conda activate base
           command -v uw >/dev/null || {
@@ -102,7 +105,6 @@ jobs:
             exit 1
           }
           uw --version || true
-
           # ---- helpers ----
           slurm_wait() {
             local job_id="$1"
