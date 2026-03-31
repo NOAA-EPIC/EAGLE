@@ -91,6 +91,12 @@ jobs:
           export SETVARS_CALL=${SETVARS_CALL:-0}
           cd "${GITHUB_WORKSPACE}/src"
 
+          TRASH_BASE="/scratch4/NAGAPE/epic/role-epic/eagle-conda-trash"
+          if [ -d "${TRASH_BASE}" ]; then
+            echo "Cleaning old stashed conda dirs from ${TRASH_BASE}"
+            find "${TRASH_BASE}" -maxdepth 1 -mindepth 1 -type d -mtime +1 -exec rm -rf {} +
+          fi
+
           if [ -e "${INSTALLDIR}" ] && [ ! -f "${INSTALLDIR}/etc/profile.d/conda.sh" ]; then
             echo "Removing stale/incomplete conda install at ${INSTALLDIR}"
             rm -rf "${INSTALLDIR}"
