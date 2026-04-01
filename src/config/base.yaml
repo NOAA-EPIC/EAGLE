@@ -558,7 +558,7 @@ visualization:
   common:
     stats:
       - RMSE
-    variables:
+    variables: # These names are from the postwxvx output.
       - 2m_temperature
       - 10m_zonal_wind
       - 10m_meridional_wind
@@ -567,6 +567,23 @@ visualization:
       - 250hpa_zonal_wind
       - 250hpa_meridional_wind
       - surface_pressure
+    postwxvx: &postwxvx-common
+      start_date: !datetime '{{ app.time.inference_start }}'
+      end_date: !datetime '{{ app.time.inference_stop }}'
+      freq: '{{ app.time.freq }}'
+      leadtimes:
+        start: 0
+        end: 24
+        step: !int '{{ val.step }}'
+      variable_prefixes: # These names are from the wxvx output.
+        - 2t_heightAboveGround_0002
+        - u_10m_heightAboveGround_0010
+        - v_10m_heightAboveGround_0010
+        - gh_isobaricInhPa_0500
+        - t_isobaricInhPa_0850
+        - u_isobaricInhPa_0250
+        - v_isobaricInhPa_0250
+        - sp_surface
 
   grid2grid:
     spatial_stat_plots:
