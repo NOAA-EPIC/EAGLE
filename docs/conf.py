@@ -18,19 +18,25 @@
 # -- Project information -----------------------------------------------------
 
 project = "eagle"
-copyright = "2025, eagle contributors "
+copyright = "2025, eagle contributors"
 author = "eagle contributors"
+
+version = "main"
+release = "Main Branch Documentation"
+
+numfig = True
 
 
 # -- General configuration ---------------------------------------------------
-# -- General configuration
 
 extensions = [
-    "sphinx.ext.duration",
-    "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
 ]
 
 intersphinx_mapping = {
@@ -49,24 +55,45 @@ intersphinx_disabled_domains = ["std"]
 
 templates_path = ["_templates"]
 
-# -- Options for EPUB output
-epub_show_urls = "footnote"
+source_suffix = ".rst"
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
+master_doc = "index"
+
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 bibtex_bibfiles: list[str] = []
 linkcheck_ignore: list[str] = []
 # -- Options for HTML output -------------------------------------------------
 
+html_theme = "sphinx_rtd_theme"
+
+html_theme_options = {
+    "navigation_depth": 8,
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# commented out for right now as we do not have anything static (yet)
-# html_static_path = ["_static"]
+html_static_path = ["_static"]
+html_css_files = ["custom.css", "eagle_theme_overrides.css"]
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = "sphinx_rtd_theme"
+
+# -- Options for EPUB output -------------------------------------------------
+
+epub_show_urls = "footnote"
+
+
+# -- Options for napoleon extension ------------------------------------------
+
+napoleon_numpy_docstring = False
+napoleon_google_docstring = True
+
+
+# -- Options for autodoc extension -------------------------------------------
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+}
+
+add_module_names = False
