@@ -1,18 +1,27 @@
-=================
-Drivers
-=================
+.. _Drivers:
 
-The various software components required by EAGLE are executed by ``uwtools`` drivers implemented as Python 
+==============================================================================
+Drivers
+==============================================================================
+
+The various software components required by EAGLE are executed by :term:`uwtools` drivers implemented as Python 
 modules under ``src/eagle/``. By default, the targets in ``src/Makefile`` invoke drivers' most comprehensive 
 tasks, i.e. those that configure and execute the component to produce its final output. However, each driver 
-provides a number of tasks, some depending on others, and lower-level tasks can be invoked to request less 
+provides a number of tasks, some of which depend on others, and lower-level tasks can be invoked to request less 
 than full execution of the driver, which can be useful during development and debugging.
 
 To request a specific task, add a ``task=`` clause to the appropriate ``make`` target. To see a list of available 
 tasks, specify ``task=?``.
 
-For example::
-    
+.. _InspectAvailableTasks:
+
+Inspect Available Tasks
+------------------------------------------------------------------------------
+
+To list the tasks available for the ``Inference`` driver:
+
+.. code-block:: text
+
     $ make inference config=eagle.yaml task=?
     + uw execute --module eagle/inference/inference.py --classname Inference
     [2026-02-27T23:58:43]    ERROR Available tasks:
@@ -29,10 +38,17 @@ For example::
     [2026-02-27T23:58:43]    ERROR   validate
     [2026-02-27T23:58:43]    ERROR     Validate the UW driver config.
 
-For example, the ``provisioned_rundir`` task would provision the run directory with all its required content, but 
+The ``provisioned_rundir`` task provisions the run directory with all its required content, but 
 would not execute the ``anemoi-inference`` component. The ``run`` task would fully execute inference.
 
-To invoke the ``Inference`` driver's ``runscript`` task, provisioning only the component's runscript::
+.. _ProvisionRunscript:
+
+Provision a Runscript
+------------------------------------------------------------------------------
+
+To invoke the ``Inference`` driver's ``runscript`` task, provisioning only the component's runscript:
+
+.. code-block:: text
 
     $ make inference config=eagle.yaml task=runscript
     + uw execute --config-file eagle.yaml --module eagle/inference/inference.py --classname Inference --task runscript --batch
@@ -42,15 +58,22 @@ To invoke the ``Inference`` driver's ``runscript`` task, provisioning only the c
     [2026-02-27T22:35:11]     INFO inference runscript.inference: Executing
     [2026-02-27T22:35:11]     INFO inference runscript.inference: Ready
 
-The previously non-existent ``run/<expname>inference/`` directory now contains::
+The previously non-existent ``run/<expname>/inference/`` directory now contains:
+
+.. code-block:: text
 
     $ tree run/<expname>/inference/
-    run/<expname>inference/
-    └── runscript.inference
+    run/<expname>/inference/
+    \--- runscript.inference
 
     1 directory, 1 file
 
+.. _EditingProvisionedRunscript:
+
+Editing a Provisioned Runscript
+------------------------------------------------------------------------------
+
 Since ``uwtools`` driver tasks are idempotent, now that ``runscript.inference`` exists, it will not be overwritten 
-by subsequent driver invocations. So, it could now be manually edited to e.g. add debugging statements, and 
+by subsequent driver invocations. It could now be manually edited, for example to add debugging statements, and 
 the ``run`` task then invoked to execute inference with the debugging statements in place. If ``runscript.inference`` 
 were manually deleted and the driver invoked again, the runscript would be recreated with its default contents.
