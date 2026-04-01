@@ -1,6 +1,8 @@
+import importlib
+import importlib.util
 from pathlib import Path
 from subprocess import run
-from typing import cast
+from typing import TYPE_CHECKING, Any, cast
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -9,7 +11,18 @@ from iotaa import Asset, collection, task
 from uwtools.api.config import get_yaml_config
 from uwtools.api.driver import AssetsTimeInvariant
 
-from eagle.visualization.plot_wxvx_stats_var import run_spatial_stat_plots
+if TYPE_CHECKING:
+    from eagle.visualization.plot_wxvx_stats_var import run_spatial_stat_plots
+else:
+    import sys
+
+    if importlib.util.find_spec("eagle.visualization.plot_wxvx_stats_var") is not None:
+        _plot_mod = importlib.import_module("eagle.visualization.plot_wxvx_stats_var")
+    else:
+        sys.path.append(str(Path(__file__).resolve().parent))
+        _plot_mod = importlib.import_module("plot_wxvx_stats_var")
+
+    run_spatial_stat_plots = cast("Any", _plot_mod.run_spatial_stat_plots)
 
 mpl.use("Agg")
 

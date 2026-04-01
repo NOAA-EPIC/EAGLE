@@ -34,9 +34,16 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    "rtd": ("https://docs.readthedocs.io/en/stable/", None),
-    "python": ("https://docs.python.org/3/", None),
-    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "uwtools": ("https://uwtools.readthedocs.io/en/stable/", None),
+    "anemoi-inference": (
+        "https://anemoi.readthedocs.io/projects/inference/en/latest/",
+        None,
+    ),
+    "anemoi-training": (
+        "https://anemoi.readthedocs.io/projects/training/en/latest/",
+        None,
+    ),
+    "met": ("https://metplus.readthedocs.io/projects/met/en/latest/", None),
 }
 intersphinx_disabled_domains = ["std"]
 
@@ -49,7 +56,8 @@ epub_show_urls = "footnote"
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
+bibtex_bibfiles: list[str] = []
+linkcheck_ignore: list[str] = []
 # -- Options for HTML output -------------------------------------------------
 
 # Add any paths that contain custom static files (such as style sheets) here,

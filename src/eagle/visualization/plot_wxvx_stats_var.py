@@ -20,14 +20,14 @@ import argparse
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
+import cartopy.crs as ccrs  # type: ignore[import-untyped]
+import cartopy.feature as cfeature  # type: ignore[import-untyped]
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
 if TYPE_CHECKING:
-    from cartopy.mpl.geoaxes import GeoAxes
+    from cartopy.mpl.geoaxes import GeoAxes  # type: ignore[import-untyped]
 
 
 def choose_diff_var(ds: xr.Dataset) -> str | None:
@@ -105,7 +105,7 @@ def out_png_for_nc(nc_path: Path, plots_root: Path) -> Path:
     yyyymmdd, hh = infer_date_hour_from_path(nc_path)
     out_dir = plots_root / yyyymmdd / hh
     out_dir.mkdir(parents=True, exist_ok=True)
-    return (out_dir / nc_path.name).with_suffix(".png")
+    return out_dir / f"{nc_path.stem}_spatial.png"
 
 
 def build_main_title(ds: xr.Dataset, var: str) -> str:
