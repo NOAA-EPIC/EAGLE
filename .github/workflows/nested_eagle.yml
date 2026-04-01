@@ -109,27 +109,6 @@ jobs:
           export SETVARS_CALL=${SETVARS_CALL:-0}
           cd "${GITHUB_WORKSPACE}/src"
 
-          TRASH_BASE="/scratch4/NAGAPE/epic/role-epic/eagle-conda-trash"
-
-          echo "Disk before cleanup:"
-          df -h .
-
-          if [ -d "${TRASH_BASE}" ]; then
-            echo "Removing all stashed conda dirs from ${TRASH_BASE}"
-            rm -rf "${TRASH_BASE}"/*
-          fi
-
-          if [ -e "${INSTALLDIR}" ] && [ ! -f "${INSTALLDIR}/etc/profile.d/conda.sh" ]; then
-            echo "Removing stale/incomplete conda install at ${INSTALLDIR}"
-            rm -rf "${INSTALLDIR}"
-          fi
-
-          echo "Removing old run directories under src/run"
-          rm -rf "${GITHUB_WORKSPACE}/src/run"/ci-pr* || true
-
-          echo "Disk after cleanup:"
-          df -h .
-
           make env cudascript=ursa INSTALLDIR="${INSTALLDIR}"
 
           source conda/etc/profile.d/conda.sh
