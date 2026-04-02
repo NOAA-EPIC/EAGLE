@@ -396,41 +396,31 @@ def _run_spatial_stat_plots(
     suptitle_y: float = 0.995,
 ) -> None:
     fig_w, fig_h = _parse_figsize(figsize)
-
-    _process_one_target(
-        label="LAM",
-        stats_root=Path(lam_stats_root),
-        plots_root=Path(lam_plots_root),
-        pattern=pattern,
-        prefix=lam_prefix,
-        vmin_arg=vmin,
-        vmax_arg=vmax,
-        cmap=cmap,
-        fig_w=fig_w,
-        fig_h=fig_h,
+    common: dict = dict(
         add_states=add_states,
+        cmap=cmap,
+        fig_h=fig_h,
+        fig_w=fig_w,
+        file_fontsize=file_fontsize,
         gridlines=gridlines,
         max_files=max_files,
-        file_fontsize=file_fontsize,
-        title_fontsize=title_fontsize,
+        pattern=pattern,
         suptitle_y=suptitle_y,
+        title_fontsize=title_fontsize,
+        vmax_arg=vmax,
+        vmin_arg=vmin,
     )
-
     _process_one_target(
         label="GLOBAL",
         stats_root=Path(global_stats_root),
         plots_root=Path(global_plots_root),
-        pattern=pattern,
         prefix=global_prefix,
-        vmin_arg=vmin,
-        vmax_arg=vmax,
-        cmap=cmap,
-        fig_w=fig_w,
-        fig_h=fig_h,
-        add_states=add_states,
-        gridlines=gridlines,
-        max_files=max_files,
-        file_fontsize=file_fontsize,
-        title_fontsize=title_fontsize,
-        suptitle_y=suptitle_y,
+        **common,
+    )
+    _process_one_target(
+        label="LAM",
+        stats_root=Path(lam_stats_root),
+        plots_root=Path(lam_plots_root),
+        prefix=lam_prefix,
+        **common,
     )

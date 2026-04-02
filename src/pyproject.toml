@@ -11,6 +11,7 @@ select = ["ALL"]
 ignore = [
   "ANN201",  # missing-return-type-undocumented-public-function
   "ANN202",  # missing-return-type-private-function
+  "C408",    # unnecessary-collection-call
   "COM812",  # missing-trailing-comma
   "D100",    # undocumented-public-module
   "D101",    # undocumented-public-class
