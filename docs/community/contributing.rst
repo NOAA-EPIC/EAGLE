@@ -27,7 +27,7 @@ development packages in each environment:
 
 .. code-block:: bash
 
-    make devenv cudascript=<name-or-path> # alternatively: EAGLE_DEV=1 ./setup cudascript=<name-or-path>
+    make devenv cudascript=<name-or-path> # alternatively: EAGLEDEV=1 ./setup cudascript=<name-or-path>
 
 See :ref:`Runtime Environment <RuntimeEnvironment>` for a description of the ``cudascript=`` argument.
 
