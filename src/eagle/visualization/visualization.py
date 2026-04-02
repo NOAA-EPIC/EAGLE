@@ -78,23 +78,92 @@ class Visualization(AssetsTimeInvariant):
         #     "global_plots_root": Asset(global_plots_root, global_plots_root.is_dir),
         # }
         yield self.postwxvx()
+        cfg = self.config["spatial_stat_plots"]
         extent = "global" if "global" in self.config["name"] else "lam"
-        sspcfg = self.config["spatial_stat_plots"]
-        _process_one_target(
-            plots_root=Path(self.config["rundir"]) / "spatial-stat-plots" / extent,
-            extent=extent,
-            add_states=sspcfg["add_states"],
-            cmap=sspcfg["cmap"],
-            figsize=sspcfg["figsize"],
-            file_fontsize=sspcfg["file_fontsize"],
-            gridlines=sspcfg["gridlines"],
-            max_files=sspcfg["max_files"],
-            pattern=sspcfg["pattern"],
-            prefix=sspcfg["prefix"],
-            stats_root=sspcfg["stats_root"],
-            suptitle_y=sspcfg["suptitle_y"],
-            title_fontsize=sspcfg["title_fontsize"],
+        stats_path = Path(cfg["stats_root"] % extent)
+        if not stats_path.exists():
+            logging.warning("Stats root not found: %s", stats_path)
+            return (0, 0)
+        plots_root = Path(self.config["rundir"]) / "spatial-stat-plots" / extent
+        plots_root.mkdir(parents=True, exist_ok=True)
+        pattern = cfg["pattern"]
+        found = sorted(stats_path.rglob(pattern))
+        if not found:
+            logging.warning(
+                "No files matching '%s' found under %s", pattern, stats_path
+            )
+            return (0, 0)
+        prefix = cfg["prefix"]
+        nc_files = [p for p in found if p.name.startswith(prefix)]
+        logging.info(
+            "Found %s files, keeping %s with prefix %s",
+            len(found),
+            len(nc_files),
+            prefix,
         )
+        plotted = 0
+        skipped = 0
+        for idx, nc_path in enumerate(nc_files, start=1):
+            max_files = cfg["max_files"]
+            if max_files and idx > max_files:
+                break
+            out_png = _out_png_for_nc(nc_path, plots_root)
+            ds = xr.open_dataset(nc_path)
+            var = _choose_diff_var(ds)
+            if var is None:
+                skipped += 1
+                logging.warning("No DIFF_ var: %s", nc_path.name)
+                continue
+            if "lat" not in ds or "lon" not in ds:
+                skipped += 1
+                logging.warning("Missing lat/lon: %s", nc_path.name)
+                continue
+            lat2d = np.asarray(ds["lat"].values)
+            lon2d = _to_lon180(np.asarray(ds["lon"].values))
+            da = _mask_fill(_pick_2d(ds[var]))
+            vmin, vmax = _finite_min_max(da)
+            fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
+            fig.suptitle(
+                f"({nc_path.name})", fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"]
+            )
+            ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
+            ax.set_extent(
+                [
+                    float(np.nanmin(lon2d)),
+                    float(np.nanmax(lon2d)),
+                    float(np.nanmin(lat2d)),
+                    float(np.nanmax(lat2d)),
+                ],
+                crs=ccrs.PlateCarree(),
+            )
+            mesh = ax.pcolormesh(
+                lon2d,
+                lat2d,
+                np.asarray(da.values),
+                transform=ccrs.PlateCarree(),
+                vmin=vmin,
+                vmax=vmax,
+                cmap=cfg["cmap"],
+            )
+            ax.coastlines(resolution="50m", linewidth=0.8)
+            ax.add_feature(cfeature.BORDERS, linewidth=0.6)
+            if cfg["add_states"]:
+                ax.add_feature(cfeature.STATES, linewidth=0.4)
+            if cfg["gridlines"]:
+                gl: Any = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.6)
+                gl.right_labels = False
+                gl.top_labels = False
+            ax.set_title(_build_main_title(ds, var), fontsize=cfg["title_fontsize"])
+            units = str(ds[var].attrs.get("units", "")).strip()
+            cb = fig.colorbar(
+                mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
+            )
+            cb.set_label(units or var)
+            plt.tight_layout(rect=(0, 0, 1, 0.94))
+            plt.savefig(out_png, dpi=150)
+            plt.close(fig)
+            plotted += 1
+            logging.info("Wrote %s", out_png)
 
     # Private tasks
 
@@ -192,98 +261,6 @@ def _pick_2d(da: xr.DataArray) -> xr.DataArray:
     while out.ndim > 2:
         out = out.isel({out.dims[0]: 0})
     return out
-
-
-def _process_one_target(
-    *,
-    add_states: bool,
-    cmap: str,
-    figsize: dict[str, float],
-    file_fontsize: float,
-    gridlines: bool,
-    extent: str,
-    max_files: int,
-    pattern: str,
-    plots_root: Path,
-    prefix: str,
-    stats_root: str,
-    suptitle_y: float,
-    title_fontsize: float,
-) -> tuple[int, int]:
-    stats_path = Path(stats_root % extent)
-    if not stats_path.exists():
-        logging.warning("Stats root not found: %s", stats_path)
-        return (0, 0)
-    plots_root.mkdir(parents=True, exist_ok=True)
-    found = sorted(stats_path.rglob(pattern))
-    if not found:
-        logging.warning("No files matching '%s' found under %s", pattern, stats_path)
-        return (0, 0)
-    nc_files = [p for p in found if p.name.startswith(prefix)]
-    logging.info(
-        "Found %s files, keeping %s with prefix %s", len(found), len(nc_files), prefix
-    )
-    plotted = 0
-    skipped = 0
-    for idx, nc_path in enumerate(nc_files, start=1):
-        if max_files and idx > max_files:
-            break
-        out_png = _out_png_for_nc(nc_path, plots_root)
-        ds = xr.open_dataset(nc_path)
-        var = _choose_diff_var(ds)
-        if var is None:
-            skipped += 1
-            logging.warning("No DIFF_ var: %s", nc_path.name)
-            continue
-        if "lat" not in ds or "lon" not in ds:
-            skipped += 1
-            logging.warning("Missing lat/lon: %s", nc_path.name)
-            continue
-        lat2d = np.asarray(ds["lat"].values)
-        lon2d = _to_lon180(np.asarray(ds["lon"].values))
-        da = _mask_fill(_pick_2d(ds[var]))
-        vmin, vmax = _finite_min_max(da)
-        fig = plt.figure(figsize=(figsize["w"], figsize["h"]))
-        fig.suptitle(f"({nc_path.name})", fontsize=file_fontsize, y=suptitle_y)
-        ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
-        ax.set_extent(
-            [
-                float(np.nanmin(lon2d)),
-                float(np.nanmax(lon2d)),
-                float(np.nanmin(lat2d)),
-                float(np.nanmax(lat2d)),
-            ],
-            crs=ccrs.PlateCarree(),
-        )
-        mesh = ax.pcolormesh(
-            lon2d,
-            lat2d,
-            np.asarray(da.values),
-            transform=ccrs.PlateCarree(),
-            vmin=vmin,
-            vmax=vmax,
-            cmap=cmap,
-        )
-        ax.coastlines(resolution="50m", linewidth=0.8)
-        ax.add_feature(cfeature.BORDERS, linewidth=0.6)
-        if add_states:
-            ax.add_feature(cfeature.STATES, linewidth=0.4)
-        if gridlines:
-            gl: Any = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.6)
-            gl.right_labels = False
-            gl.top_labels = False
-        ax.set_title(_build_main_title(ds, var), fontsize=title_fontsize)
-        units = str(ds[var].attrs.get("units", "")).strip()
-        cb = fig.colorbar(
-            mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
-        )
-        cb.set_label(units or var)
-        plt.tight_layout(rect=(0, 0, 1, 0.94))
-        plt.savefig(out_png, dpi=150)
-        plt.close(fig)
-        plotted += 1
-        logging.info("Wrote %s", out_png)
-    return (plotted, skipped)
 
 
 def _to_lon180(lon2d: np.ndarray) -> np.ndarray:
