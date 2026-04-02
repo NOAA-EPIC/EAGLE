@@ -443,7 +443,7 @@ training:
       <<: *gpu-batchargs
       memory: 128G
       rundir: '{{ training.rundir }}'
-      walltime: '00:10:00'
+      walltime: '00:30:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate training
@@ -584,7 +584,26 @@ visualization:
         - u_isobaricInhPa_0250
         - v_isobaricInhPa_0250
         - sp_surface
+
   grid2grid:
+    spatial_stat_plots:
+      enabled: true
+      pattern: "*.nc"
+      lam_prefix: "grid_stat_nested"
+      global_prefix: "grid_stat_nested"
+      cmap: "RdBu_r"
+      figsize: "9.75,4.875"
+      add_states: false
+      gridlines: false
+      max_files: 0
+      file_fontsize: 8.0
+      title_fontsize: 11.0
+      suptitle_y: 0.995
+      lam_stats_root: "{{ val.vx.rundir }}/grid2grid/lam/run/stats"
+      lam_plots_root: "{{ val.vx.rundir }}/grid2grid/lam/run/plots"
+      global_stats_root: "{{ val.vx.rundir }}/grid2grid/global/run/stats"
+      global_plots_root: "{{ val.vx.rundir }}/grid2grid/global/run/plots"
+
     global:
       visualization:
         eagle_tools:
@@ -595,6 +614,7 @@ visualization:
         rundir: '{{ val.visualization.rundir }}/grid2grid/global'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
+
     lam:
       visualization:
         eagle_tools:
@@ -605,6 +625,7 @@ visualization:
         rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
+
   grid2obs:
     global:
       visualization:
@@ -616,6 +637,7 @@ visualization:
         rundir: '{{ val.visualization.rundir }}/grid2obs/global'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
+
     lam:
       visualization:
         eagle_tools:

@@ -1,4 +1,4 @@
-BASHSRCS = format setup
+BASHSRCS = $(wildcard ../.github/scripts/*) format setup
 ENVS     = data inference prewxvx training visualization wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
@@ -6,6 +6,7 @@ STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training v
 TOOLING  = config devenv env format lint realize shellcheck test typecheck validate yamllint
 
 INSTALLDIR ?= conda
+SHELL      := $(shell which bash)
 
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))

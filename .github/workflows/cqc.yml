@@ -1,0 +1,31 @@
+name: Code Quality Checks
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+jobs:
+  code-quality-checks:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v3
+      - name: Filesystem Check/Clean
+        run: .github/scripts/fsclean
+      - name: Build Runtime Environment
+        run: .github/scripts/build
+      - name: Check Formatting
+        run: .github/scripts/fmtcheck
+      - name: Run Python Linter
+        run: make -C src lint
+      - name: Run Python Typechecker
+        run: make -C src typecheck
+      - name: Run Shell Checker
+        run: make -C src shellcheck
+      - name: Run YAML Linter
+        run: make -C src yamllint
+      - name: Show Disk Usage
+        run: set -x && df -h . && du -hs .

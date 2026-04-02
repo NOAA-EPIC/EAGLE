@@ -7,13 +7,12 @@ set -aeuo pipefail
 # PM FIXME
 
 CONDAFLAGS=(
-  --quiet
   --yes
   --channel conda-forge
   --channel ufs-community
   --override-channels
 )
-INSTALLDIR=${INSTALLDIR:-$PWD/conda}
+INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 
 # In all functions, make variables local unless they are either intended for global use, or set in
 # a subshell that exits at the end of the function.
@@ -28,12 +27,12 @@ cachedir() {
 conda_activate() {
   local env
   env=$1
-  source $INSTALLDIR/etc/profile.d/conda.sh
+  source $INSTALLDIR/etc/profile.d/mamba.sh
   # Activation scripts shipped with conda packages may contain statements either expanding undefined
   # variables or exiting with error status, so temporarily disable the checks for these conditions,
   # then enable again.
   set +eu
-  conda activate $env
+  mamba activate $env
   set -eu
 }
 
@@ -45,7 +44,7 @@ conda_create() {
   shift
   conda_activate base
   msg Creating environment: $name
-  conda create ${CONDAFLAGS[@]} --name $name $* $UWTOOLS
+  mamba create ${CONDAFLAGS[@]} --name $name $* $UWTOOLS
   (
     # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
     # files in the runtime area, rather than in the user's home directory, which might impact their
@@ -101,7 +100,7 @@ EOF
     dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
     mkdir -pv $dir_deactivate
     # NB: Append to the existing script:
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
+    cat <<EOF >>$dir_deactivate/eagle.sh
 unset FI_PSM3_UUID
 if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
   export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
@@ -138,11 +137,17 @@ conda_create_wxvx() {
 }
 
 conda_env_exists() {
+  local d name x
   name=$1
-  (
-    conda_activate base
-    conda env list --json | jq -r .envs_details[].name | grep -q "^${name}$"
-  )
+  d=$INSTALLDIR/envs
+  mkdir -p $d
+  for x in $(find $d -maxdepth 1 -mindepth 1 -type d | sort); do
+    if [[ $(basename $x) == "$name" ]]; then
+      msg Found existing conda environment: $name
+      return 0
+    fi
+  done
+  return 1
 }
 
 # PM FIXME
@@ -155,7 +160,7 @@ conda_install() {
   (
     conda_activate $name
     set +eu
-    conda install ${CONDAFLAGS[@]} "$@"
+    mamba install ${CONDAFLAGS[@]} "$@"
     set -eu
   )
 }
@@ -237,7 +242,7 @@ install_conda() {
     msg Found existing conda installation: $INSTALLDIR
     return
   fi
-  ver=25.9.1-0
+  ver=26.1.1-3
   installer=Miniforge3-$ver-$(uname -s)-$(uname -p).sh
   url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
   msg Installing conda
@@ -315,10 +320,11 @@ EOF
 parse_kvargs $@
 install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
+MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
-export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
+export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
 environments=(base data inference prewxvx training visualization wxvx)
 for name in ${environments[@]}; do
-  conda_create_$name
+  time conda_create_$name
 done
 msg Done
