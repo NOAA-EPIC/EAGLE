@@ -33,18 +33,15 @@ class Visualization(AssetsTimeInvariant):
         Plots for all variables and stats, plus optional grid2grid spatial-stat plots.
         """
         yield self.taskname(f"{self._name} plots")
-
-        tasks = [
+        reqs = [
             self._plot(var, stat)
             for var in self.config["variables"]
             for stat in self.config["stats"]
         ]
-
         # spatial_cfg = self._grid2grid_spatial_cfg
         # if spatial_cfg.get("enabled", False):
-        #     tasks.append(self.spatial_stat_plots())
-
-        yield tasks
+        #     reqs.append(self.spatial_stat_plots())
+        yield reqs
 
     @task
     def postwxvx(self):
@@ -61,7 +58,6 @@ class Visualization(AssetsTimeInvariant):
             **{var: Asset(ncpath, ncpath.is_file) for var, ncpath in ncfiles.items()},
         }
         yield None
-
         path.parent.mkdir(parents=True, exist_ok=True)
         get_yaml_config(self.config["eagle_tools"]).dump(path)
         logfile = self.rundir / "postwxvx.log"
@@ -80,21 +76,16 @@ class Visualization(AssetsTimeInvariant):
         existing verification outputs.
         """
         yield self.taskname(f"{self._name} spatial stat plots")
-
         spatial_cfg = self._grid2grid_spatial_cfg
         lam_plots_root = Path(spatial_cfg["lam_plots_root"])
         global_plots_root = Path(spatial_cfg["global_plots_root"])
-
         yield {
             "lam_plots_root": Asset(lam_plots_root, lam_plots_root.is_dir),
             "global_plots_root": Asset(global_plots_root, global_plots_root.is_dir),
         }
-
         yield self.postwxvx()
-
         lam_plots_root.mkdir(parents=True, exist_ok=True)
         global_plots_root.mkdir(parents=True, exist_ok=True)
-
         _run_spatial_stat_plots(
             lam_stats_root=spatial_cfg["lam_stats_root"],
             lam_plots_root=spatial_cfg["lam_plots_root"],
@@ -122,10 +113,8 @@ class Visualization(AssetsTimeInvariant):
         yield self.taskname(f"{self._name} {var} {stat} plot")
         path = self.rundir / f"{var}_{stat}.png"
         yield Asset(path, path.is_file)
-
         req = self.postwxvx()
         yield req
-
         ds = xr.open_dataset(req.ref[var])
         var_stat = cast("xr.DataArray", ds[stat])
         var_stat.plot()  # type: ignore[call-arg]
