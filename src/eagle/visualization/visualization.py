@@ -94,7 +94,7 @@ class Visualization(AssetsTimeInvariant):
         lam_plots_root.mkdir(parents=True, exist_ok=True)
         global_plots_root.mkdir(parents=True, exist_ok=True)
 
-        run_spatial_stat_plots(
+        _run_spatial_stat_plots(
             lam_stats_root=spatial_cfg["lam_stats_root"],
             lam_plots_root=spatial_cfg["lam_plots_root"],
             global_stats_root=spatial_cfg["global_stats_root"],
@@ -156,7 +156,20 @@ class Visualization(AssetsTimeInvariant):
         )
 
 
-def choose_diff_var(ds: xr.Dataset) -> str | None:
+def _build_main_title(ds: xr.Dataset, var: str) -> str:
+    long_name = str(ds[var].attrs.get("long_name", "")).strip() or var
+    init_time = str(ds[var].attrs.get("init_time", "")).strip()
+    valid_time = str(ds[var].attrs.get("valid_time", "")).strip()
+    diff_desc = str(ds.attrs.get("Difference", "")).strip()
+    lines: list[str] = [long_name]
+    if init_time or valid_time:
+        lines.append(f"init={init_time}  valid={valid_time}")
+    if diff_desc:
+        lines.append(f"Difference: {diff_desc}")
+    return "\n".join(lines)
+
+
+def _choose_diff_var(ds: xr.Dataset) -> str | None:
     for k in ds.data_vars:
         v = cast("str", k)
         if v.startswith("DIFF_"):
@@ -164,28 +177,7 @@ def choose_diff_var(ds: xr.Dataset) -> str | None:
     return None
 
 
-def pick_2d(da: xr.DataArray) -> xr.DataArray:
-    out = da
-    while out.ndim > 2:  # noqa: PLR2004
-        out = out.isel({out.dims[0]: 0})
-    return out
-
-
-def mask_fill(da: xr.DataArray) -> xr.DataArray:
-    fill = da.attrs.get("_FillValue", None)
-    if fill is None:
-        fill = da.encoding.get("_FillValue", None)
-        miss = da.attrs.get("missing_value", None)
-
-    out = da
-    if fill is not None:
-        out = out.where(out != fill)
-    if miss is not None:
-        out = out.where(out != miss)
-    return out
-
-
-def finite_min_max(da: xr.DataArray) -> tuple[float, float]:
+def _finite_min_max(da: xr.DataArray) -> tuple[float, float]:
     a = np.asarray(da.values).astype("float64", copy=False)
     a = a[np.isfinite(a)]
     if a.size == 0:
@@ -194,25 +186,10 @@ def finite_min_max(da: xr.DataArray) -> tuple[float, float]:
     return float(a.min()), float(a.max())
 
 
-def to_lon180(lon2d: np.ndarray) -> np.ndarray:
-    lon = np.asarray(lon2d, dtype="float64")
-    return ((lon + 180.0) % 360.0) - 180.0
-
-
-def parse_figsize(s: str) -> tuple[float, float]:
-    try:
-        w, h = (float(x.strip()) for x in s.split(","))
-    except Exception as e:
-        msg = 'figsize must look like "9.75,4.875"'
-        raise ValueError(msg) from e
-    return w, h
-
-
-def infer_date_hour_from_path(nc_path: Path) -> tuple[str, str]:
+def _infer_date_hour_from_path(nc_path: Path) -> tuple[str, str]:
     parts = nc_path.parts
     yyyymmdd = "unknown_date"
     hh = "unknown_hour"
-
     for i, part in enumerate(parts):
         if len(part) == 8 and part.isdigit():  # noqa: PLR2004
             yyyymmdd = part
@@ -223,32 +200,46 @@ def infer_date_hour_from_path(nc_path: Path) -> tuple[str, str]:
             ):
                 hh = parts[i + 1]
             break
-
     return yyyymmdd, hh
 
 
-def out_png_for_nc(nc_path: Path, plots_root: Path) -> Path:
-    yyyymmdd, hh = infer_date_hour_from_path(nc_path)
+def _mask_fill(da: xr.DataArray) -> xr.DataArray:
+    fill = da.attrs.get("_FillValue", None)
+    if fill is None:
+        fill = da.encoding.get("_FillValue", None)
+        miss = da.attrs.get("missing_value", None)
+    out = da
+    if fill is not None:
+        out = out.where(out != fill)
+    if miss is not None:
+        out = out.where(out != miss)
+    return out
+
+
+def _out_png_for_nc(nc_path: Path, plots_root: Path) -> Path:
+    yyyymmdd, hh = _infer_date_hour_from_path(nc_path)
     out_dir = plots_root / yyyymmdd / hh
     out_dir.mkdir(parents=True, exist_ok=True)
     return out_dir / f"{nc_path.stem}_spatial.png"
 
 
-def build_main_title(ds: xr.Dataset, var: str) -> str:
-    long_name = str(ds[var].attrs.get("long_name", "")).strip() or var
-    init_time = str(ds[var].attrs.get("init_time", "")).strip()
-    valid_time = str(ds[var].attrs.get("valid_time", "")).strip()
-    diff_desc = str(ds.attrs.get("Difference", "")).strip()
-
-    lines: list[str] = [long_name]
-    if init_time or valid_time:
-        lines.append(f"init={init_time}  valid={valid_time}")
-    if diff_desc:
-        lines.append(f"Difference: {diff_desc}")
-    return "\n".join(lines)
+def _parse_figsize(s: str) -> tuple[float, float]:
+    try:
+        w, h = (float(x.strip()) for x in s.split(","))
+    except Exception as e:
+        msg = 'figsize must look like "9.75,4.875"'
+        raise ValueError(msg) from e
+    return w, h
 
 
-def process_one_target(  # noqa: C901, PLR0913, PLR0915
+def _pick_2d(da: xr.DataArray) -> xr.DataArray:
+    out = da
+    while out.ndim > 2:  # noqa: PLR2004
+        out = out.isel({out.dims[0]: 0})
+    return out
+
+
+def _process_one_target(  # noqa: C901, PLR0913, PLR0915
     *,
     label: str,
     stats_root: Path,
@@ -293,12 +284,12 @@ def process_one_target(  # noqa: C901, PLR0913, PLR0915
         if max_files and idx > max_files:
             break
 
-        out_png = out_png_for_nc(nc_path, plots_root)
+        out_png = _out_png_for_nc(nc_path, plots_root)
 
         try:
             ds = xr.open_dataset(nc_path)
 
-            var = choose_diff_var(ds)
+            var = _choose_diff_var(ds)
             if var is None:
                 skipped += 1
                 print(f"[{label}] SKIP (no DIFF_ var): {nc_path.name}")  # noqa: T201
@@ -310,11 +301,11 @@ def process_one_target(  # noqa: C901, PLR0913, PLR0915
                 continue
 
             lat2d = np.asarray(ds["lat"].values)
-            lon2d = to_lon180(np.asarray(ds["lon"].values))
-            da = mask_fill(pick_2d(ds[var]))
+            lon2d = _to_lon180(np.asarray(ds["lon"].values))
+            da = _mask_fill(_pick_2d(ds[var]))
 
             if vmin_arg is None or vmax_arg is None:
-                auto_vmin, auto_vmax = finite_min_max(da)
+                auto_vmin, auto_vmax = _finite_min_max(da)
                 vmin = auto_vmin if vmin_arg is None else vmin_arg
                 vmax = auto_vmax if vmax_arg is None else vmax_arg
             else:
@@ -353,7 +344,7 @@ def process_one_target(  # noqa: C901, PLR0913, PLR0915
                 gl.right_labels = False
                 gl.top_labels = False
 
-            ax.set_title(build_main_title(ds, var), fontsize=title_fontsize)
+            ax.set_title(_build_main_title(ds, var), fontsize=title_fontsize)
 
             units = str(ds[var].attrs.get("units", "")).strip()
             cb = fig.colorbar(
@@ -379,7 +370,12 @@ def process_one_target(  # noqa: C901, PLR0913, PLR0915
     return (plotted, skipped)
 
 
-def run_spatial_stat_plots(  # noqa: PLR0913
+def _to_lon180(lon2d: np.ndarray) -> np.ndarray:
+    lon = np.asarray(lon2d, dtype="float64")
+    return ((lon + 180.0) % 360.0) - 180.0
+
+
+def _run_spatial_stat_plots(  # noqa: PLR0913
     *,
     lam_stats_root: str,
     lam_plots_root: str,
@@ -399,9 +395,9 @@ def run_spatial_stat_plots(  # noqa: PLR0913
     title_fontsize: float = 11.0,
     suptitle_y: float = 0.995,
 ) -> None:
-    fig_w, fig_h = parse_figsize(figsize)
+    fig_w, fig_h = _parse_figsize(figsize)
 
-    process_one_target(
+    _process_one_target(
         label="LAM",
         stats_root=Path(lam_stats_root),
         plots_root=Path(lam_plots_root),
@@ -420,7 +416,7 @@ def run_spatial_stat_plots(  # noqa: PLR0913
         suptitle_y=suptitle_y,
     )
 
-    process_one_target(
+    _process_one_target(
         label="GLOBAL",
         stats_root=Path(global_stats_root),
         plots_root=Path(global_plots_root),
