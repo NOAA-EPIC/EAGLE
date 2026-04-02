@@ -28,6 +28,7 @@
   },
   "properties": {
     "visualization": {
+      "additionalProperties": false,
       "properties": {
         "eagle_tools": {
           "properties": {
@@ -71,6 +72,9 @@
         },
         "rundir": {
           "type": "string"
+        },
+        "spatial_stat_plots": {
+          "type": "object"
         },
         "stats": {
           "type": "array"
