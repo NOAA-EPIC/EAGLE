@@ -584,7 +584,6 @@ visualization:
         - u_isobaricInhPa_0250
         - v_isobaricInhPa_0250
         - sp_surface
-
   grid2grid:
     spatial_stat_plots:
       enabled: true
@@ -603,7 +602,6 @@ visualization:
       lam_plots_root: "{{ val.vx.rundir }}/grid2grid/lam/run/plots"
       global_stats_root: "{{ val.vx.rundir }}/grid2grid/global/run/stats"
       global_plots_root: "{{ val.vx.rundir }}/grid2grid/global/run/plots"
-
     global:
       visualization:
         eagle_tools:
@@ -614,7 +612,6 @@ visualization:
         rundir: '{{ val.visualization.rundir }}/grid2grid/global'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
-
     lam:
       visualization:
         eagle_tools:
@@ -625,7 +622,6 @@ visualization:
         rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
-
   grid2obs:
     global:
       visualization:
@@ -637,7 +633,6 @@ visualization:
         rundir: '{{ val.visualization.rundir }}/grid2obs/global'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
-
     lam:
       visualization:
         eagle_tools:
