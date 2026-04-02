@@ -1,6 +1,0 @@
-channels:
-  - conda-forge
-dependencies:
-  - python=3.11
-  - ufs2arco=0.17.0
-name: ufs2arco

@@ -205,25 +205,45 @@ jobs:
 
           RUNROOT="${SRC_ABS}/run/${EXP}"
 
-          # ---- pipeline steps ----
+          # Run data-prep and check artifacts.
+
           make grids-and-meshes config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
-          make zarr-gfs config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
-          make zarr-hrrr config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
 
-          wait_runscript_batch "${RUNROOT}/data" "zarr-gfs" "Zarr GFS"
-          wait_runscript_batch "${RUNROOT}/data" "zarr-hrrr" "Zarr HRRR"
+          for datasource in gfs hrrr; do
+            make zarr-$datasource config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          done
 
-          test -d "${RUNROOT}/data/gfs.zarr"  || { echo "Missing ${RUNROOT}/data/gfs.zarr"; exit 1; }
-          test -d "${RUNROOT}/data/hrrr.zarr" || { echo "Missing ${RUNROOT}/data/hrrr.zarr"; exit 1; }
+          for datasource in gfs hrrr; do
+            wait_runscript_batch "${RUNROOT}/data" "zarr-$datasource" "Zarr $datasource"
+          done
+
+          for datasource in gfs hrrr; do
+            test -d "${RUNROOT}/data/$datasource.zarr" || {
+              echo "Missing ${RUNROOT}/data/$datasource.zarr"
+              exit 1
+            }
+          done
+
+          # Run training.
 
           make training config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/training" "training" "Training"
 
+          # Run inference and check artifacts.
+
           make inference config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
           wait_runscript_batch "${RUNROOT}/inference" "inference" "Inference"
 
-          make prewxvx-global config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
-          make prewxvx-lam    config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          find "${RUNROOT}/inference" -type f -name "*.nc" -print -quit | grep -q . || {
+            echo "ERROR: No inference NetCDF outputs found under ${RUNROOT}/inference"
+            exit 1
+          }
+
+          # Run verification and check artifacts.
+
+          for extent in global lam; do
+            make prewxvx-$extent config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          done
 
           for truth in grid obs; do
             for extent in global lam; do
@@ -231,16 +251,11 @@ jobs:
             done
           done
 
-          wait_runscript_batch "${RUNROOT}/vx/grid2grid/global" "wxvx-grid2grid-global" "VX grid2grid global"
-          wait_runscript_batch "${RUNROOT}/vx/grid2grid/lam" "wxvx-grid2grid-lam" "VX grid2grid lam"
-          wait_runscript_batch "${RUNROOT}/vx/grid2obs/global" "wxvx-grid2obs-global" "VX grid2obs global"
-          wait_runscript_batch "${RUNROOT}/vx/grid2obs/lam" "wxvx-grid2obs-lam" "VX grid2obs lam"
-
-          # Artifact checks
-          find "${RUNROOT}/inference" -type f -name "*.nc" -print -quit | grep -q . || {
-            echo "ERROR: No inference NetCDF outputs found under ${RUNROOT}/inference"
-            exit 1
-          }
+          for truth in grid obs; do
+            for extent in global lam; do
+              wait_runscript_batch "$RUNROOT/vx/grid2$truth/$extent" "wxvx-grid2$truth-$extent" "VX grid2$truth $extent"
+            done
+          done
 
           find "${RUNROOT}/vx" -type f -name "*.png" -print -quit | grep -q . || {
             echo "ERROR: No verification PNGs found under ${RUNROOT}/vx"
@@ -251,6 +266,28 @@ jobs:
             echo "ERROR: No verification .stat outputs found under ${RUNROOT}/vx"
             exit 1
           }
+
+          # Run visualization and check artifacts.
+
+          for truth in grid obs; do
+            for extent in global lam; do
+              make vis-$truth-$extent config=eagle.yaml INSTALLDIR="$INSTALLDIR"
+            done
+          done
+
+          for truth in grid obs; do
+            for extent in global lam; do
+              dir=$RUNROOT/visualization/grid2$truth/$extent
+              count=$(ls -1 $dir/*.png | wc -l)
+              expected=8
+              test $count -eq $expected || {
+                echo "ERROR: Found $count PNG files in $dir, expected $expected"
+                exit 1
+              }
+            done
+          done
+
+          # Done.
 
           echo "Nested EAGLE CI pipeline completed successfully."
 

@@ -1,8 +1,0 @@
-name: wxvx
-channels:
-  - ufs-community
-  - paul.madden
-  - conda-forge
-dependencies:
-  - wxvx
-  - python=3.13
