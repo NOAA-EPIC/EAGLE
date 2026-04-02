@@ -1,234 +1,18 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=1090,1091,2046,2048,2068,2086,2206,2207
+# shellcheck disable=1090,1091,2046,2068,2086,2206
 
 set -aeuo pipefail
 
-CONDAFLAGS=(
-  --quiet
-  --yes
-  --channel conda-forge
-  --channel ufs-community
-  --override-channels
-)
-INSTALLDIR=${INSTALLDIR:-$PWD/conda}
-UWTOOLS="uwtools=2.13.*"
+INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 
 # In all functions, make variables local unless they are either intended for global use, or set in
 # a subshell that exits at the end of the function.
 
 cachedir() {
   (
-    conda_activate base
+    env_activate base
     echo $CONDA_PREFIX/cache
-  )
-}
-
-conda_activate() {
-  local env
-  env=$1
-  source $INSTALLDIR/etc/profile.d/conda.sh
-  # Activation scripts shipped with conda packages may contain statements either expanding undefined
-  # variables or exiting with error status, so temporarily disable the checks for these conditions,
-  # then enable again.
-  set +eu
-  conda activate $env
-  set -eu
-}
-
-conda_create() {
-  local name
-  name=$1
-  shift
-  conda_activate base
-  msg Creating environment: $name
-  conda create ${CONDAFLAGS[@]} --name $name $* $UWTOOLS
-  (
-    # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
-    # files in the runtime area, rather than in the user's home directory, which might impact their
-    # quota. When deactivated, environments should reset or unset this value, as appropriate.
-    conda_activate $name
-    dir_activate=$CONDA_PREFIX/etc/conda/activate.d
-    mkdir -pv $dir_activate
-    cat <<EOF >$dir_activate/eagle.sh
-if [[ -v XDG_CACHE_HOME ]]; then
-  export EAGLE_OLD_XDG_CACHE_HOME=\$XDG_CACHE_HOME
-fi
-export XDG_CACHE_HOME=$(cachedir)
-EOF
-    dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
-    mkdir -pv $dir_deactivate
-    cat <<EOF >$dir_deactivate/eagle.sh
-unset XDG_CACHE_HOME
-if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
-  export XDG_CACHE_HOME=\$EAGLE_OLD_XDG_CACHE_HOME
-  unset EAGLE_OLD_XDG_CACHE_HOME
-fi
-EOF
-  )
-}
-
-conda_create_base() {
-  local name pkgs
-  name=base
-  pkgs=(
-    $UWTOOLS
-  )
-  test -v EAGLE_DEV && pkgs+=($(devpkgs))
-  conda_install $name ${pkgs[@]}
-}
-
-conda_create_data() {
-  local args name pkgs
-  name=data
-  pkgs=(
-    impi_rt=2021.13.*
-    mpi4py=4.1.*
-    numpy=1.26.4
-    pandas=2.3.3
-    setuptools=81.0.*
-    types-pyyaml
-    ufs2arco=0.19.*
-  )
-  test -v EAGLE_DEV && pkgs+=($(devpkgs))
-  args=($name ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-    (
-      conda_activate $name
-      dir_activate=$CONDA_PREFIX/etc/conda/activate.d
-      mkdir -pv $dir_activate
-      cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
-if [[ -v FI_PSM3_UUID ]]; then
-  export EAGLE_OLD_FI_PSM3_UUID=\$FI_PSM3_UUID
-fi
-export FI_PSM3_UUID=eagle
-EOF
-      dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
-      mkdir -pv $dir_deactivate
-      cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
-unset FI_PSM3_UUID
-if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
-  export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
-  unset EAGLE_OLD_FI_PSM3_UUID
-fi
-EOF
-    )
-  fi
-  pip_install $name anemoi-datasets==0.5.* anemoi-graphs==0.9.*
-}
-
-conda_create_inference() {
-  local args name pkgs
-  name=inference
-  pkgs=(
-    flash-attn=2.8.*
-    numpy=2.2.6.*
-    python=3.12
-  )
-  test -v EAGLE_DEV && pkgs+=($(devpkgs))
-  args=($name ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-    write_anemoi_activation_scripts $name
-  fi
-  pip_install $name anemoi-inference==0.10.* anemoi-models==0.13.* eagle-tools
-}
-
-conda_create_prewxvx() {
-  local args name pkgs
-  name=prewxvx
-  pkgs=(
-    numpy=2.2.6.*
-    pandas=2.3.3.*
-    python=3.13
-    xesmf=0.8.*
-  )
-  test -v EAGLE_DEV && pkgs+=($(devpkgs))
-  args=($name ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-  fi
-  pip_install $name eagle-tools
-}
-
-conda_create_training() {
-  local args name pkgs
-  name=training
-  pkgs=(
-    flash-attn=2.8.*
-    numpy=1.26.4.*
-    python=3.12
-    setuptools=81.0.*
-  )
-  test -v EAGLE_DEV && pkgs+=($(devpkgs))
-  args=($name ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-    write_anemoi_activation_scripts $name
-  fi
-  pip_install $name anemoi-models==0.13.* anemoi-training==0.10.*
-}
-
-conda_create_visualization() {
-  local args name pkgs
-  name=visualization
-  pkgs=(
-    python=3.13
-    xarray=2026.2.0
-  )
-  test -v EAGLE_DEV && pkgs+=($(devpkgs))
-  args=($name ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-  fi
-  pip_install $name eagle-tools
-}
-
-conda_create_wxvx() {
-  local args name pkgs
-  name=wxvx
-  pkgs=(
-    wxvx=0.7.*
-  )
-  test -v EAGLE_DEV && pkgs+=($(devpkgs))
-  args=($name --channel oar-gsl ${pkgs[@]})
-  if conda_env_exists $name; then
-    conda_install ${args[@]}
-  else
-    conda_create ${args[@]}
-  fi
-}
-
-conda_env_exists() {
-  name=$1
-  (
-    conda_activate base
-    conda env list --json | jq -r .envs_details[].name | grep -q "^${name}$"
-    test $? -eq 0 && msg Found existing conda environment: $name
-  )
-}
-
-conda_install() {
-  local name
-  name=$1
-  shift
-  msg Installing conda packages into environment: $name
-  (
-    conda_activate $name
-    set +eu
-    conda install ${CONDAFLAGS[@]} "$@"
-    set -eu
   )
 }
 
@@ -247,16 +31,30 @@ cuda_release() {
   )
 }
 
-devpkgs() {
-  local pkgs=(
-    go-shfmt=3.13.*
-    jq=1.8.*
-    mypy=1.19.*
-    ruff=0.14.*
-    shellcheck=0.11.*
-    yamllint=1.38.*
-  )
-  echo ${pkgs[@]}
+env_activate() {
+  local env
+  env=$1
+  source $INSTALLDIR/etc/profile.d/mamba.sh
+  # Activation scripts shipped with conda packages may contain statements either expanding undefined
+  # variables or exiting with error status, so temporarily disable the checks for these conditions,
+  # then enable again.
+  set +eu
+  mamba activate $env
+  set -eu
+}
+
+env_exists() {
+  local d name x
+  name=$1
+  d=$INSTALLDIR/envs
+  mkdir -p $d
+  for x in $(find $d -maxdepth 1 -mindepth 1 -type d | sort); do
+    if [[ $(basename $x) == "$name" ]]; then
+      msg Found existing conda environment: $name
+      return 0
+    fi
+  done
+  return 1
 }
 
 install_conda() {
@@ -265,13 +63,25 @@ install_conda() {
     msg Found existing conda installation: $INSTALLDIR
     return
   fi
-  ver=25.9.1-0
+  ver=26.1.1-3
   installer=Miniforge3-$ver-$(uname -s)-$(uname -p).sh
   url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
   msg Installing conda
   wget -nv $url
   bash $installer -bfp $INSTALLDIR
   rm -v $installer
+}
+
+install_devpkgs_maybe() {
+  local name
+  if [[ -v EAGLEDEV ]]; then
+    name=$1
+    msg Installing dev packages into environment: $name
+    (
+      env_activate $name
+      mamba env update ${MAMBAFLAGS[@]} --file envs/dev.yaml
+    )
+  fi
 }
 
 msg() {
@@ -292,21 +102,119 @@ parse_kvargs() {
   export ARGS
 }
 
-pip_install() {
-  local name
+prep_env() {
+  local args name
   name=$1
-  shift
-  msg Installing pip packages into environment: $name
+  args=(${MAMBAFLAGS[@]} --file envs/$name.yaml --name $name)
   (
-    conda_activate $name
-    pip install $@ | { grep -v "already satisfied" || true; }
+    env_activate base
+    if env_exists $name; then
+      msg Updating environment: $name
+      mamba env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
+    else
+      msg Creating environment: $name
+      mamba env create ${args[@]}
+    fi
   )
+  install_devpkgs_maybe $name
+  # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
+  # files in the runtime area, rather than in the user's home directory, which might impact their
+  # quota. When deactivated, environments should reset or unset this value, as appropriate.
+  #
+  # Always run this step to re-create these scripts, as downstream steps will *append* to them.
+  (
+    env_activate $name
+    dir_activate=$CONDA_PREFIX/etc/conda/activate.d
+    mkdir -pv $dir_activate
+    cat <<EOF >$dir_activate/eagle.sh
+if [[ -v XDG_CACHE_HOME ]]; then
+  export EAGLE_OLD_XDG_CACHE_HOME=\$XDG_CACHE_HOME
+fi
+export XDG_CACHE_HOME=$(cachedir)
+EOF
+    dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
+    mkdir -pv $dir_deactivate
+    cat <<EOF >$dir_deactivate/eagle.sh
+unset XDG_CACHE_HOME
+if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
+  export XDG_CACHE_HOME=\$EAGLE_OLD_XDG_CACHE_HOME
+  unset EAGLE_OLD_XDG_CACHE_HOME
+fi
+EOF
+  )
+}
+
+prep_env_base() {
+  local name
+  name=base
+  (
+    env_activate $name
+    msg Updating environment: $name
+    mamba env update ${MAMBAFLAGS[@]} --file envs/$name.yaml
+    install_devpkgs_maybe $name
+  )
+}
+
+prep_env_data() {
+  local name
+  name=data
+  prep_env $name
+  # Add logic to the [de]activation scripts to silence a run-time complaint:
+  (
+    env_activate $name
+    dir_activate=$CONDA_PREFIX/etc/conda/activate.d
+    mkdir -pv $dir_activate
+    # NB: Append to the existing script:
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
+if [[ -v FI_PSM3_UUID ]]; then
+  export EAGLE_OLD_FI_PSM3_UUID=\$FI_PSM3_UUID
+fi
+export FI_PSM3_UUID=eagle
+EOF
+    dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
+    mkdir -pv $dir_deactivate
+    # NB: Append to the existing script:
+    cat <<EOF >>$dir_deactivate/eagle.sh
+unset FI_PSM3_UUID
+if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
+  export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
+  unset EAGLE_OLD_FI_PSM3_UUID
+fi
+EOF
+  )
+}
+
+prep_env_inference() {
+  local name
+  name=inference
+  prep_env $name
+  write_anemoi_activation_scripts $name
+}
+
+prep_env_prewxvx() {
+  prep_env prewxvx
+}
+
+prep_env_training() {
+  local name
+  name=training
+  prep_env $name
+  write_anemoi_activation_scripts $name
+}
+
+prep_env_visualization() {
+  prep_env visualization
+}
+
+prep_env_wxvx() {
+  prep_env wxvx
 }
 
 write_anemoi_activation_scripts() {
   local name=$1
   (
-    conda_activate $name
+    env_activate $name
+    # NB: Append to the existing script:
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
 modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
 if [[ -n "\$modules" ]]; then
@@ -314,6 +222,7 @@ if [[ -n "\$modules" ]]; then
 fi
 $(cat $(cuda_command_file))
 EOF
+    # NB: Append to the existing script:
     cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
 module purge 2>/dev/null
 if [[ -v EAGLE_OLD_MODULES ]]; then
@@ -327,10 +236,12 @@ EOF
 parse_kvargs $@
 install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
+MAMBAFLAGS=(--log-level error --yes)
+MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
-export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
+export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
 environments=(base data inference prewxvx training visualization wxvx)
 for name in ${environments[@]}; do
-  conda_create_$name
+  time prep_env_$name
 done
 msg Done

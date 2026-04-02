@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=2068,2086
+
+GIGSREQD=57
+
+gigsfree() { df . -BG --output=avail | tail -n1 | sed 's/[^0-9]//g'; }
+msg() { echo $GIGSREQD GB NEEDED, $1 GB AVAILABLE: $2; }
+
+initial=$(gigsfree)
+if [[ $initial -ge $GIGSREQD ]]; then
+  msg $initial OK
+else
+  msg $initial CLEANING
+  packages=(
+    'docker-*'
+    'gcc-12'
+    'gcc-13'
+    'gcc-14'
+    'gfortran-*'
+    'google-*'
+    'llvm-*'
+    'microsoft-*'
+    'mysql-*'
+    'postgresql-*'
+    'python3-boto*'
+    'temurin-*'
+    ant
+    azure-cli
+    containerd.io
+    firefox
+    gfortran
+    gh
+    kubectl
+    podman
+    powershell
+    snapd
+  )
+  dirs=(
+    /home/runner/{.cargo,.dotnet,.rustup}
+    /opt/hostedtoolcache/{Ruby,PyPy,node,go,CodeQL}
+    /opt/{az,google,microsoft,pipx}
+    /usr/lib/{firefox,google-cloud-sdk,jvm,snapd}
+    /usr/local/lib/android
+    /usr/local/share/{chromium,powershell}
+    /usr/local/{aws-*,julia*}
+    /usr/share/{az_*,dotnet,gradle-*,kotlinc,miniconda,swift}
+  )
+  (
+    set -x
+    sudo docker system prune -af || true
+    sudo docker builder prune -af || true
+    sudo apt remove -y ${packages[@]} | grep --line-buffered -v "is not installed"
+    sudo apt autoremove -y
+    sudo apt clean -y
+    sudo rm -rf ${dirs[@]}
+  )
+  final=$(gigsfree)
+  reclaimed=$((final - initial))
+  echo RECLAIMED $reclaimed GB
+  if [[ $final -lt $GIGSREQD ]]; then
+    msg $final STOPPING
+    exit 1
+  fi
+  msg $final OK
+fi

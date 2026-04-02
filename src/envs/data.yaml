@@ -1,0 +1,20 @@
+channels:
+  - nodefaults
+  - conda-forge
+  - ufs-community
+dependencies:
+  - cf-xarray 0.10.11
+  - impi_rt 2021.13.*
+  - mpi4py 4.1.*
+  - numpy 1.26.4
+  - pandas 2.3.3
+  - setuptools 81.0.*
+  - types-pyyaml
+  - ufs2arco 0.19.*
+  - uwtools 2.13.*
+  - xarray 2026.2.*
+  - xesmf 0.9.2
+  - pip:
+      - anemoi-datasets==0.5.*
+      - anemoi-graphs==0.9.*
+      - anemoi-transform==0.1.29
