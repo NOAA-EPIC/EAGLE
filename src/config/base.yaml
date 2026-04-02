@@ -580,8 +580,6 @@ visualization:
       file_fontsize: 8.0
       gridlines: false
       max_files: 0
-      pattern: '*.nc'
-      prefix: grid_stat_nested
       stats_root: '{{ val.vx.rundir }}/grid2grid/%s/run/stats'
       suptitle_y: 0.995
       title_fontsize: 11.0

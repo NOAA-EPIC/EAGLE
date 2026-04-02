@@ -71,39 +71,18 @@ class Visualization(AssetsTimeInvariant):
         """
         Spatial-stat PNG plots of grid2grid verification results.
         """
-        yield self.taskname(f"{self._name} spatial stat plots")
-        yield Asset(None, lambda: False)
-        # yield {
-        #     "lam_plots_root": Asset(lam_plots_root, lam_plots_root.is_dir),
-        #     "global_plots_root": Asset(global_plots_root, global_plots_root.is_dir),
-        # }
-        yield self.postwxvx()
+        taskname = self.taskname(f"{self._name} spatial stat plots")
+        yield taskname
         cfg = self.config["spatial_stat_plots"]
-        stats_root = Path(
-            cfg["stats_root"] % "global" if "global" in self.config["name"] else "lam"
-        )
-        if not stats_root.exists():
-            logging.warning("Stats root not found: %s", stats_root)
-            return (0, 0)
+        extent = "global" if "global" in self.config["name"] else "lam"
+        stats_root = Path(cfg["stats_root"] % extent)
+        ncfiles = sorted(stats_root.rglob("grid_stat_*_pairs.nc"))
+        logging.debug("%s: Plotting %s MET diff netCDF files", taskname, len(ncfiles))
+        yield Asset(None, lambda: False)
+        yield self.postwxvx()
         plots_root = Path(self.config["rundir"]) / "plots-spatial-stats"
         plots_root.mkdir(parents=True, exist_ok=True)
-        pattern = cfg["pattern"]
-        found = sorted(stats_root.rglob(pattern))
-        if not found:
-            msg = "No files matching '%s' found under %s"
-            logging.warning(msg, pattern, stats_root)
-            return
-        prefix = cfg["prefix"]
-        nc_files = [p for p in found if p.name.startswith(prefix)]
-        logging.debug(
-            "Found %s files, keeping %s with prefix %s",
-            len(found),
-            len(nc_files),
-            prefix,
-        )
-        plotted = 0
-        skipped = 0
-        for idx, nc_path in enumerate(nc_files, start=1):
+        for idx, nc_path in enumerate(ncfiles, start=1):
             max_files = cfg["max_files"]
             if max_files and idx > max_files:
                 break
@@ -111,12 +90,10 @@ class Visualization(AssetsTimeInvariant):
             ds = xr.open_dataset(nc_path)
             var = _choose_diff_var(ds)
             if var is None:
-                skipped += 1
-                logging.warning("No DIFF_ var: %s", nc_path.name)
+                logging.warning("%s: No DIFF_ var: %s", taskname, nc_path.name)
                 continue
             if "lat" not in ds or "lon" not in ds:
-                skipped += 1
-                logging.warning("Missing lat/lon: %s", nc_path.name)
+                logging.warning("%s: Missing lat/lon: %s", taskname, nc_path.name)
                 continue
             lat2d = np.asarray(ds["lat"].values)
             lon2d = _to_lon180(np.asarray(ds["lon"].values))
@@ -124,7 +101,7 @@ class Visualization(AssetsTimeInvariant):
             vmin, vmax = _finite_min_max(da)
             fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
             fig.suptitle(
-                f"({nc_path.name})", fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"]
+                nc_path.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"]
             )
             ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
             ax.set_extent(
@@ -162,8 +139,7 @@ class Visualization(AssetsTimeInvariant):
             plt.tight_layout(rect=(0, 0, 1, 0.94))
             plt.savefig(path, dpi=150)
             plt.close(fig)
-            plotted += 1
-            logging.info("Wrote %s", path.name)
+            logging.info("%s: Wrote %s", taskname, path.name)
 
     # Private tasks
 
@@ -248,13 +224,6 @@ def _mask_fill(da: xr.DataArray) -> xr.DataArray:
     if miss is not None:
         out = out.where(out != miss)
     return out
-
-
-# def _out_png_for_nc(nc_path: Path, plots_root: Path) -> Path:
-#     yyyymmdd, hh = _infer_date_hour_from_path(nc_path)
-#     out_dir = plots_root / yyyymmdd / hh
-#     out_dir.mkdir(parents=True, exist_ok=True)
-#     return out_dir / f"{nc_path.stem}_spatial.png"
 
 
 def _pick_2d(da: xr.DataArray) -> xr.DataArray:
