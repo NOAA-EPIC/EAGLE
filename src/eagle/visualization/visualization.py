@@ -9,7 +9,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-from iotaa import Asset, collection, task  # provided by uwtools
+from iotaa import Asset, Node, collection, task  # provided by uwtools
 from uwtools.api.config import get_yaml_config
 from uwtools.api.driver import AssetsTimeInvariant
 
@@ -33,7 +33,7 @@ class Visualization(AssetsTimeInvariant):
         Plots for all variables and stats, plus optional grid2grid spatial-stat plots.
         """
         yield self.taskname(f"{self._name} plots")
-        reqs = [
+        reqs: list[Node] = [
             self._plot(var, stat)
             for var in self.config["variables"]
             for stat in self.config["stats"]
@@ -66,83 +66,99 @@ class Visualization(AssetsTimeInvariant):
             shell=True,
         )
 
-    @task
+    @collection
     def spatial_stat_plots(self):
         """
-        Spatial-stat PNG plots of grid2grid verification results.
+        Spatial-stat PNG plots of all grid2grid verification results.
         """
-        taskname = self.taskname(f"{self._name} spatial stat plots")
-        yield taskname
-        cfg = self.config["spatial_stat_plots"]
+        yield self.taskname(f"{self._name} spatial stat plots")
         extent = "global" if "global" in self.config["name"] else "lam"
-        stats_root = Path(cfg["stats_root"] % extent)
-        ncfiles = sorted(stats_root.rglob("grid_stat_*_pairs.nc"))
-        plots_root = Path(self.config["rundir"]) / "plots-spatial-stats"
-        f = lambda ncfile: plots_root / f"{ncfile.stem}_spatial.png"
-        yield [Asset(f(ncfile), f(ncfile).is_file) for ncfile in ncfiles]
-        yield None
-        plots_root.mkdir(parents=True, exist_ok=True)
-        logging.debug("%s: Plotting %s MET diff netCDF files", taskname, len(ncfiles))
-        for idx, ncfile in enumerate(ncfiles, start=1):
-            max_files = cfg["max_files"]
-            if max_files and idx > max_files:
-                break
-            path = plots_root / f"{ncfile.stem}_spatial.png"
-            ds = xr.open_dataset(ncfile)
-            var = _choose_diff_var(ds)
-            if var is None:
-                logging.warning("%s: No DIFF_ var: %s", taskname, ncfile.name)
-                continue
-            if "lat" not in ds or "lon" not in ds:
-                logging.warning("%s: Missing lat/lon: %s", taskname, ncfile.name)
-                continue
-            lat2d = np.asarray(ds["lat"].values)
-            lon2d = _to_lon180(np.asarray(ds["lon"].values))
-            da = _mask_fill(_pick_2d(ds[var]))
-            vmin, vmax = _finite_min_max(da)
-            fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
-            fig.suptitle(
-                ncfile.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"]
-            )
-            ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
-            ax.set_extent(
-                [
-                    float(np.nanmin(lon2d)),
-                    float(np.nanmax(lon2d)),
-                    float(np.nanmin(lat2d)),
-                    float(np.nanmax(lat2d)),
-                ],
-                crs=ccrs.PlateCarree(),
-            )
-            mesh = ax.pcolormesh(
-                lon2d,
-                lat2d,
-                np.asarray(da.values),
-                transform=ccrs.PlateCarree(),
-                vmin=vmin,
-                vmax=vmax,
-                cmap=cfg["cmap"],
-            )
-            ax.coastlines(resolution="50m", linewidth=0.8)
-            ax.add_feature(cfeature.BORDERS, linewidth=0.6)
-            if cfg["add_states"]:
-                ax.add_feature(cfeature.STATES, linewidth=0.4)
-            if cfg["gridlines"]:
-                gl: Any = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.6)
-                gl.right_labels = False
-                gl.top_labels = False
-            ax.set_title(_build_main_title(ds, var), fontsize=cfg["title_fontsize"])
-            units = str(ds[var].attrs.get("units", "")).strip()
-            cb = fig.colorbar(
-                mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
-            )
-            cb.set_label(units or var)
-            plt.tight_layout(rect=(0, 0, 1, 0.94))
-            plt.savefig(path, dpi=150)
-            plt.close(fig)
-            logging.info("%s: Wrote %s", taskname, path.name)
+        stats_root = Path(self.config["spatial_stat_plots"]["stats_root"] % extent)
+        ncpaths = sorted(stats_root.rglob("grid_stat_*_pairs.nc"))
+        outdir = Path(self.config["rundir"], "plots-spatial-stats")
+        pngpath = lambda ncpath: outdir / f"{ncpath.stem}_spatial.png"
+        yield [self._spatial_stat_plot(ncpath, pngpath(ncpath)) for ncpath in ncpaths]
 
     # Private tasks
+
+    @task
+    def _spatial_stat_plot(self, ncpath: Path, pngpath: Path):
+        """
+        Spatial-stat PNG plot of one grid2grid verification result.
+        """
+        taskname = self.taskname(f"{self._name} spatial stat plot {pngpath.name}")
+        yield taskname
+        yield Asset(pngpath, pngpath.is_file)
+        yield None
+        cfg = self.config["spatial_stat_plots"]
+        logging.debug("%s: Plotting %s -> %s", taskname, ncpath, pngpath)
+        ds = xr.open_dataset(ncpath)
+        var = _choose_diff_var(ds)
+        if var is None:
+            logging.error("%s: No DIFF_ var in %s", taskname, ncpath)
+            return
+        # if "lat" not in ds:
+        #     logging.error("%s: Missing lat in %s", taskname, ncpath)
+        #     return
+        # if "lon" not in ds:
+        #     logging.error("%s: Missing lon in %s", taskname, ncpath)
+        #     return
+        lat2d = np.asarray(ds["lat"].values)
+        lon2d = _to_lon180(np.asarray(ds["lon"].values))
+        da = _mask_fill(_pick_2d(ds[var]))
+        vmin, vmax = _finite_min_max(da)
+        fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
+        fig.suptitle(ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"])
+        ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
+        extent = list(
+            map(
+                float,
+                [
+                    np.nanmin(lon2d),
+                    np.nanmax(lon2d),
+                    np.nanmin(lat2d),
+                    np.nanmax(lat2d),
+                ],
+            )
+        )
+        extent = [
+            float(x)
+            for x in (
+                np.nanmin(lon2d),
+                np.nanmax(lon2d),
+                np.nanmin(lat2d),
+                np.nanmax(lat2d),
+            )
+        ]
+        ax.set_extent(extent, crs=ccrs.PlateCarree())
+        mesh = ax.pcolormesh(
+            lon2d,
+            lat2d,
+            np.asarray(da.values),
+            transform=ccrs.PlateCarree(),
+            vmin=vmin,
+            vmax=vmax,
+            cmap=cfg["cmap"],
+        )
+        ax.coastlines(resolution="50m", linewidth=0.8)
+        ax.add_feature(cfeature.BORDERS, linewidth=0.6)
+        if cfg["add_states"]:
+            ax.add_feature(cfeature.STATES, linewidth=0.4)
+        if cfg["gridlines"]:
+            gl: Any = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.6)
+            gl.right_labels = False
+            gl.top_labels = False
+        ax.set_title(_build_main_title(ds, var), fontsize=cfg["title_fontsize"])
+        units = str(ds[var].attrs.get("units", "")).strip()
+        cb = fig.colorbar(
+            mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
+        )
+        cb.set_label(units or var)
+        plt.tight_layout(rect=(0, 0, 1, 0.94))
+        pngpath.parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(pngpath, dpi=150)
+        plt.close(fig)
+        logging.info("%s: Wrote %s", taskname, pngpath.name)
 
     @task
     def _plot(self, var: str, stat: str):

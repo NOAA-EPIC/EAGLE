@@ -579,7 +579,6 @@ visualization:
       figsize: {h: 9.75, w: 4.875}
       file_fontsize: 8.0
       gridlines: false
-      max_files: 0
       stats_root: '{{ val.vx.rundir }}/grid2grid/%s/run/stats'
       suptitle_y: 0.995
       title_fontsize: 11.0
