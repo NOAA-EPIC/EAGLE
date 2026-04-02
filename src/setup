@@ -4,6 +4,8 @@
 
 set -aeuo pipefail
 
+INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
+
 # In all functions, make variables local unless they are either intended for global use, or set in
 # a subshell that exits at the end of the function.
 
@@ -234,8 +236,7 @@ EOF
 parse_kvargs $@
 install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
-INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
-MAMBAFLAGS=(--log-level error --use-uv --yes)
+MAMBAFLAGS=(--log-level error --yes)
 MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
