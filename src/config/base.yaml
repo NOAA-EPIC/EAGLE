@@ -575,20 +575,18 @@ visualization:
         - sp_surface
     spatial_stat_plots:
       add_states: false
-      cmap: "RdBu_r"
-      figsize: "9.75,4.875"
+      cmap: RdBu_r
+      figsize: {h: 9.75, w: 4.875}
       file_fontsize: 8.0
-      global_plots_root: "{{ val.vx.rundir }}/grid2grid/global/run/plots"
-      global_prefix: "grid_stat_nested"
-      global_stats_root: "{{ val.vx.rundir }}/grid2grid/global/run/stats"
       gridlines: false
-      lam_plots_root: "{{ val.vx.rundir }}/grid2grid/lam/run/plots"
-      lam_prefix: "grid_stat_nested"
-      lam_stats_root: "{{ val.vx.rundir }}/grid2grid/lam/run/stats"
       max_files: 0
-      pattern: "*.nc"
+      pattern: '*.nc'
+      prefix: grid_stat_nested
+      stats_root: '{{ val.vx.rundir }}/grid2grid/%s/run/stats'
       suptitle_y: 0.995
       title_fontsize: 11.0
+      vmax: null
+      vmin: null
     stats:
       - RMSE
     variables: # These names are from the postwxvx output.
