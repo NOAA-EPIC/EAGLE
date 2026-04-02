@@ -38,16 +38,14 @@ class Visualization(AssetsTimeInvariant):
             for var in self.config["variables"]
             for stat in self.config["stats"]
         ]
-        # spatial_cfg = self._grid2grid_spatial_cfg
-        # if spatial_cfg.get("enabled", False):
-        #     reqs.append(self.spatial_stat_plots())
+        if self.config.get("spatial_stat_plots"):
+            reqs.append(self.spatial_stat_plots())
         yield reqs
 
     @task
     def postwxvx(self):
         """
-        Prepares postwxvx config, runs eagle-tools, and produces one netCDF file per
-        output variable.
+        netCDF files from eagle-tools per output variable.
         """
         yield self.taskname(f"{self.driver_name()} {self._name}")
         path = self.rundir / f"postwxvx-{self._name}.yaml"
@@ -71,12 +69,10 @@ class Visualization(AssetsTimeInvariant):
     @task
     def spatial_stat_plots(self):
         """
-        Generate grid2grid spatial-stat plots from verification NetCDF files and
-        write PNGs into the same vx/grid2grid/*/run/plots directories used by the
-        existing verification outputs.
+        Spatial-stat PNG plots of grid2grid verification results.
         """
         yield self.taskname(f"{self._name} spatial stat plots")
-        spatial_cfg = self._grid2grid_spatial_cfg
+        spatial_cfg = self.config["spatial_stat_plots"]
         lam_plots_root = Path(spatial_cfg["lam_plots_root"])
         global_plots_root = Path(spatial_cfg["global_plots_root"])
         yield {
@@ -132,18 +128,6 @@ class Visualization(AssetsTimeInvariant):
     @property
     def _name(self) -> str:
         return cast("str", self.config["name"])
-
-    @property
-    def _grid2grid_spatial_cfg(self) -> dict:
-        """
-        Read the shared grid2grid spatial plotting config added under
-        visualization.grid2grid.spatial_stat_plots in base.yaml.
-        """
-        root_cfg = get_yaml_config(self.config["config"])
-        return cast(
-            "dict",
-            root_cfg["visualization"]["grid2grid"]["spatial_stat_plots"],
-        )
 
 
 def _build_main_title(ds: xr.Dataset, var: str) -> str:

@@ -576,7 +576,6 @@ visualization:
     spatial_stat_plots:
       add_states: false
       cmap: "RdBu_r"
-      enabled: true
       figsize: "9.75,4.875"
       file_fontsize: 8.0
       global_plots_root: "{{ val.vx.rundir }}/grid2grid/global/run/plots"
@@ -633,7 +632,6 @@ visualization:
           work_path: '{{ val.vx.rundir }}/grid2obs/global/'
         name: obs-global
         rundir: '{{ val.visualization.rundir }}/grid2obs/global'
-        spatial_stat_plots: !dict '{{ visualization.common.spatial_stat_plots }}'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
     lam:
@@ -644,7 +642,6 @@ visualization:
           work_path: '{{ val.vx.rundir }}/grid2obs/lam/'
         name: obs-lam
         rundir: '{{ val.visualization.rundir }}/grid2obs/lam'
-        spatial_stat_plots: !dict '{{ visualization.common.spatial_stat_plots }}'
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
 vx:
