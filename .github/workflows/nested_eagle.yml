@@ -277,7 +277,7 @@ jobs:
 
           for truth in grid obs; do
             for extent in global lam; do
-              dir=$RUNROOT/visualization/grid2$truth/$extent
+              dir=$RUNROOT/visualization/grid2$truth/$extent/plots-basic
               count=$(ls -1 $dir/*.png | wc -l)
               expected=8
               test $count -eq $expected || {

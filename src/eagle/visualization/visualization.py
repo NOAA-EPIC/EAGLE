@@ -79,23 +79,23 @@ class Visualization(AssetsTimeInvariant):
         # }
         yield self.postwxvx()
         cfg = self.config["spatial_stat_plots"]
-        extent = "global" if "global" in self.config["name"] else "lam"
-        stats_path = Path(cfg["stats_root"] % extent)
-        if not stats_path.exists():
-            logging.warning("Stats root not found: %s", stats_path)
+        stats_root = Path(
+            cfg["stats_root"] % "global" if "global" in self.config["name"] else "lam"
+        )
+        if not stats_root.exists():
+            logging.warning("Stats root not found: %s", stats_root)
             return (0, 0)
-        plots_root = Path(self.config["rundir"]) / "spatial-stat-plots" / extent
+        plots_root = Path(self.config["rundir"]) / "plots-spatial-stats"
         plots_root.mkdir(parents=True, exist_ok=True)
         pattern = cfg["pattern"]
-        found = sorted(stats_path.rglob(pattern))
+        found = sorted(stats_root.rglob(pattern))
         if not found:
-            logging.warning(
-                "No files matching '%s' found under %s", pattern, stats_path
-            )
-            return (0, 0)
+            msg = "No files matching '%s' found under %s"
+            logging.warning(msg, pattern, stats_root)
+            return
         prefix = cfg["prefix"]
         nc_files = [p for p in found if p.name.startswith(prefix)]
-        logging.info(
+        logging.debug(
             "Found %s files, keeping %s with prefix %s",
             len(found),
             len(nc_files),
@@ -107,7 +107,7 @@ class Visualization(AssetsTimeInvariant):
             max_files = cfg["max_files"]
             if max_files and idx > max_files:
                 break
-            out_png = _out_png_for_nc(nc_path, plots_root)
+            path = plots_root / f"{nc_path.stem}_spatial.png"
             ds = xr.open_dataset(nc_path)
             var = _choose_diff_var(ds)
             if var is None:
@@ -160,20 +160,21 @@ class Visualization(AssetsTimeInvariant):
             )
             cb.set_label(units or var)
             plt.tight_layout(rect=(0, 0, 1, 0.94))
-            plt.savefig(out_png, dpi=150)
+            plt.savefig(path, dpi=150)
             plt.close(fig)
             plotted += 1
-            logging.info("Wrote %s", out_png)
+            logging.info("Wrote %s", path.name)
 
     # Private tasks
 
     @task
     def _plot(self, var: str, stat: str):
         yield self.taskname(f"{self._name} {var} {stat} plot")
-        path = self.rundir / f"{var}_{stat}.png"
+        path = self.rundir / "plots-basic" / f"{var}_{stat}.png"
         yield Asset(path, path.is_file)
         req = self.postwxvx()
         yield req
+        path.parent.mkdir(parents=True, exist_ok=True)
         ds = xr.open_dataset(req.ref[var])
         var_stat = cast("xr.DataArray", ds[stat])
         var_stat.plot()  # type: ignore[call-arg]
@@ -249,11 +250,11 @@ def _mask_fill(da: xr.DataArray) -> xr.DataArray:
     return out
 
 
-def _out_png_for_nc(nc_path: Path, plots_root: Path) -> Path:
-    yyyymmdd, hh = _infer_date_hour_from_path(nc_path)
-    out_dir = plots_root / yyyymmdd / hh
-    out_dir.mkdir(parents=True, exist_ok=True)
-    return out_dir / f"{nc_path.stem}_spatial.png"
+# def _out_png_for_nc(nc_path: Path, plots_root: Path) -> Path:
+#     yyyymmdd, hh = _infer_date_hour_from_path(nc_path)
+#     out_dir = plots_root / yyyymmdd / hh
+#     out_dir.mkdir(parents=True, exist_ok=True)
+#     return out_dir / f"{nc_path.stem}_spatial.png"
 
 
 def _pick_2d(da: xr.DataArray) -> xr.DataArray:
