@@ -80,7 +80,7 @@ class Visualization(AssetsTimeInvariant):
         plots_root = Path(self.config["rundir"]) / "plots-spatial-stats"
         f = lambda ncfile: plots_root / f"{ncfile.stem}_spatial.png"
         yield [Asset(f(ncfile), f(ncfile).is_file) for ncfile in ncfiles]
-        yield self.postwxvx()  # PM probably None
+        yield None
         plots_root.mkdir(parents=True, exist_ok=True)
         logging.debug("%s: Plotting %s MET diff netCDF files", taskname, len(ncfiles))
         for idx, ncfile in enumerate(ncfiles, start=1):
