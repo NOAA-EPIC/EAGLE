@@ -12,7 +12,7 @@ from anemoi.graphs.generate.utils import (  # type: ignore[import-untyped]
     get_coordinates_ordering,
 )
 from anemoi.transform.spatial import cutout_mask  # type: ignore[import-untyped]
-from iotaa import Asset, collection, task
+from iotaa import Asset, collection, task  # provided by uwtools
 from ufs2arco import sources  # type: ignore[import-untyped]
 from uwtools.api.driver import AssetsTimeInvariant
 from xarray import Dataset

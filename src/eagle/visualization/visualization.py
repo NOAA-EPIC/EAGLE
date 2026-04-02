@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, cast
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import xarray as xr
-from iotaa import Asset, collection, task
+from iotaa import Asset, collection, task  # provided by uwtools
 from uwtools.api.config import get_yaml_config
 from uwtools.api.driver import AssetsTimeInvariant
 
