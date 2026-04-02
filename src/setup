@@ -77,7 +77,7 @@ install_devpkgs_maybe() {
     msg Installing dev packages into environment: $name
     (
       env_activate $name
-      conda env update --file envs/dev.yaml
+      mamba env update --file envs/dev.yaml --yes
     )
   fi
 }
@@ -103,15 +103,15 @@ parse_kvargs() {
 prep_env() {
   local args name
   name=$1
-  args=(--file envs/$name.yaml --name $name)
+  args=(--file envs/$name.yaml --name $name --yes)
   (
     env_activate base
     if env_exists $name; then
       msg Updating environment: $name
-      conda env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
+      mamba env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
     else
       msg Creating environment: $name
-      conda env create ${args[@]}
+      mamba env create ${args[@]}
     fi
   )
   install_devpkgs_maybe $name
@@ -148,7 +148,7 @@ prep_env_base() {
   (
     env_activate $name
     msg Updating environment: $name
-    conda env update -f envs/$name.yaml
+    mamba env update --file envs/$name.yaml --yes
     install_devpkgs_maybe $name
   )
 }
