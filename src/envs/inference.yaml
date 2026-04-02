@@ -7,7 +7,6 @@ dependencies:
   - numpy 2.2.6.*
   - python 3.12
   - uwtools 2.13.*
-  # ---
   - pip:
       - anemoi-inference==0.10.*
       - anemoi-models==0.13.*

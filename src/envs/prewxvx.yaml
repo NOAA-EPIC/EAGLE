@@ -8,6 +8,5 @@ dependencies:
   - python 3.13
   - uwtools 2.13.*
   - xesmf 0.8.*
-  # ---
   - pip:
       - eagle-tools
