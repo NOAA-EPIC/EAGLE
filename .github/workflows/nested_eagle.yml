@@ -109,7 +109,7 @@ jobs:
           export SETVARS_CALL=${SETVARS_CALL:-0}
           cd "${GITHUB_WORKSPACE}/src"
 
-          make env cudascript=ursa INSTALLDIR="${INSTALLDIR}"
+          time make env cudascript=ursa INSTALLDIR="${INSTALLDIR}"
 
           source conda/etc/profile.d/conda.sh
           conda activate base
