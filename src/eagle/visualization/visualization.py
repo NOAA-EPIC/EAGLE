@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from subprocess import run
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import cartopy.crs as ccrs  # type: ignore[import-untyped]
 import cartopy.feature as cfeature  # type: ignore[import-untyped]
@@ -82,85 +82,6 @@ class Visualization(AssetsTimeInvariant):
     # Private tasks
 
     @task
-    def _spatial_stat_plot(self, ncpath: Path, pngpath: Path):
-        """
-        Spatial-stat PNG plot of one grid2grid verification result.
-        """
-        taskname = self.taskname(f"{self._name} spatial stat plot {pngpath.name}")
-        yield taskname
-        yield Asset(pngpath, pngpath.is_file)
-        yield None
-        cfg = self.config["spatial_stat_plots"]
-        logging.debug("%s: Plotting %s -> %s", taskname, ncpath, pngpath)
-        ds = xr.open_dataset(ncpath)
-        var = _choose_diff_var(ds)
-        if var is None:
-            logging.error("%s: No DIFF_ var in %s", taskname, ncpath)
-            return
-        # if "lat" not in ds:
-        #     logging.error("%s: Missing lat in %s", taskname, ncpath)
-        #     return
-        # if "lon" not in ds:
-        #     logging.error("%s: Missing lon in %s", taskname, ncpath)
-        #     return
-        lat2d = np.asarray(ds["lat"].values)
-        lon2d = _to_lon180(np.asarray(ds["lon"].values))
-        da = _mask_fill(_pick_2d(ds[var]))
-        vmin, vmax = _finite_min_max(da)
-        fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
-        fig.suptitle(ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"])
-        ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
-        extent = list(
-            map(
-                float,
-                [
-                    np.nanmin(lon2d),
-                    np.nanmax(lon2d),
-                    np.nanmin(lat2d),
-                    np.nanmax(lat2d),
-                ],
-            )
-        )
-        extent = [
-            float(x)
-            for x in (
-                np.nanmin(lon2d),
-                np.nanmax(lon2d),
-                np.nanmin(lat2d),
-                np.nanmax(lat2d),
-            )
-        ]
-        ax.set_extent(extent, crs=ccrs.PlateCarree())
-        mesh = ax.pcolormesh(
-            lon2d,
-            lat2d,
-            np.asarray(da.values),
-            transform=ccrs.PlateCarree(),
-            vmin=vmin,
-            vmax=vmax,
-            cmap=cfg["cmap"],
-        )
-        ax.coastlines(resolution="50m", linewidth=0.8)
-        ax.add_feature(cfeature.BORDERS, linewidth=0.6)
-        if cfg["add_states"]:
-            ax.add_feature(cfeature.STATES, linewidth=0.4)
-        if cfg["gridlines"]:
-            gl: Any = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.6)
-            gl.right_labels = False
-            gl.top_labels = False
-        ax.set_title(_build_main_title(ds, var), fontsize=cfg["title_fontsize"])
-        units = str(ds[var].attrs.get("units", "")).strip()
-        cb = fig.colorbar(
-            mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
-        )
-        cb.set_label(units or var)
-        plt.tight_layout(rect=(0, 0, 1, 0.94))
-        pngpath.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(pngpath, dpi=150)
-        plt.close(fig)
-        logging.info("%s: Wrote %s", taskname, pngpath.name)
-
-    @task
     def _plot(self, var: str, stat: str):
         yield self.taskname(f"{self._name} {var} {stat} plot")
         path = self.rundir / "plots-basic" / f"{var}_{stat}.png"
@@ -173,6 +94,62 @@ class Visualization(AssetsTimeInvariant):
         var_stat.plot()  # type: ignore[call-arg]
         plt.savefig(path)
         plt.close()
+
+    @task
+    def _spatial_stat_plot(self, ncpath: Path, pngpath: Path):
+        """
+        Spatial-stat PNG plot of one grid2grid verification result.
+        """
+        taskname = self.taskname(f"{self._name} spatial stat plot {pngpath.name}")
+        yield taskname
+        yield Asset(pngpath, pngpath.is_file)
+        yield None
+        logging.debug("%s: Plotting %s -> %s", taskname, ncpath, pngpath)
+        ds = xr.open_dataset(ncpath)
+        lat2d = np.asarray(ds["lat"].values)
+        lon2d = _to_lon180(np.asarray(ds["lon"].values))
+        extent = [
+            float(np.nanmin(lon2d)),
+            float(np.nanmax(lon2d)),
+            float(np.nanmin(lat2d)),
+            float(np.nanmax(lat2d)),
+        ]
+        cfg = self.config["spatial_stat_plots"]
+        fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
+        fig.suptitle(ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"])
+        ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
+        ax.set_extent(extent, crs=ccrs.PlateCarree())
+        ax.coastlines(resolution="50m", linewidth=0.8)
+        ax.add_feature(cfeature.BORDERS, linewidth=0.6)
+        var = _choose_diff_var(ds)
+        da = _mask_fill(_pick_2d(ds[var]))
+        vmin, vmax = _finite_min_max(da)
+        mesh = ax.pcolormesh(
+            lon2d,
+            lat2d,
+            np.asarray(da.values),
+            transform=ccrs.PlateCarree(),
+            vmin=vmin,
+            vmax=vmax,
+            cmap=cfg["cmap"],
+        )
+        if cfg["add_states"]:
+            ax.add_feature(cfeature.STATES, linewidth=0.4)
+        if cfg["gridlines"]:
+            gl = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.6)
+            gl.right_labels = False
+            gl.top_labels = False
+        ax.set_title(_build_main_title(ds, var), fontsize=cfg["title_fontsize"])
+        cb = fig.colorbar(
+            mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
+        )
+        units = str(ds[var].attrs.get("units", "")).strip()
+        cb.set_label(units or var)
+        plt.tight_layout(rect=(0, 0, 1, 0.94))
+        pngpath.parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(pngpath, dpi=150)
+        plt.close(fig)
+        logging.info("%s: Wrote %s", taskname, pngpath.name)
 
     # Public methods
 
@@ -200,12 +177,12 @@ def _build_main_title(ds: xr.Dataset, var: str) -> str:
     return "\n".join(lines)
 
 
-def _choose_diff_var(ds: xr.Dataset) -> str | None:
+def _choose_diff_var(ds: xr.Dataset) -> str:
     for k in ds.data_vars:
         v = cast("str", k)
         if v.startswith("DIFF_"):
             return v
-    return None
+    raise AttributeError("No DIFF_ var in %s" % ds.encoding["source"])
 
 
 def _finite_min_max(da: xr.DataArray) -> tuple[float, float]:
