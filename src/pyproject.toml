@@ -24,6 +24,10 @@ ignore = [
   "D400",    # missing-trailing-period
   "D401",    # non-imperative-mood
   "ERA001",  # commented-out-code
+  "LOG015",  # root-logger-call
+  "PLR0913", # too-many-arguments
+  "PLR0915", # too-many-statements
+  "PLR2004", # magic-value-comparison
   "S602",    # subprocess-popen-with-shell-equals-true
   "UP031",   # printf-string-formatting
 ]

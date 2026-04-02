@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from subprocess import run
 from typing import TYPE_CHECKING, Any, cast
@@ -191,13 +192,9 @@ def _infer_date_hour_from_path(nc_path: Path) -> tuple[str, str]:
     yyyymmdd = "unknown_date"
     hh = "unknown_hour"
     for i, part in enumerate(parts):
-        if len(part) == 8 and part.isdigit():  # noqa: PLR2004
+        if len(part) == 8 and part.isdigit():
             yyyymmdd = part
-            if (
-                i + 1 < len(parts)
-                and len(parts[i + 1]) == 2  # noqa: PLR2004
-                and parts[i + 1].isdigit()
-            ):
+            if i + 1 < len(parts) and len(parts[i + 1]) == 2 and parts[i + 1].isdigit():
                 hh = parts[i + 1]
             break
     return yyyymmdd, hh
@@ -234,12 +231,12 @@ def _parse_figsize(s: str) -> tuple[float, float]:
 
 def _pick_2d(da: xr.DataArray) -> xr.DataArray:
     out = da
-    while out.ndim > 2:  # noqa: PLR2004
+    while out.ndim > 2:
         out = out.isel({out.dims[0]: 0})
     return out
 
 
-def _process_one_target(  # noqa: C901, PLR0913, PLR0915
+def _process_one_target(  # noqa: C901
     *,
     label: str,
     stats_root: Path,
@@ -259,22 +256,25 @@ def _process_one_target(  # noqa: C901, PLR0913, PLR0915
     suptitle_y: float,
 ) -> tuple[int, int]:
     if not stats_root.exists():
-        print(f"[{label}] SKIP: stats root not found: {stats_root}")  # noqa: T201
+        logging.warning("[%s] SKIP: stats root not found: %s", label, stats_root)
         return (0, 0)
 
     plots_root.mkdir(parents=True, exist_ok=True)
 
     found = sorted(stats_root.rglob(pattern))
     if not found:
-        print(  # noqa: T201
-            f"[{label}] No files matched under: {stats_root} (pattern={pattern})"
+        logging.warning(
+            "[%s] No files matched under: %s (pattern=%s)", label, stats_root, pattern
         )
         return (0, 0)
 
     nc_files = [p for p in found if p.name.startswith(prefix)]
-    print(  # noqa: T201
-        f"[{label}] Found {len(found)} files, keeping {len(nc_files)} with prefix "
-        f"'{prefix}'"
+    logging.warning(
+        "[%s] Found %s files, keeping %s with prefix %s",
+        label,
+        len(found),
+        len(nc_files),
+        prefix,
     )
 
     plotted = 0
@@ -292,12 +292,12 @@ def _process_one_target(  # noqa: C901, PLR0913, PLR0915
             var = _choose_diff_var(ds)
             if var is None:
                 skipped += 1
-                print(f"[{label}] SKIP (no DIFF_ var): {nc_path.name}")  # noqa: T201
+                logging.warning("[%s] SKIP (no DIFF_ var): %s", label, nc_path.name)
                 continue
 
             if "lat" not in ds or "lon" not in ds:
                 skipped += 1
-                print(f"[{label}] SKIP (missing lat/lon): {nc_path.name}")  # noqa: T201
+                logging.warning("[%s]  SKIP (missing lat/lon): %s", label, nc_path.name)
                 continue
 
             lat2d = np.asarray(ds["lat"].values)
@@ -361,11 +361,11 @@ def _process_one_target(  # noqa: C901, PLR0913, PLR0915
             plt.close(fig)
 
             plotted += 1
-            print(f"[{label}] WROTE: {out_png}")  # noqa: T201
+            logging.warning("[%s] WROTE: %s", label, out_png)
 
         except Exception as e:  # noqa: BLE001
             skipped += 1
-            print(f"[{label}] SKIP (error): {nc_path.name} -> {e}")  # noqa: T201
+            logging.warning("[%s]  SKIP (error): %s -> %s", label, nc_path.name, e)
 
     return (plotted, skipped)
 
@@ -375,7 +375,7 @@ def _to_lon180(lon2d: np.ndarray) -> np.ndarray:
     return ((lon + 180.0) % 360.0) - 180.0
 
 
-def _run_spatial_stat_plots(  # noqa: PLR0913
+def _run_spatial_stat_plots(
     *,
     lam_stats_root: str,
     lam_plots_root: str,
