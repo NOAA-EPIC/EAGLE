@@ -34,7 +34,7 @@ class Visualization(AssetsTimeInvariant):
         """
         yield self.taskname(f"{self._name} plots")
         reqs: list[Node] = [
-            self._plot(var, stat)
+            self._basic_plot(var, stat)
             for var in self.config["variables"]
             for stat in self.config["stats"]
         ]
@@ -82,7 +82,7 @@ class Visualization(AssetsTimeInvariant):
     # Private tasks
 
     @task
-    def _plot(self, var: str, stat: str):
+    def _basic_plot(self, var: str, stat: str):
         yield self.taskname(f"{self._name} {var} {stat} plot")
         path = self.rundir / "plots-basic" / f"{var}_{stat}.png"
         yield Asset(path, path.is_file)
