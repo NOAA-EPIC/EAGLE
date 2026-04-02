@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=1090,1091,2046,2048,2068,2086,2206,2207
+# shellcheck disable=1090,1091,2046,2068,2086,2206
 
 set -aeuo pipefail
 
