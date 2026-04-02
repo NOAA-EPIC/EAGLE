@@ -585,8 +585,6 @@ visualization:
       stats_root: '{{ val.vx.rundir }}/grid2grid/%s/run/stats'
       suptitle_y: 0.995
       title_fontsize: 11.0
-      vmax: null
-      vmin: null
     stats:
       - RMSE
     variables: # These names are from the postwxvx output.
