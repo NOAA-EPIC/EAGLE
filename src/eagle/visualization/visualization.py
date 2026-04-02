@@ -77,23 +77,24 @@ class Visualization(AssetsTimeInvariant):
         extent = "global" if "global" in self.config["name"] else "lam"
         stats_root = Path(cfg["stats_root"] % extent)
         ncfiles = sorted(stats_root.rglob("grid_stat_*_pairs.nc"))
-        logging.debug("%s: Plotting %s MET diff netCDF files", taskname, len(ncfiles))
-        yield Asset(None, lambda: False)
-        yield self.postwxvx()
         plots_root = Path(self.config["rundir"]) / "plots-spatial-stats"
+        f = lambda ncfile: plots_root / f"{ncfile.stem}_spatial.png"
+        yield [Asset(f(ncfile), f(ncfile).is_file) for ncfile in ncfiles]
+        yield self.postwxvx()  # PM probably None
         plots_root.mkdir(parents=True, exist_ok=True)
-        for idx, nc_path in enumerate(ncfiles, start=1):
+        logging.debug("%s: Plotting %s MET diff netCDF files", taskname, len(ncfiles))
+        for idx, ncfile in enumerate(ncfiles, start=1):
             max_files = cfg["max_files"]
             if max_files and idx > max_files:
                 break
-            path = plots_root / f"{nc_path.stem}_spatial.png"
-            ds = xr.open_dataset(nc_path)
+            path = plots_root / f"{ncfile.stem}_spatial.png"
+            ds = xr.open_dataset(ncfile)
             var = _choose_diff_var(ds)
             if var is None:
-                logging.warning("%s: No DIFF_ var: %s", taskname, nc_path.name)
+                logging.warning("%s: No DIFF_ var: %s", taskname, ncfile.name)
                 continue
             if "lat" not in ds or "lon" not in ds:
-                logging.warning("%s: Missing lat/lon: %s", taskname, nc_path.name)
+                logging.warning("%s: Missing lat/lon: %s", taskname, ncfile.name)
                 continue
             lat2d = np.asarray(ds["lat"].values)
             lon2d = _to_lon180(np.asarray(ds["lon"].values))
@@ -101,7 +102,7 @@ class Visualization(AssetsTimeInvariant):
             vmin, vmax = _finite_min_max(da)
             fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
             fig.suptitle(
-                nc_path.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"]
+                ncfile.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"]
             )
             ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
             ax.set_extent(
