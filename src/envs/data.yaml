@@ -15,7 +15,6 @@ dependencies:
   - xarray 2026.2.*
   - xesmf 0.9.2
   # ---
-  - pip
   - pip:
       - anemoi-datasets==0.5.*
       - anemoi-graphs==0.9.*

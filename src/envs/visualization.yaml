@@ -7,6 +7,5 @@ dependencies:
   - xarray 2026.2.0
   - uwtools 2.13.*
   # ---
-  - pip
   - pip:
       - eagle-tools

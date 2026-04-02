@@ -9,7 +9,6 @@ dependencies:
   - setuptools 81.0.*
   - uwtools 2.13.*
   # ---
-  - pip
   - pip:
       - anemoi-models==0.13.*
       - anemoi-training==0.10.*

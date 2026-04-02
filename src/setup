@@ -235,7 +235,7 @@ parse_kvargs $@
 install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
 INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
-MAMBAFLAGS=(--log-level error --yes)
+MAMBAFLAGS=(--log-level error --use-uv --yes)
 MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME

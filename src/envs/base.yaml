@@ -3,4 +3,5 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
+  - uv
   - uwtools 2.13.*
