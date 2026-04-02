@@ -287,9 +287,19 @@ jobs:
             done
           done
 
+          for extent in global lam; do
+            dir=$RUNROOT/visualization/grid2grid/$extent/plots-spatial-stats
+            count=$(ls -1 $dir/*.png | wc -l)
+            expected=40
+            test $count -eq $expected || {
+              echo "ERROR: Found $count PNG files in $dir, expected $expected"
+              exit 1
+            }
+          done
+
           # Done.
 
-          echo "Nested EAGLE CI pipeline completed successfully."
+          echo Nested EAGLE CI pipeline completed successfully.
 
   cleanup_label:
     name: Cleanup ci-running label
