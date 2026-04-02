@@ -77,7 +77,7 @@ install_devpkgs_maybe() {
     msg Installing dev packages into environment: $name
     (
       env_activate $name
-      mamba env update --file envs/dev.yaml --yes
+      mamba env update ${MAMBAFLAGS[@]} --file envs/dev.yaml
     )
   fi
 }
@@ -103,7 +103,7 @@ parse_kvargs() {
 prep_env() {
   local args name
   name=$1
-  args=(--file envs/$name.yaml --name $name --yes)
+  args=(${MAMBAFLAGS[@]} --file envs/$name.yaml --name $name)
   (
     env_activate base
     if env_exists $name; then
@@ -148,7 +148,7 @@ prep_env_base() {
   (
     env_activate $name
     msg Updating environment: $name
-    mamba env update --file envs/$name.yaml --yes
+    mamba env update ${MAMBAFLAGS[@]} --file envs/$name.yaml
     install_devpkgs_maybe $name
   )
 }
@@ -235,10 +235,11 @@ parse_kvargs $@
 install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
 INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
+MAMBAFLAGS=(--log-level error --yes)
 MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
-environments=(base) # data inference prewxvx training visualization wxvx)
+environments=(base data) #inference prewxvx training visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
 done
