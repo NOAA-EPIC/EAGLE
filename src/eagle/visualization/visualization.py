@@ -46,9 +46,9 @@ class Visualization(AssetsTimeInvariant):
             for stat in self.config["stats"]
         ]
 
-        spatial_cfg = self._grid2grid_spatial_cfg
-        if spatial_cfg.get("enabled", False):
-            tasks.append(self.spatial_stat_plots())
+        # spatial_cfg = self._grid2grid_spatial_cfg
+        # if spatial_cfg.get("enabled", False):
+        #     tasks.append(self.spatial_stat_plots())
 
         yield tasks
 
