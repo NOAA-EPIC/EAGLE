@@ -3,10 +3,10 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
-  - flash-attn=2.8.*
-  - numpy=2.2.6.*
-  - python=3.12
-  - uwtools=2.13.*
+  - flash-attn 2.8.*
+  - numpy 2.2.6.*
+  - python 3.12
+  - uwtools 2.13.*
   # ---
   - pip
   - pip:
