@@ -245,7 +245,7 @@ If you are adding to or updating the documentation, wish to build and review cha
 
 If wish to use some other conda installation:
 
-.. code-block:: bash
+.. code-block:: text
 
     <command to activate your conda installation>
     make -C docs
