@@ -149,7 +149,7 @@ class Visualization(AssetsTimeInvariant):
         pngpath.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(pngpath, dpi=150)
         plt.close(fig)
-        logging.info("%s: Wrote %s", taskname, pngpath.name)
+        logging.info("%s: Wrote plot", taskname)
 
     # Public methods
 
