@@ -19,3 +19,10 @@ zarrs:
     execution:
       batchargs:
         --mem-per-cpu: 3G
+      envcmds:
+        - source /etc/profile.d/slurm.sh
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate data
+        - set -ex
+      mpiargs:
+        - "--export=ALL"

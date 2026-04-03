@@ -833,7 +833,7 @@ vx:
           regrid: !dict '{{ vx.grid2obs.global.wxvx.wxvx.regrid }}'
 zarrs:
   common:
-    execution: &zarrs-common-execution
+    execution:
       batchargs:
         cores: 4
         export: false
@@ -844,14 +844,15 @@ zarrs:
         - source {{ val.conda }}/etc/profile.d/conda.sh
         - conda activate data
         - set -ex
-      executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+      mpiargs: []
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
   gfs:
     zarr:
       execution:
-        <<: *zarrs-common-execution
         batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
+        envcmds: !list '{{ zarrs.common.execution.envcmds }}'
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+        mpiargs: !list '{{ zarrs.common.execution.mpiargs }}'
         mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: gfs
       ufs2arco:
@@ -870,9 +871,10 @@ zarrs:
   hrrr:
     zarr:
       execution:
-        <<: *zarrs-common-execution
         batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
+        envcmds: !list '{{ zarrs.common.execution.envcmds }}'
         executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
+        mpiargs: !list '{{ zarrs.common.execution.mpiargs }}'
         mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: hrrr
       ufs2arco:
