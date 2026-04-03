@@ -4,6 +4,7 @@ HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck validate yamllint
+VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
 INSTALLDIR ?= conda
 SHELL      := $(shell which bash)
@@ -11,9 +12,9 @@ SHELL      := $(shell which bash)
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
 envloop  = @set -e && for env in $(ENVS); do $(make) env=$$env $(1); done
-exec     = set -x && uw execute --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
+exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
-tasklist = @(set -x && uw execute --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
+tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
 
 .ONESHELL:
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
@@ -29,7 +30,7 @@ all:
 config:
 	$(call check,$(compose),compose)
 	$(call activate,base)
-	@(set -x && uw config compose $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
+	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
 	@$(make) grids-and-meshes
@@ -93,7 +94,7 @@ prewxvx-lam:
 realize:
 	$(call check,$(config),config)
 	$(call activate,base)
-	@(set -x && uw config realize --input-file $(config))
+	@(set -x && uw config realize$(VERBOSE) --input-file $(config))
 
 shellcheck:
 	$(call activate,base)
@@ -123,7 +124,7 @@ endif
 validate:
 	$(call check,$(config),config)
 	$(call activate,base)
-	@(set -x && uw config validate --input-file $(config) --schema-file eagle/eagle.jsonschema)
+	@(set -x && uw config validate$(VERBOSE) --input-file $(config) --schema-file eagle/eagle.jsonschema)
 
 vis:
 	$(call activate,visualization)
