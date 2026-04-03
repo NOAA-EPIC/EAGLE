@@ -42,6 +42,7 @@ inference:
   execution:
     batchargs:
       <<: *gpu-batchargs
+      export: false
       memory: 16G
       rundir: '{{ inference.rundir }}'
       walltime: '00:10:00'
@@ -441,6 +442,7 @@ training:
   execution:
     batchargs:
       <<: *gpu-batchargs
+      export: false
       memory: 128G
       rundir: '{{ training.rundir }}'
       walltime: '00:30:00'
@@ -642,6 +644,7 @@ vx:
     execution:
       batchargs: &wxvx-common-batchargs
         cores: 1
+        export: false
         partition: '{{ app.partitions.netaccess }}'
         walltime: '00:30:00'
       envcmds:
@@ -833,6 +836,7 @@ zarrs:
     execution: &zarrs-common-execution
       batchargs:
         cores: 4
+        export: false
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:10:00'
