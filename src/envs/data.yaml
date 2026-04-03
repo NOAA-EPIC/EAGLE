@@ -11,7 +11,7 @@ dependencies:
   - setuptools 81.0.*
   - types-pyyaml
   - ufs2arco 0.19.*
-  - uwtools 2.13.*
+  - uwtools 2.14.*
   - xarray 2026.2.*
   - xesmf 0.9.2
   - pip:

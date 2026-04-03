@@ -7,7 +7,7 @@ dependencies:
   - matplotlib 3.10.*
   - numpy 2.2.6
   - python 3.13
-  - uwtools 2.13.*
+  - uwtools 2.14.*
   - xarray 2026.2.0
   - pip:
       - eagle-tools

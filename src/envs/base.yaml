@@ -4,4 +4,4 @@ channels:
   - ufs-community
 dependencies:
   - pip
-  - uwtools 2.13.*
+  - uwtools 2.14.*

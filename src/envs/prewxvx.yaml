@@ -6,7 +6,7 @@ dependencies:
   - numpy 2.2.6.*
   - pandas 2.3.3.*
   - python 3.13
-  - uwtools 2.13.*
+  - uwtools 2.14.*
   - xesmf 0.8.*
   - pip:
       - eagle-tools
