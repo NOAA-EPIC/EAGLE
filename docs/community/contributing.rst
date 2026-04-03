@@ -237,19 +237,25 @@ Use the following pull request template when opening a PR:
 Documentation
 ------------------------------------------------------------------------------
 
-If you are adding to the documentation and wish to build and review changes locally:
+If you are adding to or updating the documentation, wish to build and review changes locally, and have already built the EAGLE runtime software environment environment under ``src/`` (i.e., ``src/conda`` exists), then from the root directory of a clone of this repository:
 
 .. code-block:: bash
-    
-    conda create -y -n docs sphinx sphinx_rtd_theme
-    conda activate docs
-    cd EAGLE/docs
-    make html
+
+    make -C docs
+
+If wish to use some other conda installation:
+
+.. code-block:: bash
+
+    <command to activate your conda installation>
+    make -C docs
+
+Note the, if you use your own conda installation, an environment called ``docs`` will be created, or an existing one will be updated.
 
 After that, open the generated HTML files in your web browser:
 
 .. code-block:: bash
 
-    _build/html/index.html
+    docs/build/html/index.html
 
 After you submit the changes as a pull request, the docs will build automatically.
