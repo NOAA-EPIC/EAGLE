@@ -33,7 +33,7 @@ See :ref:`Runtime Environment <RuntimeEnvironment>` for a description of the ``c
 
 After successful completion, the following ``make`` targets will be available:
 
-.. code-block:: bash
+.. code-block:: text
 
     make format     # format Python code
     make lint       # run a linter on Python code
@@ -58,6 +58,27 @@ EAGLE drivers are idempotent and, as such, will not take further action if run a
 created is removed. In general, removing ``.done`` (and, when present, ``.submit``) files in the appropriate run directory 
 should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or 
 renaming the entire run directory also works.
+
+Debugging Execution
+==============================================================================
+
+A number of ``make`` targets, including those that execute EAGLE drivers, invoke the ``uwtools`` CLI and display the full underlying ``uw`` command they run. For example:
+
+.. code-block:: text
+
+    $ make vis-grid-global config=eagle.yaml
+    + uw execute --config-file eagle.yaml --module eagle/visualization/visualization.py --classname Visualization --task plots --key-path visualization.grid2grid.global
+    ...
+
+Setting the ``DEBUG`` environment variable when executing such a ``make`` target will the ``--verbose`` flag to the ``uw`` command. For example:
+
+.. code-block:: text
+
+    $ DEBUG=1 make vis-obs-global config=eagle.yaml 2>&1 | head
+    + uw execute --verbose --config-file eagle.yaml --module eagle/visualization/visualization.py --classname Visualization --task plots --key-path visualization.grid2obs.global
+    ...
+
+The resulting verbose logging, which will include stacktraces from any unhandled Python exceptions, can be invaluable for debugging.
 
 .. _PRs:
 
