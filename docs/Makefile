@@ -1,25 +1,20 @@
- # Minimal makefile for Sphinx documentation
-#
+BUILDDIR   = build
+CONDAFLAGS = $(CONDAOPTS) $(CONDAPKGS)
+CONDAOPTS  = -y -n docs -c conda-forge --override-channels
+CONDAPKGS  = sphinx sphinx_rtd_theme sphinxcontrib-bibtex
 
-# You can set these variables from the command line, and also
-# from the environment for the first two.
-SPHINXOPTS    ?=
-SPHINXBUILD   ?= sphinx-build
-SOURCEDIR     = .
-BUILDDIR      = _build
+.ONESHELL:
+.PHONY: clean docs help Makefile
 
-# Put it first so that "make" without argument is like "make help".
-help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+docs:
+	which conda 2>/dev/null || source ../src/conda/etc/profile.d/conda.sh
+	conda activate docs 2>/dev/null && conda install $(CONDAFLAGS) || conda create $(CONDAFLAGS)
+	conda activate docs
+	$(MAKE) html
 
-# Sphinx doesn't know to clean out the debris from sphinx-gallery
 clean:
-	rm -rf $(BUILDDIR)/*
+	rm -rf $(BUILDDIR)
 
-.PHONY: help Makefile
-
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	[ -d $(BUILDDIR) ] || mkdir -p $(BUILDDIR)
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -w "$(BUILDDIR)/warnings.log"
+	mkdir -p $(BUILDDIR)
+	sphinx-build -M $@ . $(BUILDDIR) -w $(BUILDDIR)/warnings.log

@@ -103,7 +103,7 @@ Configuration for the ``Training`` driver.
 ufs2arco
 ------------------------------------------------------------------------------
 
-This block provides general configuration parameters for the :ufs2arco:`ufs2arco <>` component.
+This block provides general configuration parameters for the :term:`ufs2arco` component.
 
 This configuration is used as a source for default and common configuration parameters, which are supplemented by the
 Zarr driver when it executes ``ufs2arco`` for specific use cases.
@@ -146,7 +146,7 @@ zarrs
 Configuration for the ``Zarr`` driver.
 
 ``component``
-   This driver executes the :ufs2arco:`ufs2arco <>` component.
+   This driver executes the :term:`ufs2arco` component.
 
 ``gfs`` and ``hrrr``
    The ``gfs:`` and ``hrrr:`` sub-blocks provide refinements for ingesting GFS and HRRR data, respectively, for EAGLE.

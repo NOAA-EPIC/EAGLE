@@ -28,6 +28,7 @@
   },
   "properties": {
     "visualization": {
+      "additionalProperties": false,
       "properties": {
         "eagle_tools": {
           "properties": {
@@ -71,6 +72,59 @@
         },
         "rundir": {
           "type": "string"
+        },
+        "spatial_stat_plots": {
+          "additionalProperties": false,
+          "properties": {
+            "add_states": {
+              "type": "boolean"
+            },
+            "cmap": {
+              "type": "string"
+            },
+            "figsize": {
+              "additionalProperties": false,
+              "properties": {
+                "h": {
+                  "type": "number"
+                },
+                "w": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "h",
+                "w"
+              ],
+              "type": "object"
+            },
+            "file_fontsize": {
+              "type": "number"
+            },
+            "gridlines": {
+              "type": "boolean"
+            },
+            "stats_root": {
+              "type": "string"
+            },
+            "suptitle_y": {
+              "type": "number"
+            },
+            "title_fontsize": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "add_states",
+            "cmap",
+            "figsize",
+            "file_fontsize",
+            "gridlines",
+            "stats_root",
+            "suptitle_y",
+            "title_fontsize"
+          ],
+          "type": "object"
         },
         "stats": {
           "type": "array"
