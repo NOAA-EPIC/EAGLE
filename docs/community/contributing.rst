@@ -70,7 +70,7 @@ A number of ``make`` targets, including those that execute EAGLE drivers, invoke
     + uw execute --config-file eagle.yaml --module eagle/visualization/visualization.py --classname Visualization --task plots --key-path visualization.grid2grid.global
     ...
 
-Setting the ``DEBUG`` environment variable when executing such a ``make`` target will the ``--verbose`` flag to the ``uw`` command. For example:
+Setting the ``DEBUG`` environment variable when executing such a ``make`` target will add the ``--verbose`` flag to the ``uw`` command. For example:
 
 .. code-block:: text
 
@@ -250,7 +250,7 @@ If wish to use some other conda installation:
     <command to activate your conda installation>
     make -C docs
 
-Note the, if you use your own conda installation, an environment called ``docs`` will be created, or an existing one will be updated.
+Note that, if you use your own conda installation, an environment called ``docs`` will be created, or an existing one will be updated.
 
 After that, open the generated HTML files in your web browser:
 
