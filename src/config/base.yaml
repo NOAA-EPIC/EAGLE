@@ -833,6 +833,10 @@ vx:
           regrid: !dict '{{ vx.grid2obs.global.wxvx.wxvx.regrid }}'
 zarrs:
   common:
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate data
+      - set -ex
     execution:
       batchargs:
         cores: 4
@@ -840,10 +844,7 @@ zarrs:
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:10:00'
-      envcmds:
-        - source {{ val.conda }}/etc/profile.d/conda.sh
-        - conda activate data
-        - set -ex
+      envcmds: !list '{{ zarrs.common.envcmds }}'
       mpiargs: []
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
   gfs:
