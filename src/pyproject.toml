@@ -1,7 +1,23 @@
+[tool.coverage.report]
+#exclude_also = [
+# "if TYPE_CHECKING:"
+#]
+fail_under = 100
+show_missing = true
+skip_covered = true
+
+[tool.coverage.run]
+branch = true
+
 [tool.mypy]
 check_untyped_defs = true
 pretty = true
 warn_return_any = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+  "ignore:jsonschema.RefResolver is deprecated:DeprecationWarning" # from uwtools
+]
 
 [tool.ruff]
 line-length = 88
@@ -9,6 +25,7 @@ line-length = 88
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+  "ANN001",  # missing-type-function-argument
   "ANN201",  # missing-return-type-undocumented-public-function
   "ANN202",  # missing-return-type-private-function
   "C408",    # unnecessary-collection-call
@@ -31,6 +48,7 @@ ignore = [
   "PLR0913", # too-many-arguments
   "PLR0915", # too-many-statements
   "PLR2004", # magic-value-comparison
+  "S101",    # assert
   "S602",    # subprocess-popen-with-shell-equals-true
   "UP031",   # printf-string-formatting
 ]

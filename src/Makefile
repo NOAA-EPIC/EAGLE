@@ -3,7 +3,7 @@ ENVS     = data inference prewxvx training visualization wxvx
 HELPERS  = prewxvx vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
-TOOLING  = config devenv env format lint realize shellcheck test typecheck validate yamllint
+TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
 INSTALLDIR ?= conda
@@ -119,6 +119,15 @@ ifdef env
 	mypy $(PACKAGE)/$(env)
 else
 	$(call envloop,typecheck)
+endif
+
+unittest:
+ifdef env
+	@echo "=> Unit testing package: $$env"
+	$(call activate,$(env))
+	pytest $(PACKAGE)/$(env)
+else
+	$(call envloop,unittest)
 endif
 
 validate:
