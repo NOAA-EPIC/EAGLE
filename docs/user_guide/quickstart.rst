@@ -13,6 +13,8 @@ platform. Future development will include additional platforms.
 
 **Complete the following steps from the** ``src/`` **directory.**
 
+.. note:: The EAGLE runtime software environment currently requires over 50 GB of disk space. Consider available space, quota, etc. when choosing where to clone the EAGLE repository and run the following steps.
+
 .. _QuickstartWorkflow:
 
 Building and Running :term:`EAGLE`
