@@ -104,7 +104,7 @@ shellcheck:
 	@echo "=> Checking shell scripts"
 	@(set -x && shellcheck --format=gcc --severity=info --shell=bash $(BASHSRCS))
 
-test: lint shellcheck typecheck yamllint
+test: lint shellcheck typecheck unittest yamllint
 
 training:
 	$(call activate,training)
