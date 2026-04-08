@@ -3,7 +3,7 @@
 CONFIG = {
     "inference": {
         "anemoi": {
-            # anemoi-inference validates its config.
+            # anemoi-inference validates this block.
         },
         "checkpoint_dir": "/path/to/checkpoint",
         "execution": {

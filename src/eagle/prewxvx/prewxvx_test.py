@@ -116,6 +116,9 @@ def test_prewxvx__eagle_tools(logged, validator, tmp_path, with_del, with_set):
     for key in ["levels"]:
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'array'")
+    # Some keys have enum values:
+    assert not ok(with_set(config, "foo", "model_type"))
+    assert logged("'foo' is not one of")
     # Some keys have integer values:
     for key in ["lam_index", "lead_time"]:
         assert not ok(with_set(config, None, key))
@@ -129,14 +132,7 @@ def test_prewxvx__eagle_tools(logged, validator, tmp_path, with_del, with_set):
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'object'")
     # Some keys have string values:
-    for key in [
-        "end_date",
-        "forecast_path",
-        "freq",
-        "model_type",
-        "output_path",
-        "start_date",
-    ]:
+    for key in ["end_date", "forecast_path", "freq", "output_path", "start_date"]:
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'string'")
 
