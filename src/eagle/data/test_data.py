@@ -50,3 +50,30 @@ def test_grids_and_meshes_grids_and_meshes(
     for key in ["rundir"]:
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'string'")
+
+
+def test_grids_and_meshes_grids_and_meshes_filenames(
+    logged, tmp_path, validator, with_del, with_set
+):
+    ok = validator(
+        __file__,
+        "grids_and_meshes",
+        tmp_path,
+        "properties",
+        "grids_and_meshes",
+        "properties",
+        "filenames",
+    )
+    config = CONFIG_GRIDS_AND_MESHES["grids_and_meshes"]["filenames"]
+    # Basic correctness:
+    assert ok(config)
+    # Certain top-level keys are required:
+    for key in ["gfs_target_grid", "hrrr_target_grid", "latent_mesh"]:
+        assert not ok(with_del(config, key))
+        assert logged(f"'{key}' is a required property")
+    # Additional keys are not allowed:
+    assert not ok(with_set(config, "foo", "bar"))
+    # Some keys have string values:
+    for key in ["gfs_target_grid", "hrrr_target_grid", "latent_mesh"]:
+        assert not ok(with_set(config, None, key))
+        assert logged("is not of type 'string'")
