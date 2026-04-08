@@ -1,3 +1,5 @@
+# ruff: noqa: ANN401,PT013
+
 import json
 import re
 from collections.abc import Callable

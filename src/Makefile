@@ -72,6 +72,9 @@ ifdef env
 	$(call activate,$(env))
 	ruff check $(PACKAGE)/$(env)
 else
+	@echo "=> Linting package: $(PACKAGE)"
+	$(call activate,base)
+	ruff check $(PACKAGE)/*.py
 	$(call envloop,lint)
 endif
 
@@ -118,6 +121,9 @@ ifdef env
 	$(call activate,$(env))
 	mypy $(PACKAGE)/$(env)
 else
+	@echo "=> Typechecking package: $(PACKAGE)"
+	$(call activate,base)
+	mypy $(PACKAGE)/*.py
 	$(call envloop,typecheck)
 endif
 
