@@ -1,8 +1,9 @@
-CONFIG_ZARR: dict = {
+# Schema tests.
+
+CONFIG: dict = {
     "zarr": {
         "execution": {
-            # Rigorous schema checking of this block is provided by uwtools. Provide
-            # minimum viable config here.
+            # uwtools validates this block.
             "batchargs": {
                 "walltime": "01:00:00",
             },
@@ -34,7 +35,7 @@ CONFIG_ZARR: dict = {
 
 def test_top(logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "zarr", tmp_path)
-    config = CONFIG_ZARR
+    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -51,7 +52,7 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
 
 def test_zarr(logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "zarr", tmp_path, "properties", "zarr")
-    config = CONFIG_ZARR["zarr"]
+    config = CONFIG["zarr"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -74,7 +75,7 @@ def test_zarr__ufs2arco(logged, tmp_path, validator, with_del, with_set):
     ok = validator(
         __file__, "zarr", tmp_path, "properties", "zarr", "properties", "ufs2arco"
     )
-    config = CONFIG_ZARR["zarr"]["ufs2arco"]
+    config = CONFIG["zarr"]["ufs2arco"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -105,7 +106,7 @@ def test_zarr__ufs2arco__multisource(logged, tmp_path, validator):
         "properties",
         "multisource",
     )
-    config = CONFIG_ZARR["zarr"]["ufs2arco"]["multisource"]
+    config = CONFIG["zarr"]["ufs2arco"]["multisource"]
     # Basic correctness:
     assert ok(config)
     # At least one element is required:
@@ -128,7 +129,7 @@ def test_zarr__ufs2arco__multisource__item(
         "multisource",
         "items",
     )
-    config = CONFIG_ZARR["zarr"]["ufs2arco"]["multisource"][0]
+    config = CONFIG["zarr"]["ufs2arco"]["multisource"][0]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -160,7 +161,7 @@ def test_zarr__ufs2arco__multisource__item__source(
         "properties",
         "source",
     )
-    config = CONFIG_ZARR["zarr"]["ufs2arco"]["multisource"][0]["source"]
+    config = CONFIG["zarr"]["ufs2arco"]["multisource"][0]["source"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:

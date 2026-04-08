@@ -1,4 +1,6 @@
-CONFIG_GRIDS_AND_MESHES = {
+# Schema tests.
+
+CONFIG = {
     "grids_and_meshes": {
         "filenames": {
             "gfs_target_grid": "/path/to/global_one_degree.nc",
@@ -12,7 +14,7 @@ CONFIG_GRIDS_AND_MESHES = {
 
 def test_top(logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "grids_and_meshes", tmp_path)
-    config = CONFIG_GRIDS_AND_MESHES
+    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -31,7 +33,7 @@ def test_grids_and_meshes(logged, tmp_path, validator, with_del, with_set):
     ok = validator(
         __file__, "grids_and_meshes", tmp_path, "properties", "grids_and_meshes"
     )
-    config = CONFIG_GRIDS_AND_MESHES["grids_and_meshes"]
+    config = CONFIG["grids_and_meshes"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -60,7 +62,7 @@ def test_grids_and_meshes__filenames(logged, tmp_path, validator, with_del, with
         "properties",
         "filenames",
     )
-    config = CONFIG_GRIDS_AND_MESHES["grids_and_meshes"]["filenames"]
+    config = CONFIG["grids_and_meshes"]["filenames"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
