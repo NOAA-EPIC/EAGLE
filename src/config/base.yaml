@@ -856,6 +856,7 @@ zarrs:
         mpiargs: !list '{{ zarrs.common.execution.mpiargs }}'
         mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: gfs
+      rundir: '{{ val.data.rundir }}'
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
         mover: !dict '{{ ufs2arco.mover }}'
@@ -867,7 +868,6 @@ zarrs:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
             target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
-      rundir: '{{ val.data.rundir }}'
     platform: !dict '{{ app.platform }}'
   hrrr:
     zarr:
@@ -878,6 +878,7 @@ zarrs:
         mpiargs: !list '{{ zarrs.common.execution.mpiargs }}'
         mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: hrrr
+      rundir: '{{ val.data.rundir }}'
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
         mover: !dict '{{ ufs2arco.mover }}'
@@ -895,5 +896,4 @@ zarrs:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
             target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
-      rundir: '{{ val.data.rundir }}'
     platform: !dict '{{ app.platform }}'
