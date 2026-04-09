@@ -32,7 +32,7 @@ Building and Running :term:`EAGLE`
 
    Developers who will be modifying Python driver code should replace ``make env`` with ``make devenv``, which will 
    create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, 
-   typechecking, and :term:`YAML` linting.
+   typechecking, unit testing, and :term:`YAML` linting.
 
 #. Create the EAGLE YAML config
 
