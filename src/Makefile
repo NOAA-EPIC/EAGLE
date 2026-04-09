@@ -11,7 +11,7 @@ SHELL      := $(shell which bash)
 
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
-envloop  = @set -e && for env in $(ENVS); do $(make) env=$$env $(1); done
+envloop  = @set -e && for env in eagle $(ENVS); do $(make) env=$$env $(1); done
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
@@ -69,12 +69,9 @@ endif
 lint:
 ifdef env
 	@echo "=> Linting package: $$env"
-	$(call activate,$(env))
-	ruff check $(PACKAGE)/$(env)
+	$(call activate,$(if $(filter eagle,$(env)),base,$(env)))
+	ruff check $(PACKAGE)/$(if $(filter eagle,$(env)),*.py,$(env))
 else
-	@echo "=> Linting package: $(PACKAGE)"
-	$(call activate,base)
-	ruff check $(PACKAGE)/*.py
 	$(call envloop,lint)
 endif
 
@@ -118,20 +115,17 @@ endif
 typecheck:
 ifdef env
 	@echo "=> Typechecking package: $$env"
-	$(call activate,$(env))
-	mypy $(PACKAGE)/$(env)
+	$(call activate,$(if $(filter eagle,$(env)),base,$(env)))
+	mypy $(PACKAGE)/$(if $(filter eagle,$(env)),*.py,$(env))
 else
-	@echo "=> Typechecking package: $(PACKAGE)"
-	$(call activate,base)
-	mypy $(PACKAGE)/*.py
 	$(call envloop,typecheck)
 endif
 
 unittest:
 ifdef env
 	@echo "=> Unit testing package: $$env"
-	$(call activate,$(env))
-	pytest $(PACKAGE)/$(env)
+	$(call activate,$(if $(filter eagle,$(env)),base,$(env)))
+	pytest $(PACKAGE)/$(if $(filter eagle,$(env)),*.py,$(env))
 else
 	$(call envloop,unittest)
 endif
