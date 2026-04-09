@@ -29,7 +29,7 @@ def logged(caplog):
 def readytask():
     @task
     def f(*_args, **_kwargs):
-        yield "readyteask"
+        yield "readytask"
         yield Asset(None, lambda: True)
         yield None
 
