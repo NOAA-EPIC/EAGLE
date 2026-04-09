@@ -15,7 +15,6 @@ omit = [ # TODO REMOVE ALL THESE
   "eagle/prewxvx/prewxvx.py",
   "eagle/training/training.py",
   "eagle/visualization/visualization.py",
-  "eagle/wxvx/wxvx.py",
 ]
 
 [tool.mypy]
@@ -60,4 +59,13 @@ ignore = [
   "S101",    # assert
   "S602",    # subprocess-popen-with-shell-equals-true
   "UP031",   # printf-string-formatting
+]
+
+[tool.ruff.lint.per-file-ignores]
+"{conftest.py,**/*_test.py}" = [
+  "ANN002",  # missing-type-args
+  "ANN003",  # missing-type-kwargs
+  "ANN401",  # any-type
+  "PT013",   # pytest-incorrect-pytest-import
+  "SLF001",  # private-member-access
 ]

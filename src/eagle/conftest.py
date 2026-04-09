@@ -1,5 +1,3 @@
-# ruff: noqa: ANN401,PT013
-
 import json
 import re
 from collections.abc import Callable
@@ -7,6 +5,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from iotaa import Asset, task
 from pytest import fixture
 from uwtools.api.config import validate
 
@@ -17,6 +16,17 @@ def logged(caplog):
         found = any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
         caplog.clear()
         return found
+
+    return f
+
+
+@fixture
+def readytask():
+    @task
+    def f(*_args, **_kwargs):
+        yield "readyteask"
+        yield Asset(None, lambda: True)
+        yield None
 
     return f
 
