@@ -568,8 +568,8 @@ visualization:
         step: !int '{{ val.step }}'
       variable_prefixes: # These names are from the wxvx output.
         - 2t_heightAboveGround_0002
-        - u_10m_heightAboveGround_0010
-        - v_10m_heightAboveGround_0010
+        - u10_heightAboveGround_0010
+        - v10_heightAboveGround_0010
         - gh_isobaricInhPa_0500
         - t_isobaricInhPa_0850
         - u_isobaricInhPa_0250
@@ -705,7 +705,7 @@ vx:
         u10:
           level_type: heightAboveGround
           levels: [10]
-          name: u_10m
+          name: u10
         v:
           level_type: isobaricInhPa
           levels: [250]
@@ -713,7 +713,7 @@ vx:
         v10:
           level_type: heightAboveGround
           levels: [10]
-          name: v_10m
+          name: v10
   grid2grid:
     global:
       platform: !dict '{{ app.platform }}'

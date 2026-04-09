@@ -16,8 +16,8 @@ CONFIG: dict = {
             "start_date": "2026-04-01T00:00:00",
             "stat_prefix": "grid_stat_nested_global",
             "variable_prefixes": [
-                "u_10m_heightAboveGround_0010",
-                "v_10m_heightAboveGround_0010",
+                "u10_heightAboveGround_0010",
+                "v10_heightAboveGround_0010",
             ],
             "work_path": "/path/to/work",
         },
