@@ -12,6 +12,11 @@ from uwtools.api.config import validate
 
 @fixture
 def logged(caplog):
+    # NB: Calling this fixture in a test will clear the captured-so-far log messages. If
+    # assertions need to be made in tests about multiple log messages from a single bit
+    # of code execution, the 'caplog' fixture and be received in the test and assertions
+    # made about 'caplog.text', which contains everything logged since the last time
+    # caplog was cleared.
     def f(s: str):
         found = any(re.match(rf"^.*{s}.*$", message) for message in caplog.messages)
         caplog.clear()
