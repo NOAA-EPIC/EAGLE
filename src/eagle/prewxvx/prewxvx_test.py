@@ -255,11 +255,11 @@ def test_prewxvx__eagle_tools__levels(logged, validator, tmp_path):
     assert logged("is not of type 'number'")
 
 
-def test_prewxvx__defs__datetime(caplog, tmp_path, validator):
+def test_prewxvx__defs__datetime(caplog, logged, tmp_path, validator):
     ok = validator(__file__, "prewxvx", tmp_path, "$defs", "datetime")
     for val in [datetime(2026, 4, 8, 12, tzinfo=timezone.utc), "2026-04-08T01:23:45"]:
         assert ok(val)
     assert not ok("foo")
     assert "is not valid under any of the given schemas" in caplog.text
     assert "is not of type 'datetime'" in caplog.text
-    assert "does not match" in caplog.text
+    assert logged("does not match")
