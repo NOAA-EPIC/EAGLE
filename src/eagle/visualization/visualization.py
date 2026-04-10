@@ -47,7 +47,8 @@ class Visualization(AssetsTimeInvariant):
         """
         netCDF files from eagle-tools per output variable.
         """
-        yield self.taskname(f"{self._name} postwxvx")
+        taskname = self.taskname(f"{self._name} postwxvx")
+        yield taskname
         path = self.rundir / f"postwxvx-{self._name}.yaml"
         vx_dir = Path(self.config["eagle_tools"]["work_path"])
         ncfiles = {var: vx_dir / f"{var}.nc" for var in self.config["variables"]}
@@ -65,6 +66,17 @@ class Visualization(AssetsTimeInvariant):
             cwd=self.rundir,
             shell=True,
         )
+        # HACK START # noqa: FIX004
+        # See https://github.com/NOAA-PSL/eagle-tools/pull/61, remove when fixed.
+        for fn_old, fn_new in {
+            "10u_heightAboveGround_0010.nc": "10m_zonal_wind.nc",
+            "10v_heightAboveGround_0010.nc": "10m_meridional_wind.nc",
+        }.items():
+            path_old, path_new = [vx_dir / fn for fn in (fn_old, fn_new)]
+            if path_old.is_file():
+                path_old.rename(path_new)
+                logging.debug("%s: Renamed %s -> %s", taskname, path_old, path_new)
+        # HACK END # noqa: FIX004
 
     @collection
     def spatial_stat_plots(self):
