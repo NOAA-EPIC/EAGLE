@@ -445,7 +445,7 @@ training:
       export: false
       memory: 128G
       rundir: '{{ training.rundir }}'
-      walltime: '00:30:00'
+      walltime: '01:00:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate training

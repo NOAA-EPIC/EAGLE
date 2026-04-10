@@ -9,4 +9,4 @@ dependencies:
   - uwtools 2.14.*
   - xesmf 0.8.*
   - pip:
-      - eagle-tools
+      - eagle-tools==0.8.1

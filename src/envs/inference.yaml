@@ -10,4 +10,4 @@ dependencies:
   - pip:
       - anemoi-inference==0.10.*
       - anemoi-models==0.13.*
-      - eagle-tools
+      - eagle-tools==0.8.1
