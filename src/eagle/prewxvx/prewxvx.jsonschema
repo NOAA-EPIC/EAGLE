@@ -103,13 +103,13 @@
             }
           },
           "required": [
+            "end_date",
             "forecast_path",
             "freq",
             "lead_time",
-            "start_date",
-            "end_date",
+            "model_type",
             "output_path",
-            "model_type"
+            "start_date"
           ],
           "type": "object"
         },
