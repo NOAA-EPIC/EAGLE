@@ -4,5 +4,5 @@ channels:
   - oar-gsl
   - ufs-community
 dependencies:
-  - wxvx 0.7.*
+  - wxvx >=0.7.2
   - uwtools 2.14.*
