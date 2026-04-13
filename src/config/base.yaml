@@ -42,6 +42,7 @@ inference:
   execution:
     batchargs:
       <<: *gpu-batchargs
+      export: false
       memory: 16G
       rundir: '{{ inference.rundir }}'
       walltime: '00:10:00'
@@ -441,9 +442,10 @@ training:
   execution:
     batchargs:
       <<: *gpu-batchargs
+      export: false
       memory: 128G
       rundir: '{{ training.rundir }}'
-      walltime: '00:30:00'
+      walltime: '01:00:00'
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate training
@@ -566,8 +568,8 @@ visualization:
         step: !int '{{ val.step }}'
       variable_prefixes: # These names are from the wxvx output.
         - 2t_heightAboveGround_0002
-        - u_10m_heightAboveGround_0010
-        - v_10m_heightAboveGround_0010
+        - 10u_heightAboveGround_0010
+        - 10v_heightAboveGround_0010
         - gh_isobaricInhPa_0500
         - t_isobaricInhPa_0850
         - u_isobaricInhPa_0250
@@ -642,6 +644,7 @@ vx:
     execution:
       batchargs: &wxvx-common-batchargs
         cores: 1
+        export: false
         partition: '{{ app.partitions.netaccess }}'
         walltime: '00:30:00'
       envcmds:
@@ -702,7 +705,7 @@ vx:
         u10:
           level_type: heightAboveGround
           levels: [10]
-          name: u_10m
+          name: 10u
         v:
           level_type: isobaricInhPa
           levels: [250]
@@ -710,7 +713,7 @@ vx:
         v10:
           level_type: heightAboveGround
           levels: [10]
-          name: v_10m
+          name: 10v
   grid2grid:
     global:
       platform: !dict '{{ app.platform }}'
@@ -830,26 +833,30 @@ vx:
           regrid: !dict '{{ vx.grid2obs.global.wxvx.wxvx.regrid }}'
 zarrs:
   common:
-    execution: &zarrs-common-execution
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate data
+      - set -ex
+    execution:
       batchargs:
         cores: 4
+        export: false
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:10:00'
-      envcmds:
-        - source {{ val.conda }}/etc/profile.d/conda.sh
-        - conda activate data
-        - set -ex
-      executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+      envcmds: !list '{{ zarrs.common.envcmds }}'
+      mpiargs: []
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
   gfs:
     zarr:
       execution:
-        <<: *zarrs-common-execution
         batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
+        envcmds: !list '{{ zarrs.common.execution.envcmds }}'
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+        mpiargs: !list '{{ zarrs.common.execution.mpiargs }}'
         mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: gfs
+      rundir: '{{ val.data.rundir }}'
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
         mover: !dict '{{ ufs2arco.mover }}'
@@ -861,16 +868,17 @@ zarrs:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
             target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
-      rundir: '{{ val.data.rundir }}'
     platform: !dict '{{ app.platform }}'
   hrrr:
     zarr:
       execution:
-        <<: *zarrs-common-execution
         batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
+        envcmds: !list '{{ zarrs.common.execution.envcmds }}'
         executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
+        mpiargs: !list '{{ zarrs.common.execution.mpiargs }}'
         mpicmd: '{{ zarrs.common.execution.mpicmd }}'
       name: hrrr
+      rundir: '{{ val.data.rundir }}'
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
         mover: !dict '{{ ufs2arco.mover }}'
@@ -888,5 +896,4 @@ zarrs:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
             target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
-      rundir: '{{ val.data.rundir }}'
     platform: !dict '{{ app.platform }}'

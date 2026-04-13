@@ -42,6 +42,14 @@ jobs:
       name: eagle-ursa
 
     steps:
+
+      - name: Add ci-running label
+        continue-on-error: true
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: ci-running
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Perform cleanup
         run: |
           set -euo pipefail
@@ -91,13 +99,6 @@ jobs:
         run: |
           echo "No changes under nested_eagle/ or src/. Skipping."
           exit 0
-
-      - name: Add ci-running label
-        continue-on-error: true
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: ci-running
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build env and run pipeline via src/Makefile + uwtools
         env:

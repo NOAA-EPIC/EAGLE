@@ -39,12 +39,11 @@ After successful completion, the following ``make`` targets will be available:
     make lint       # run a linter on Python code
     make shellcheck # run a checker on Bash scripts
     make typecheck  # run a typechecker on Python code
+    make unittest   # run unit tests on Python code and JSON Schema schemas
     make yamllint   # run a linter on :term:`YAML` configs
     make test       # all of the above except formatting
 
-The ``lint`` and ``typecheck`` targets accept an optional ``env=<name>`` key-value pair that, if provided, will 
-restrict the tool to the code associated with a particular virtual environment. For example, ``make lint env=data`` 
-will lint only the code associated with the ``data`` environment. If no ``env`` value is provided, all code will be tested.
+The ``lint``, ``typecheck``, and ``unittest`` targets accept an optional ``env=<name>`` key-value pair that, if provided, will restrict the tool to the code associated with a particular virtual environment. For example, ``make lint env=data``  will lint only the code associated with the ``data`` environment. If no ``env`` value is provided, all code will be tested. (Specify `env=eagle` to restrict the tool to the small amount of code in the top level of the ``eagle`` Python package.)
 
 For each ``make`` target that executes an EAGLE driver, the following
 files will be created in the appropriate run directory:
@@ -70,7 +69,7 @@ A number of ``make`` targets, including those that execute EAGLE drivers, invoke
     + uw execute --config-file eagle.yaml --module eagle/visualization/visualization.py --classname Visualization --task plots --key-path visualization.grid2grid.global
     ...
 
-Setting the ``DEBUG`` environment variable when executing such a ``make`` target will the ``--verbose`` flag to the ``uw`` command. For example:
+Setting the ``DEBUG`` environment variable when executing such a ``make`` target will add the ``--verbose`` flag to the ``uw`` command. For example:
 
 .. code-block:: text
 
@@ -110,7 +109,7 @@ Development and Testing Process
 
 #. **Branch and develop:** Work on a branch dedicated to a single change or closely related set of changes.
 #. **Build the development environment:** Use the commands in the `Development` section above to create the required environments and install development tools.
-#. **Run checks:** Before opening a pull request, run the relevant quality checks such as ``make lint``, ``make typecheck``, ``make yamllint``, and ``make test``.
+#. **Format code/data and run code-quality checks:** Before opening a pull request, format code and data and perform code-quality checks by running ``make format && make test``.
 #. **Update documentation:** If your change affects workflow behavior, capabilities, or developer setup, update the appropriate RST files in ``docs/``.
 #. **Open the pull request:** Push your branch to GitHub and open a pull request against the upstream repository.
 
@@ -250,7 +249,7 @@ If wish to use some other conda installation:
     <command to activate your conda installation>
     make -C docs
 
-Note the, if you use your own conda installation, an environment called ``docs`` will be created, or an existing one will be updated.
+Note that, if you use your own conda installation, an environment called ``docs`` will be created, or an existing one will be updated.
 
 After that, open the generated HTML files in your web browser:
 

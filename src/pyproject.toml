@@ -1,7 +1,28 @@
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true
+
+[tool.coverage.run]
+branch = true
+omit = [ # TODO REMOVE ALL THESE
+  "eagle/data/grids_and_meshes.py",
+  "eagle/data/zarr.py",
+  "eagle/inference/inference.py",
+  "eagle/prewxvx/prewxvx.py",
+  "eagle/training/training.py",
+  "eagle/visualization/visualization.py",
+]
+
 [tool.mypy]
 check_untyped_defs = true
 pretty = true
 warn_return_any = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+  "ignore:jsonschema.RefResolver is deprecated:DeprecationWarning" # from uwtools
+]
 
 [tool.ruff]
 line-length = 88
@@ -9,12 +30,11 @@ line-length = 88
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+  "ANN001",  # missing-type-function-argument
   "ANN201",  # missing-return-type-undocumented-public-function
   "ANN202",  # missing-return-type-private-function
-  "C408",    # unnecessary-collection-call
   "COM812",  # missing-trailing-comma
   "D100",    # undocumented-public-module
-  "D101",    # undocumented-public-class
   "D102",    # undocumented-public-method
   "D103",    # undocumented-public-function
   "D104",    # undocumented-public-package
@@ -22,15 +42,22 @@ ignore = [
   "D203",    # incorrect-blank-line-before-class
   "D205",    # missing-blank-line-after-summary
   "D212",    # multi-line-summary-first-line
-  "D400",    # missing-trailing-period
   "D401",    # non-imperative-mood
   "D403",    # first-word-uncapitalized
   "E731",    # lambda-assignment
-  "ERA001",  # commented-out-code
   "LOG015",  # root-logger-call
   "PLR0913", # too-many-arguments
-  "PLR0915", # too-many-statements
   "PLR2004", # magic-value-comparison
+  "S101",    # assert
   "S602",    # subprocess-popen-with-shell-equals-true
   "UP031",   # printf-string-formatting
+]
+
+[tool.ruff.lint.per-file-ignores]
+"{conftest.py,**/*_test.py}" = [
+  "ANN002",  # missing-type-args
+  "ANN003",  # missing-type-kwargs
+  "ANN401",  # any-type
+  "PT013",   # pytest-incorrect-pytest-import
+  "SLF001",  # private-member-access
 ]

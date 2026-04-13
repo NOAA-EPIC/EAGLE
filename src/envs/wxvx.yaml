@@ -5,8 +5,8 @@ channels:
   - ufs-community
 dependencies:
   - python 3.13
-  - uwtools 2.13.*
-  - wxvx 0.7.*
+  - uwtools 2.14.*
+  - wxvx >=0.7.2
   - xesmf 0.8.*
   - pip:
       - eagle-tools

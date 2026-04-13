@@ -7,7 +7,7 @@ dependencies:
   - numpy 1.26.4.*
   - python 3.12
   - setuptools 81.0.*
-  - uwtools 2.13.*
+  - uwtools 2.14.*
   - pip:
       - anemoi-models==0.13.*
       - anemoi-training==0.10.*

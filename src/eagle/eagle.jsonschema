@@ -42,9 +42,6 @@
             "batchargs": {
               "additionalProperties": true,
               "properties": {
-                "--gres": {
-                  "type": "string"
-                },
                 "nodes": {
                   "type": "integer"
                 },
@@ -56,7 +53,6 @@
                 }
               },
               "required": [
-                "--gres",
                 "nodes",
                 "partition",
                 "queue"

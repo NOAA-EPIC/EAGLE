@@ -23,6 +23,8 @@ jobs:
         run: make -C src lint
       - name: Run Python Typechecker
         run: make -C src typecheck
+      - name: Run Python Unit Tests
+        run: make -C src unittest
       - name: Run Shell Checker
         run: make -C src shellcheck
       - name: Run YAML Linter

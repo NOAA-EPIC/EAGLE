@@ -17,4 +17,4 @@ clean:
 
 %: Makefile
 	mkdir -p $(BUILDDIR)
-	sphinx-build -M $@ . $(BUILDDIR) -w $(BUILDDIR)/warnings.log
+	sphinx-build -M $@ . $(BUILDDIR) --fail-on-warning --nitpicky -w $(BUILDDIR)/warnings.log

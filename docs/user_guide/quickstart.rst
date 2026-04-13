@@ -13,6 +13,8 @@ platform. Future development will include additional platforms.
 
 **Complete the following steps from the** ``src/`` **directory.**
 
+.. note:: The EAGLE runtime software environment currently requires over 50 GB of disk space. Consider available space, quota, etc. when choosing where to clone the EAGLE repository and run the following steps.
+
 .. _QuickstartWorkflow:
 
 Building and Running :term:`EAGLE`
@@ -30,7 +32,7 @@ Building and Running :term:`EAGLE`
 
    Developers who will be modifying Python driver code should replace ``make env`` with ``make devenv``, which will 
    create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, 
-   typechecking, and :term:`YAML` linting.
+   typechecking, unit testing, and :term:`YAML` linting.
 
 #. Create the EAGLE YAML config
 
