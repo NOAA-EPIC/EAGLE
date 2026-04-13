@@ -12,6 +12,31 @@ class WXVX(DriverTimeInvariant):
     lam).
     """
 
+    @task
+    def prewxvx(self):
+        """
+        todo
+        global or lam
+        """
+        yield self.taskname(f"{self.driver_name()} {self._name}")
+        path = self.rundir / f"prewxvx-{self._name}.yaml"
+        vx_dir = Path(self.config["eagle_tools"]["work_path"])
+        ncfiles = {var: vx_dir / f"{var}.nc" for var in self.config["variables"]}
+        yield {
+            "config": Asset(path, path.is_file),
+            **{var: Asset(ncpath, ncpath.is_file) for var, ncpath in ncfiles.items()},
+        }
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        get_yaml_config(self.config["eagle_tools"]).dump(path)
+        logfile = self.rundir / "prewxvx.log"
+        run(
+            "eagle-tools prewxvx prewxvx-%s.yaml >%s 2>&1" % (self._name, logfile),
+            check=False,
+            cwd=self.rundir,
+            shell=True,
+        )
+
     @collection
     def provisioned_rundir(self):
         """
