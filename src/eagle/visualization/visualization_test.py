@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import call, patch
 
 from pytest import fixture
 
@@ -62,8 +63,18 @@ def driverobj(config):
     )
 
 
-def test_plots(driverobj):
-    pass
+def test_plots(driverobj, readytask):
+    with (
+        patch.object(driverobj, "_basic_plot", wraps=readytask) as _basic_plot,
+        patch.object(
+            driverobj, "spatial_stat_plots", wraps=readytask
+        ) as spatial_stat_plots,
+    ):
+        assert driverobj.plots().ready
+        for var in driverobj.config["variables"]:
+            for stat in driverobj.config["stats"]:
+                assert call(var, stat) in _basic_plot.call_args_list
+        spatial_stat_plots.assert_called_once_with()
 
 
 # Schema tests.

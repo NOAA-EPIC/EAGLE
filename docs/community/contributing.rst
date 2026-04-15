@@ -43,7 +43,7 @@ After successful completion, the following ``make`` targets will be available:
     make yamllint   # run a linter on :term:`YAML` configs
     make test       # all of the above except formatting
 
-The ``lint``, ``typecheck``, and ``unittest`` targets accept an optional ``env=<name>`` key-value pair that, if provided, will restrict the tool to the code associated with a particular virtual environment. For example, ``make lint env=data``  will lint only the code associated with the ``data`` environment. If no ``env`` value is provided, all code will be tested. (Specify `env=eagle` to restrict the tool to the small amount of code in the top level of the ``eagle`` Python package.)
+By default, these targets run their tests for every virtual environment. The ``lint``, ``typecheck``, ``unittest``, and ``test`` targets accept an optional ``env=<name>`` key-value pair that, if provided, will restrict the tool to the code associated with a particular virtual environment. For example, ``make lint env=data``  will lint only the code associated with the ``data`` environment, and ``make test env=data`` will run all code-quality checks on ``data`` environment. Specify ``env=eagle`` to restrict tests to the small amount of code in the top level of the ``eagle`` Python package. If no ``env`` value is provided, all code will be tested.
 
 For each ``make`` target that executes an EAGLE driver, the following
 files will be created in the appropriate run directory:
