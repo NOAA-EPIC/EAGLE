@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import call, patch
 
+import xarray as xr
+from iotaa import Asset, task
 from pytest import fixture, mark
 
 from . import visualization
@@ -112,9 +114,27 @@ def test_spatial_stat_plots(driverobj, readytask):
     ncfiles = [Path(x) for x in ("grid_stat_b_pairs.nc", "grid_stat_a_pairs.nc")]
     with (
         patch.object(Path, "rglob", return_value=ncfiles),
-        patch.object(driverobj, "_spatial_stat_plot", wraps=readytask) as _spatial_stat_plot,
+        patch.object(
+            driverobj, "_spatial_stat_plot", wraps=readytask
+        ) as _spatial_stat_plot,
     ):
         assert driverobj.spatial_stat_plots().ready
+
+
+def test__basic_plot(driverobj, tmp_path):
+    @task
+    def postwxvx():
+        yield "postwxvx"
+        yield Asset({"v": path}, lambda: True)
+        yield None
+
+    driverobj._config["rundir"] = tmp_path
+    path = tmp_path / "a.nc"
+    assert not path.is_file()
+    xr.Dataset({"y": (["x"], [1, 2, 3])}).to_netcdf(path)
+    with patch.object(driverobj, "postwxvx", postwxvx):
+        assert driverobj._basic_plot(var="v", stat="y").ready
+    assert path.is_file()
 
 
 # Schema tests.
