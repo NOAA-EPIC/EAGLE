@@ -20,7 +20,8 @@ warn_return_any = true
 
 [tool.pytest.ini_options]
 filterwarnings = [
-  "ignore:jsonschema.RefResolver is deprecated:DeprecationWarning" # from uwtools
+  "ignore:Tight layout not applied:UserWarning", # from matplotlib
+  "ignore:jsonschema.RefResolver is deprecated:DeprecationWarning", # from uwtools
 ]
 
 [tool.ruff]

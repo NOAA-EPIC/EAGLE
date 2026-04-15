@@ -137,6 +137,21 @@ def test__basic_plot(driverobj, tmp_path):
     assert path.is_file()
 
 
+def test__spatial_stat_plot(driverobj, tmp_path):
+    pngpath = tmp_path / "a.png"
+    assert not pngpath.exists()
+    ncpath = tmp_path / "a.nc"
+    xr.Dataset(
+        {
+            "lat": (["lat"], [1, 2, 3]),
+            "lon": (["lon"], [4, 5, 6]),
+            "DIFF_v": (["lat", "lon"], [[11, 22, 33], [44, 55, 66], [77, 88, 99]]),
+        }
+    ).to_netcdf(ncpath)
+    driverobj._spatial_stat_plot(ncpath=ncpath, pngpath=pngpath)
+    assert pngpath.is_file()
+
+
 # Schema tests.
 
 
