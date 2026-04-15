@@ -1,55 +1,76 @@
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+from pytest import fixture
+
+from .visualization import Visualization
+
+
+@fixture
+def config():
+    return {
+        "visualization": {
+            "eagle_tools": {
+                "end_date": "2026-04-08T12:00:00",
+                "freq": "6h",
+                "leadtimes": {
+                    "start": 0,
+                    "step": 3,
+                    "stop": 24,
+                },
+                "start_date": "2026-04-01T00:00:00",
+                "stat_prefix": "grid_stat_nested_global",
+                "variable_prefixes": [
+                    "u10_heightAboveGround_0010",
+                    "v10_heightAboveGround_0010",
+                ],
+                "work_path": "/path/to/work",
+            },
+            "name": "asdf",
+            "rundir": "/path/to/rundir",
+            "spatial_stat_plots": {
+                "add_states": True,
+                "cmap": "RdBu_r",
+                "figsize": {
+                    "h": 1.1,
+                    "w": 2,
+                },
+                "file_fontsize": 3.3,
+                "gridlines": True,
+                "stats_root": "/path/to/stats",
+                "suptitle_y": 4.4,
+                "title_fontsize": 5.5,
+            },
+            "stats": [
+                "RMSE",
+            ],
+            "variables": [
+                "10m_zonal_wind",
+                "10m_meridional_wind",
+            ],
+        }
+    }
+
+
+# Driver tests.
+
+
+@fixture
+def driverobj(config):
+    return Visualization(
+        config=config, schema_file=Path(__file__).parent / "visualization.jsonschema"
+    )
+
+
+def test_plots(driverobj):
+    pass
+
 
 # Schema tests.
 
 
-CONFIG: dict = {
-    "visualization": {
-        "eagle_tools": {
-            "end_date": "2026-04-08T12:00:00",
-            "freq": "6h",
-            "leadtimes": {
-                "start": 0,
-                "step": 3,
-                "stop": 24,
-            },
-            "start_date": "2026-04-01T00:00:00",
-            "stat_prefix": "grid_stat_nested_global",
-            "variable_prefixes": [
-                "u10_heightAboveGround_0010",
-                "v10_heightAboveGround_0010",
-            ],
-            "work_path": "/path/to/work",
-        },
-        "name": "asdf",
-        "rundir": "/path/to/rundir",
-        "spatial_stat_plots": {
-            "add_states": True,
-            "cmap": "RdBu_r",
-            "figsize": {
-                "h": 1.1,
-                "w": 2,
-            },
-            "file_fontsize": 3.3,
-            "gridlines": True,
-            "stats_root": "/path/to/stats",
-            "suptitle_y": 4.4,
-            "title_fontsize": 5.5,
-        },
-        "stats": [
-            "RMSE",
-        ],
-        "variables": [
-            "10m_zonal_wind",
-            "10m_meridional_wind",
-        ],
-    }
-}
-
-
-def test_top(logged, tmp_path, validator, with_del, with_set):
+def test_top(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "visualization", tmp_path)
-    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -64,9 +85,9 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'object'")
 
 
-def test_visualization(logged, tmp_path, validator, with_del, with_set):
+def test_visualization(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "visualization", tmp_path, "properties", "visualization")
-    config = CONFIG["visualization"]
+    config = config["visualization"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -89,7 +110,9 @@ def test_visualization(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'string'")
 
 
-def test_visualization__eagle_tools(caplog, logged, tmp_path, validator, with_set):
+def test_visualization__eagle_tools(
+    caplog, config, logged, tmp_path, validator, with_set
+):
     ok = validator(
         __file__,
         "visualization",
@@ -99,7 +122,7 @@ def test_visualization__eagle_tools(caplog, logged, tmp_path, validator, with_se
         "properties",
         "eagle_tools",
     )
-    config = CONFIG["visualization"]["eagle_tools"]
+    config = config["visualization"]["eagle_tools"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -127,7 +150,7 @@ def test_visualization__eagle_tools(caplog, logged, tmp_path, validator, with_se
 
 
 def test_visualization__eagle_tools__leadtimes(
-    caplog, logged, tmp_path, validator, with_set
+    caplog, config, logged, tmp_path, validator, with_set
 ):
     ok = validator(
         __file__,
@@ -140,7 +163,7 @@ def test_visualization__eagle_tools__leadtimes(
         "properties",
         "leadtimes",
     )
-    config = CONFIG["visualization"]["eagle_tools"]["leadtimes"]
+    config = config["visualization"]["eagle_tools"]["leadtimes"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -159,7 +182,7 @@ def test_visualization__eagle_tools__leadtimes(
 
 
 def test_visualization__spatial_stat_plots(
-    logged, tmp_path, validator, with_del, with_set
+    config, logged, tmp_path, validator, with_del, with_set
 ):
     ok = validator(
         __file__,
@@ -170,7 +193,7 @@ def test_visualization__spatial_stat_plots(
         "properties",
         "spatial_stat_plots",
     )
-    config = CONFIG["visualization"]["spatial_stat_plots"]
+    config = config["visualization"]["spatial_stat_plots"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -207,7 +230,7 @@ def test_visualization__spatial_stat_plots(
 
 
 def test_visualization__spatial_stat_plots__figsize(
-    logged, tmp_path, validator, with_del, with_set
+    config, logged, tmp_path, validator, with_del, with_set
 ):
     ok = validator(
         __file__,
@@ -220,7 +243,7 @@ def test_visualization__spatial_stat_plots__figsize(
         "properties",
         "figsize",
     )
-    config = CONFIG["visualization"]["spatial_stat_plots"]["figsize"]
+    config = config["visualization"]["spatial_stat_plots"]["figsize"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
