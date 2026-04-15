@@ -4,6 +4,7 @@ from unittest.mock import call, patch
 
 from pytest import fixture, mark
 
+from . import visualization
 from .visualization import Visualization
 
 
@@ -84,6 +85,27 @@ def test_plots(driverobj, omit_spatial_stat_plots, readytask):
             else "assert_called_once_with",
         )
         spatial_stat_plots_check()
+
+
+def test_postwxvx(driverobj, tmp_path):
+    driverobj._config["eagle_tools"]["work_path"] = tmp_path
+    driverobj._config["rundir"] = tmp_path
+    yamlcfg = tmp_path / "postwxvx-asdf.yaml"
+    assert not yamlcfg.exists()
+    ncfiles = [tmp_path / f"{var}.nc" for var in driverobj.config["variables"]]
+    for ncfile in ncfiles:
+        assert not ncfile.exists()
+    with patch.object(visualization, "run") as run:
+        run.side_effect = [ncfile.touch() for ncfile in ncfiles]
+        assert driverobj.postwxvx().ready
+    logfile = tmp_path / "postwxvx.log"
+    run.assert_called_once_with(  # noqa: S604
+        f"eagle-tools postwxvx {yamlcfg.name} >{logfile} 2>&1",
+        check=False,
+        cwd=tmp_path,
+        shell=True,
+    )
+    assert yamlcfg.is_file()
 
 
 # Schema tests.

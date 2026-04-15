@@ -47,8 +47,7 @@ class Visualization(AssetsTimeInvariant):
         """
         netCDF files from eagle-tools per output variable.
         """
-        taskname = self.taskname(f"{self._name} postwxvx")
-        yield taskname
+        yield self.taskname(f"{self._name} postwxvx")
         path = self.rundir / f"postwxvx-{self._name}.yaml"
         vx_dir = Path(self.config["eagle_tools"]["work_path"])
         ncfiles = {var: vx_dir / f"{var}.nc" for var in self.config["variables"]}
