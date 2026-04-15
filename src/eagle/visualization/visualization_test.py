@@ -39,7 +39,7 @@ def config():
                 },
                 "file_fontsize": 3.3,
                 "gridlines": True,
-                "stats_root": "/path/to/stats",
+                "stats_root": "/path/to//stats/%s",
                 "suptitle_y": 4.4,
                 "title_fontsize": 5.5,
             },
@@ -106,6 +106,15 @@ def test_postwxvx(driverobj, tmp_path):
         shell=True,
     )
     assert yamlcfg.is_file()
+
+
+def test_spatial_stat_plots(driverobj, readytask):
+    ncfiles = [Path(x) for x in ("grid_stat_b_pairs.nc", "grid_stat_a_pairs.nc")]
+    with (
+        patch.object(Path, "rglob", return_value=ncfiles),
+        patch.object(driverobj, "_spatial_stat_plot", wraps=readytask) as _spatial_stat_plot,
+    ):
+        assert driverobj.spatial_stat_plots().ready
 
 
 # Schema tests.
