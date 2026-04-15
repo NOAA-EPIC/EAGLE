@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import call, patch
 
-from pytest import fixture
+from pytest import fixture, mark
 
 from .visualization import Visualization
 
@@ -63,7 +63,10 @@ def driverobj(config):
     )
 
 
-def test_plots(driverobj, readytask):
+@mark.parametrize("omit_spatial_stat_plots", [True, False])
+def test_plots(driverobj, omit_spatial_stat_plots, readytask):
+    if omit_spatial_stat_plots:
+        del driverobj._config["spatial_stat_plots"]
     with (
         patch.object(driverobj, "_basic_plot", wraps=readytask) as _basic_plot,
         patch.object(
@@ -74,7 +77,13 @@ def test_plots(driverobj, readytask):
         for var in driverobj.config["variables"]:
             for stat in driverobj.config["stats"]:
                 assert call(var, stat) in _basic_plot.call_args_list
-        spatial_stat_plots.assert_called_once_with()
+        spatial_stat_plots_check = getattr(
+            spatial_stat_plots,
+            "assert_not_called"
+            if omit_spatial_stat_plots
+            else "assert_called_once_with",
+        )
+        spatial_stat_plots_check()
 
 
 # Schema tests.
