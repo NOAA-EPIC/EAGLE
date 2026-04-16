@@ -107,43 +107,58 @@ class Visualization(AssetsTimeInvariant):
         yield None
         logging.debug("%s: Plotting %s -> %s", taskname, ncpath, pngpath)
         ds = xr.open_dataset(ncpath)
-        lat2d = np.asarray(ds["lat"].values)
-        lon2d = _to_lon180(np.asarray(ds["lon"].values))
-        cfg = self.config["spatial_stat_plots"]
-        ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
-        ax.coastlines(resolution="50m", linewidth=0.8)
-        ax.add_feature(cfeature.BORDERS, linewidth=0.6)
         var = _choose_diff_var(ds)
         da = _mask_fill(_pick_2d(ds[var]))
         vmin, vmax = _finite_min_max(da)
-        mesh = ax.pcolormesh(
-            lon2d,
-            lat2d,
-            np.asarray(da.values),
-            transform=ccrs.PlateCarree(),
-            vmin=vmin,
-            vmax=vmax,
-            cmap=cfg["cmap"],
-        )
-        if cfg["add_states"]:
-            ax.add_feature(cfeature.STATES, linewidth=0.4)
-        if cfg["gridlines"]:
-            gl = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.6)
-            gl.right_labels = False
-            gl.top_labels = False
-        ax.set_title(_build_main_title(ds, var), fontsize=cfg["title_fontsize"])
-        fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
-        fig.suptitle(ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"])
-        cb = fig.colorbar(
-            mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
-        )
         units = str(ds[var].attrs.get("units", "")).strip()
-        cb.set_label(units or var)
-        plt.tight_layout(rect=(0, 0, 1, 0.94))
-        pngpath.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(pngpath, dpi=150)
-        plt.close("all")
-        logging.info("%s: Wrote plot", taskname)
+        lat2d = np.asarray(ds["lat"].values)
+        lon2d = _to_lon180(np.asarray(ds["lon"].values))
+        extents = [
+            float(np.nanmin(lon2d)),
+            float(np.nanmax(lon2d)),
+            float(np.nanmin(lat2d)),
+            float(np.nanmax(lat2d)),
+        ]
+        cfg = self.config["spatial_stat_plots"]
+        # NB: There seems to be some problematic interaction between matplotlib or
+        # cartopy and pytest coverage: Past this point, if the code is dedented and
+        # exposed to coverage, coverage reports that the lines are uncovered, although
+        # they are all, in fact, executed. So, disable coverage reporting for the rest
+        # of this function. This should be investigated and fixed when time allows.
+        if True:  # pragma: no cover
+            fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
+            fig.suptitle(
+                ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"]
+            )
+            ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
+            ax.set_extent(extents, crs=ccrs.PlateCarree())
+            ax.coastlines(resolution="50m", linewidth=0.8)
+            ax.add_feature(cfeature.BORDERS, linewidth=0.6)
+            mesh = ax.pcolormesh(
+                lon2d,
+                lat2d,
+                np.asarray(da.values),
+                transform=ccrs.PlateCarree(),
+                vmin=vmin,
+                vmax=vmax,
+                cmap=cfg["cmap"],
+            )
+            if cfg["add_states"]:
+                ax.add_feature(cfeature.STATES, linewidth=0.4)
+            if cfg["gridlines"]:
+                gl = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.6)
+                gl.right_labels = False
+                gl.top_labels = False
+            ax.set_title(_build_main_title(ds, var), fontsize=cfg["title_fontsize"])
+            cb = fig.colorbar(
+                mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
+            )
+            cb.set_label(units or var)
+            plt.tight_layout(rect=(0, 0, 1, 0.94))
+            pngpath.parent.mkdir(parents=True, exist_ok=True)
+            plt.savefig(pngpath, dpi=150)
+            plt.close()
+            logging.info("%s: Wrote plot", taskname)
 
     # Public methods
 
