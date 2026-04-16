@@ -125,7 +125,7 @@ unittest:
 ifdef env
 	@echo "=> Unit testing package: $$env"
 	$(call activate,$(if $(filter eagle,$(env)),base,$(env)))
-	pytest --cov-reset $(if $(filter eagle,$(env)),,--cov=eagle.$(env) )$(PACKAGE)/$(if $(filter eagle,$(env)),*.py,$(env))
+	pytest $(if $(filter eagle,$(env)),,--cov=eagle.$(env) )$(PACKAGE)/$(if $(filter eagle,$(env)),*.py,$(env))
 else
 	$(call envloop,unittest)
 endif
