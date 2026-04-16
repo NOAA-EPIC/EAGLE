@@ -245,6 +245,13 @@ def test__pick_2d():
     assert visualization._pick_2d(da=xr.DataArray(np.ones((1, 1)))) == expected
 
 
+@mark.parametrize(("old", "new"), [(-180, -180), (0, 0), (180, -180), (360, 0)])
+def test__to_lon180(old, new):
+    expected = np.array([new])
+    actual = visualization._to_lon180(lon2d=np.array([old]))
+    assert actual == expected
+
+
 # Schema tests.
 
 
