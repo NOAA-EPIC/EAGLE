@@ -4,7 +4,7 @@ from unittest.mock import call, patch
 
 import xarray as xr
 from iotaa import Asset, task
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from . import visualization
 from .visualization import Visualization
@@ -61,7 +61,7 @@ def config():
 
 @fixture
 def dataset():
-    return xr.Dataset(
+    ds = xr.Dataset(
         data_vars={
             "lat": (["lat"], [-45, 0, +45]),
             "lon": (["lon"], [-90, 0, +90]),
@@ -70,9 +70,12 @@ def dataset():
                 [[11, 22, 33], [44, 55, 66], [77, 88, 99]],
                 {"long_name": "variable", "init_time": "t0", "valid_time": "t1"},
             ),
+            "foo": (["n"], [1]),
         },
         attrs={"Difference": "fcst - obs"},
     )
+    ds.encoding.update({"source": "fixture"})
+    return ds
 
 
 @fixture
@@ -175,6 +178,17 @@ def test__build_main_title(dataset, remove_attrs):
     else:
         expected = "variable\ninit=t0 valid=t1\nDifference: fcst - obs"
     assert visualization._build_main_title(ds=dataset, var="DIFF_v") == expected
+
+
+def test__choose_diff_var_found(dataset):
+    assert visualization._choose_diff_var(ds=dataset) == "DIFF_v"
+
+
+def test__choose_diff_var_not_found(dataset):
+    del dataset["DIFF_v"]
+    with raises(AttributeError) as e:
+        visualization._choose_diff_var(dataset)
+    assert str(e.value) == "No DIFF_ var in fixture"
 
 
 # Schema tests.
