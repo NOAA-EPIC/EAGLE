@@ -173,13 +173,14 @@ class Visualization(AssetsTimeInvariant):
 
 
 def _build_main_title(ds: xr.Dataset, var: str) -> str:
-    long_name = str(ds[var].attrs.get("long_name", "")).strip() or var
-    init_time = str(ds[var].attrs.get("init_time", "")).strip()
-    valid_time = str(ds[var].attrs.get("valid_time", "")).strip()
+    get = lambda x: str(ds[var].attrs.get(x, "")).strip()
+    long_name = get("long_name") or var
+    init_time = get("init_time")
+    valid_time = get("valid_time")
     diff_desc = str(ds.attrs.get("Difference", "")).strip()
     lines: list[str] = [long_name]
     if init_time or valid_time:
-        lines.append(f"init={init_time}  valid={valid_time}")
+        lines.append(f"init={init_time} valid={valid_time}")
     if diff_desc:
         lines.append(f"Difference: {diff_desc}")
     return "\n".join(lines)

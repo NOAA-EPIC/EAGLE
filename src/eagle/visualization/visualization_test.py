@@ -60,6 +60,22 @@ def config():
 
 
 @fixture
+def dataset():
+    return xr.Dataset(
+        data_vars={
+            "lat": (["lat"], [-45, 0, +45]),
+            "lon": (["lon"], [-90, 0, +90]),
+            "DIFF_v": (
+                ["lat", "lon"],
+                [[11, 22, 33], [44, 55, 66], [77, 88, 99]],
+                {"long_name": "variable", "init_time": "t0", "valid_time": "t1"},
+            ),
+        },
+        attrs={"Difference": "fcst - obs"},
+    )
+
+
+@fixture
 def driverobj(config):
     return Visualization(
         config=config, schema_file=Path(__file__).parent / "visualization.jsonschema"
@@ -138,21 +154,27 @@ def test__basic_plot(driverobj, tmp_path):
 
 
 @mark.parametrize("optional", [True, False])
-def test__spatial_stat_plot(driverobj, optional, tmp_path):
+def test__spatial_stat_plot(dataset, driverobj, optional, tmp_path):
     for key in ["add_states", "gridlines"]:
         driverobj._config["spatial_stat_plots"][key] = optional
     pngpath = tmp_path / "a.png"
     assert not pngpath.exists()
     ncpath = tmp_path / "a.nc"
-    xr.Dataset(
-        {
-            "lat": (["lat"], [-45, 0, +45]),
-            "lon": (["lon"], [-90, 0, +90]),
-            "DIFF_v": (["lat", "lon"], [[11, 22, 33], [44, 55, 66], [77, 88, 99]]),
-        }
-    ).to_netcdf(ncpath)
+    dataset.to_netcdf(ncpath)
     driverobj._spatial_stat_plot(ncpath=ncpath, pngpath=pngpath)
     assert pngpath.is_file()
+
+
+@mark.parametrize("remove_attrs", [True, False])
+def test__build_main_title(dataset, remove_attrs):
+    if remove_attrs:
+        del dataset.DIFF_v.attrs["init_time"]
+        del dataset.DIFF_v.attrs["valid_time"]
+        del dataset.attrs["Difference"]
+        expected = "variable"
+    else:
+        expected = "variable\ninit=t0 valid=t1\nDifference: fcst - obs"
+    assert visualization._build_main_title(ds=dataset, var="DIFF_v") == expected
 
 
 # Schema tests.
