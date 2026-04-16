@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING, cast
 import cartopy.crs as ccrs  # type: ignore[import-untyped]
 import cartopy.feature as cfeature  # type: ignore[import-untyped]
 import matplotlib as mpl
+
+mpl.use("Agg")
+
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -15,8 +18,6 @@ from uwtools.api.driver import AssetsTimeInvariant
 
 if TYPE_CHECKING:
     from cartopy.mpl.geoaxes import GeoAxes  # type: ignore[import-untyped]
-
-mpl.use("Agg")
 
 
 class Visualization(AssetsTimeInvariant):
