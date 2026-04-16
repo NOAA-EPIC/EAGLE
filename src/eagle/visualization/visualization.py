@@ -109,15 +109,8 @@ class Visualization(AssetsTimeInvariant):
         ds = xr.open_dataset(ncpath)
         lat2d = np.asarray(ds["lat"].values)
         lon2d = _to_lon180(np.asarray(ds["lon"].values))
-        extent = [
-            float(np.nanmin(lon2d)),
-            float(np.nanmax(lon2d)),
-            float(np.nanmin(lat2d)),
-            float(np.nanmax(lat2d)),
-        ]
         cfg = self.config["spatial_stat_plots"]
         ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
-        ax.set_extent(extent, crs=ccrs.PlateCarree())
         ax.coastlines(resolution="50m", linewidth=0.8)
         ax.add_feature(cfeature.BORDERS, linewidth=0.6)
         var = _choose_diff_var(ds)
