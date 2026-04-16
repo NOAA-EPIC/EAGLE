@@ -94,7 +94,7 @@ class Visualization(AssetsTimeInvariant):
         var_stat = cast("xr.DataArray", ds[stat])
         var_stat.plot()  # type: ignore[call-arg]
         plt.savefig(path)
-        plt.close()
+        plt.close("all")
 
     @task
     def _spatial_stat_plot(self, ncpath: Path, pngpath: Path):
@@ -149,7 +149,7 @@ class Visualization(AssetsTimeInvariant):
         plt.tight_layout(rect=(0, 0, 1, 0.94))
         pngpath.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(pngpath, dpi=150)
-        plt.close(fig)
+        plt.close("all")
         logging.info("%s: Wrote plot", taskname)
 
     # Public methods
