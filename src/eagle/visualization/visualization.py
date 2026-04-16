@@ -120,16 +120,14 @@ class Visualization(AssetsTimeInvariant):
             float(np.nanmax(lat2d)),
         ]
         cfg = self.config["spatial_stat_plots"]
+        fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
+        fig.suptitle(ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"])
         # NB: There seems to be some problematic interaction between matplotlib or
         # cartopy and pytest coverage: Past this point, if the code is dedented and
         # exposed to coverage, coverage reports that the lines are uncovered, although
         # they are all, in fact, executed. So, disable coverage reporting for the rest
         # of this function. This should be investigated and fixed when time allows.
         if True:  # pragma: no cover
-            fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
-            fig.suptitle(
-                ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"]
-            )
             ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
             ax.set_extent(extents, crs=ccrs.PlateCarree())
             ax.coastlines(resolution="50m", linewidth=0.8)
