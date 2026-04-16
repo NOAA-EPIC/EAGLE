@@ -204,6 +204,25 @@ def test__finite_min_max__pass(dataset):
     assert visualization._finite_min_max(da=dataset.DIFF_v) == (11.0, 99.0)
 
 
+def test__infer_date_hour_from_path():
+    yyyymmdd, hh = "20260415", "12"
+    path = Path(f"/path/to/{yyyymmdd}/{hh}")
+    expected = (yyyymmdd, hh)
+    assert visualization._infer_date_hour_from_path(nc_path=path) == expected
+
+
+def test__infer_date_hour_from_path__alt():
+    yyyymmdd, hh = "20260415", "unknown_hour"
+    path = Path(f"/path/to/{yyyymmdd}/x")
+    expected = (yyyymmdd, hh)
+    assert visualization._infer_date_hour_from_path(nc_path=path) == expected
+
+
+def test__infer_date_hour_from_path__empty():
+    expected = ("unknown_date", "unknown_hour")
+    assert visualization._infer_date_hour_from_path(nc_path=Path()) == expected
+
+
 # Schema tests.
 
 
