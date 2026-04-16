@@ -137,7 +137,10 @@ def test__basic_plot(driverobj, tmp_path):
     assert path.is_file()
 
 
-def test__spatial_stat_plot(driverobj, tmp_path):
+@mark.parametrize("optional", [True, False])
+def test__spatial_stat_plot(driverobj, optional, tmp_path):
+    for key in ["add_states", "gridlines"]:
+        driverobj._config["spatial_stat_plots"][key] = optional
     pngpath = tmp_path / "a.png"
     assert not pngpath.exists()
     ncpath = tmp_path / "a.nc"
