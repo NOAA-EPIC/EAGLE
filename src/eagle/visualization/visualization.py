@@ -92,9 +92,10 @@ class Visualization(AssetsTimeInvariant):
         path.parent.mkdir(parents=True, exist_ok=True)
         ds = xr.open_dataset(req.ref[var])
         var_stat = cast("xr.DataArray", ds[stat])
-        var_stat.plot()  # type: ignore[call-arg]
-        plt.savefig(path)
-        plt.close("all")
+        ax = var_stat.plot()  # type: ignore[call-arg]
+        fig = ax[0].figure
+        fig.savefig(path)
+        plt.close(fig)
 
     @task
     def _spatial_stat_plot(self, ncpath: Path, pngpath: Path):
