@@ -218,6 +218,7 @@ def _infer_date_hour_from_path(nc_path: Path) -> tuple[str, str]:
 
 def _mask_fill(da: xr.DataArray) -> xr.DataArray:
     fill = da.attrs.get("_FillValue", None)
+    miss = None
     if fill is None:
         fill = da.encoding.get("_FillValue", None)
         miss = da.attrs.get("missing_value", None)
@@ -230,10 +231,9 @@ def _mask_fill(da: xr.DataArray) -> xr.DataArray:
 
 
 def _pick_2d(da: xr.DataArray) -> xr.DataArray:
-    out = da
-    while out.ndim > 2:
-        out = out.isel({out.dims[0]: 0})
-    return out
+    while da.ndim > 2:
+        da = da.isel({da.dims[0]: 0})
+    return da
 
 
 def _to_lon180(lon2d: np.ndarray) -> np.ndarray:

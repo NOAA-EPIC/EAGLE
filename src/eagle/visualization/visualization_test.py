@@ -5,6 +5,7 @@ from unittest.mock import call, patch
 import numpy as np
 import xarray as xr
 from iotaa import Asset, task
+from numpy.testing import assert_array_equal
 from pytest import fixture, mark, raises
 
 from . import visualization
@@ -69,13 +70,19 @@ def dataset():
             "DIFF_v": (
                 ["lat", "lon"],
                 [[11.0, 22.0, 33.0], [44.0, 55.0, 66.0], [77.0, 88.0, 99.0]],
-                {"long_name": "variable", "init_time": "t0", "valid_time": "t1"},
+                {
+                    "long_name": "variable",
+                    "init_time": "t0",
+                    "valid_time": "t1",
+                    "missing_value": 99.0,
+                    "_FillValue": 99.0,
+                },
             ),
             "foo": (["n"], [1]),
         },
         attrs={"Difference": "fcst - obs"},
     )
-    ds.encoding.update({"source": "fixture"})
+    ds.encoding.update({"source": "fixture", "_FillValue": 99.0})
     return ds
 
 
@@ -221,6 +228,21 @@ def test__infer_date_hour_from_path__alt():
 def test__infer_date_hour_from_path__empty():
     expected = ("unknown_date", "unknown_hour")
     assert visualization._infer_date_hour_from_path(nc_path=Path()) == expected
+
+
+def test__mask_fill(dataset):
+    da = dataset.DIFF_v
+    expected = np.array([[11.0, 22.0, 33.0], [44.0, 55.0, 66.0], [77.0, 88.0, np.nan]])
+    check = lambda: assert_array_equal(visualization._mask_fill(da=da).values, expected)
+    check()
+    del da.attrs["_FillValue"]
+    check()
+
+
+def test__pick_2d():
+    expected = xr.DataArray(np.ones((1, 1)))
+    assert visualization._pick_2d(da=xr.DataArray(np.ones((1, 1, 1)))) == expected
+    assert visualization._pick_2d(da=xr.DataArray(np.ones((1, 1)))) == expected
 
 
 # Schema tests.
