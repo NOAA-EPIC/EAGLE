@@ -116,8 +116,6 @@ class Visualization(AssetsTimeInvariant):
             float(np.nanmax(lat2d)),
         ]
         cfg = self.config["spatial_stat_plots"]
-        fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
-        fig.suptitle(ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"])
         ax = cast("GeoAxes", plt.axes(projection=ccrs.PlateCarree()))
         ax.set_extent(extent, crs=ccrs.PlateCarree())
         ax.coastlines(resolution="50m", linewidth=0.8)
@@ -141,6 +139,8 @@ class Visualization(AssetsTimeInvariant):
             gl.right_labels = False
             gl.top_labels = False
         ax.set_title(_build_main_title(ds, var), fontsize=cfg["title_fontsize"])
+        fig = plt.figure(figsize=(cfg["figsize"]["w"], cfg["figsize"]["h"]))
+        fig.suptitle(ncpath.name, fontsize=cfg["file_fontsize"], y=cfg["suptitle_y"])
         cb = fig.colorbar(
             mesh, ax=ax, orientation="horizontal", pad=0.12, fraction=0.06
         )
