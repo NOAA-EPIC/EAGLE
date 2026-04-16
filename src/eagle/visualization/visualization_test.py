@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import call, patch
 
+import numpy as np
 import xarray as xr
 from iotaa import Asset, task
 from pytest import fixture, mark, raises
@@ -67,7 +68,7 @@ def dataset():
             "lon": (["lon"], [-90, 0, +90]),
             "DIFF_v": (
                 ["lat", "lon"],
-                [[11, 22, 33], [44, 55, 66], [77, 88, 99]],
+                [[11.0, 22.0, 33.0], [44.0, 55.0, 66.0], [77.0, 88.0, 99.0]],
                 {"long_name": "variable", "init_time": "t0", "valid_time": "t1"},
             ),
             "foo": (["n"], [1]),
@@ -180,15 +181,27 @@ def test__build_main_title(dataset, remove_attrs):
     assert visualization._build_main_title(ds=dataset, var="DIFF_v") == expected
 
 
-def test__choose_diff_var_found(dataset):
-    assert visualization._choose_diff_var(ds=dataset) == "DIFF_v"
-
-
-def test__choose_diff_var_not_found(dataset):
+def test__choose_diff_var__fail(dataset):
     del dataset["DIFF_v"]
     with raises(AttributeError) as e:
         visualization._choose_diff_var(dataset)
     assert str(e.value) == "No DIFF_ var in fixture"
+
+
+def test__choose_diff_var__pass(dataset):
+    assert visualization._choose_diff_var(ds=dataset) == "DIFF_v"
+
+
+def test__finite_min_max__fail(dataset):
+    da = dataset.DIFF_v
+    da.values = np.full_like(da.values, np.nan)
+    with raises(ValueError, match="NaN/inf") as e:
+        visualization._finite_min_max(da=da)
+    assert str(e.value) == "All values are NaN/inf after masking fill values."
+
+
+def test__finite_min_max__pass(dataset):
+    assert visualization._finite_min_max(da=dataset.DIFF_v) == (11.0, 99.0)
 
 
 # Schema tests.
