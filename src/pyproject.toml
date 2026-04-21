@@ -9,7 +9,6 @@ omit = [ # TODO REMOVE ALL THESE
   "eagle/data/grids_and_meshes.py",
   "eagle/data/zarr.py",
   "eagle/prewxvx/prewxvx.py",
-  "eagle/visualization/visualization.py",
 ]
 
 [tool.mypy]
@@ -19,7 +18,9 @@ warn_return_any = true
 
 [tool.pytest.ini_options]
 filterwarnings = [
-  "ignore:jsonschema.RefResolver is deprecated:DeprecationWarning" # from uwtools
+  "ignore:Tight layout not applied:UserWarning", # from matplotlib
+  "ignore:jsonschema.RefResolver is deprecated:DeprecationWarning", # from uwtools
+  "ignore:numpy.ndarray size changed:RuntimeWarning",  # from numpy
 ]
 
 [tool.ruff]

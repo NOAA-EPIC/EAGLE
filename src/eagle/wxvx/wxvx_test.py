@@ -6,18 +6,13 @@ from pytest import fixture
 from . import wxvx
 from .wxvx import WXVX
 
-CONFIG = {
-    "platform": {
-        "account": "a",
-        "scheduler": "slurm",
-    },
-    "wxvx": {
-        "execution": {
-            # uwtools validates this block.
-            "batchargs": {
-                "walltime": "00:30:00",
-            },
-            "executable": "wxvx",
+
+@fixture
+def config():
+    return {
+        "platform": {
+            "account": "a",
+            "scheduler": "slurm",
         },
         "name": "grid2grid-global",
         "prewxvx": {
@@ -28,52 +23,63 @@ CONFIG = {
         },
         "rundir": "/path/to/rundir",
         "wxvx": {
-            # wxvx validates this block.
-            "cycles": ["2026-04-09T12:00:00"],
-            "forecast": {
-                "coords": {
-                    "latitude": "lat",
-                    "longitude": "lon",
-                    "level": "lvl",
-                    "time": {
-                        "inittime": "time",
-                        "leadtime": "leadtime",
+            "execution": {
+                # uwtools validates this block.
+                "batchargs": {
+                    "walltime": "00:30:00",
+                },
+                "executable": "wxvx",
+            },
+            "name": "grid2grid-global",
+            "rundir": "/path/to/rundir",
+            "wxvx": {
+                # wxvx validates this block.
+                "cycles": ["2026-04-09T12:00:00"],
+                "forecast": {
+                    "coords": {
+                        "latitude": "lat",
+                        "longitude": "lon",
+                        "level": "lvl",
+                        "time": {
+                            "inittime": "time",
+                            "leadtime": "leadtime",
+                        },
                     },
+                    "name": "test",
+                    "path": "/path/to/forecast.nc",
                 },
-                "name": "test",
-                "path": "/path/to/forecast.nc",
-            },
-            "leadtimes": [6],
-            "paths": {
-                "grids": {
-                    "forecast": "/path/to/forecast/grids",
-                    "truth": "/path/to/truth/grids",
+                "leadtimes": [6],
+                "paths": {
+                    "grids": {
+                        "forecast": "/path/to/forecast/grids",
+                        "truth": "/path/to/truth/grids",
+                    },
+                    "run": "/path/to/rundir",
                 },
-                "run": "/path/to/rundir",
-            },
-            "truth": {
-                "name": "GFS",
-                "type": "grid",
-                "url": "https://some.url",
-            },
-            "variables": {
-                "T2M": {
-                    "level_type": "heightAboveGround",
-                    "levels": [2],
-                    "name": "2t",
+                "truth": {
+                    "name": "GFS",
+                    "type": "grid",
+                    "url": "https://some.url",
+                },
+                "variables": {
+                    "T2M": {
+                        "level_type": "heightAboveGround",
+                        "levels": [2],
+                        "name": "2t",
+                    },
                 },
             },
         },
-    },
-}
+    }
+
 
 # Driver tests.
 
 
 @fixture
-def driverobj():
+def driverobj(config):
     return WXVX(
-        config=CONFIG, batch=True, schema_file=Path(__file__).parent / "wxvx.jsonschema"
+        config=config, batch=True, schema_file=Path(__file__).parent / "wxvx.jsonschema"
     )
 
 
@@ -132,9 +138,8 @@ def test__runscript_path(driverobj):
 # Schema tests.
 
 
-def test_top(logged, tmp_path, validator, with_del, with_set):
+def test_top(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "wxvx", tmp_path)
-    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -149,9 +154,9 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'object'")
 
 
-def test_wxvx(logged, tmp_path, validator, with_del, with_set):
+def test_wxvx(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "wxvx", tmp_path, "properties", "wxvx")
-    config = CONFIG["wxvx"]
+    config = config["wxvx"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:

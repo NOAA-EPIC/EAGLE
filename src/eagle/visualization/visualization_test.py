@@ -1,55 +1,262 @@
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from unittest.mock import call, patch
+
+import numpy as np
+import xarray as xr
+from iotaa import Asset, task
+from numpy.testing import assert_array_equal
+from pytest import fixture, mark, raises
+
+from . import visualization
+from .visualization import Visualization
+
+
+@fixture
+def config():
+    return {
+        "visualization": {
+            "eagle_tools": {
+                "end_date": "2026-04-08T12:00:00",
+                "freq": "6h",
+                "leadtimes": {
+                    "start": 0,
+                    "step": 3,
+                    "stop": 24,
+                },
+                "start_date": "2026-04-01T00:00:00",
+                "stat_prefix": "grid_stat_nested_global",
+                "variable_prefixes": [
+                    "u10_heightAboveGround_0010",
+                    "v10_heightAboveGround_0010",
+                ],
+                "work_path": "/path/to/work",
+            },
+            "name": "asdf",
+            "rundir": "/path/to/rundir",
+            "spatial_stat_plots": {
+                "add_states": True,
+                "cmap": "RdBu_r",
+                "figsize": {
+                    "h": 1.1,
+                    "w": 2,
+                },
+                "file_fontsize": 3.3,
+                "gridlines": True,
+                "stats_root": "/path/to//stats/%s",
+                "suptitle_y": 4.4,
+                "title_fontsize": 5.5,
+            },
+            "stats": [
+                "RMSE",
+            ],
+            "variables": [
+                "10m_zonal_wind",
+                "10m_meridional_wind",
+            ],
+        }
+    }
+
+
+# Driver tests.
+
+
+@fixture
+def dataset():
+    ds = xr.Dataset(
+        data_vars={
+            "lat": (["lat"], [-45, 0, +45]),
+            "lon": (["lon"], [-90, 0, +90]),
+            "DIFF_v": (
+                ["lat", "lon"],
+                [[11.0, 22.0, 33.0], [44.0, 55.0, 66.0], [77.0, 88.0, 99.0]],
+                {
+                    "long_name": "variable",
+                    "init_time": "t0",
+                    "valid_time": "t1",
+                    "missing_value": 99.0,
+                    "_FillValue": 99.0,
+                },
+            ),
+            "foo": (["n"], [1]),
+        },
+        attrs={"Difference": "fcst - obs"},
+    )
+    ds.encoding.update({"source": "fixture", "_FillValue": 99.0})
+    return ds
+
+
+@fixture
+def driverobj(config):
+    return Visualization(
+        config=config, schema_file=Path(__file__).parent / "visualization.jsonschema"
+    )
+
+
+@mark.parametrize("omit_spatial_stat_plots", [True, False])
+def test_plots(driverobj, omit_spatial_stat_plots, readytask):
+    if omit_spatial_stat_plots:
+        del driverobj._config["spatial_stat_plots"]
+    with (
+        patch.object(driverobj, "_basic_plot", wraps=readytask) as _basic_plot,
+        patch.object(
+            driverobj, "spatial_stat_plots", wraps=readytask
+        ) as spatial_stat_plots,
+    ):
+        assert driverobj.plots().ready
+        for var in driverobj.config["variables"]:
+            for stat in driverobj.config["stats"]:
+                assert call(var, stat) in _basic_plot.call_args_list
+        spatial_stat_plots_check = getattr(
+            spatial_stat_plots,
+            "assert_not_called"
+            if omit_spatial_stat_plots
+            else "assert_called_once_with",
+        )
+        spatial_stat_plots_check()
+
+
+def test_postwxvx(driverobj, tmp_path):
+    driverobj._config["eagle_tools"]["work_path"] = tmp_path
+    driverobj._config["rundir"] = tmp_path
+    yamlcfg = tmp_path / "postwxvx-asdf.yaml"
+    assert not yamlcfg.exists()
+    ncfiles = [tmp_path / f"{var}.nc" for var in driverobj.config["variables"]]
+    for ncfile in ncfiles:
+        assert not ncfile.exists()
+    with patch.object(visualization, "run") as run:
+        run.side_effect = [ncfile.touch() for ncfile in ncfiles]
+        assert driverobj.postwxvx().ready
+    logfile = tmp_path / "postwxvx.log"
+    run.assert_called_once_with(  # noqa: S604
+        f"eagle-tools postwxvx {yamlcfg.name} >{logfile} 2>&1",
+        check=False,
+        cwd=tmp_path,
+        shell=True,
+    )
+    assert yamlcfg.is_file()
+
+
+def test_spatial_stat_plots(driverobj, readytask):
+    ncfiles = [Path(x) for x in ("grid_stat_b_pairs.nc", "grid_stat_a_pairs.nc")]
+    with (
+        patch.object(Path, "rglob", return_value=ncfiles),
+        patch.object(
+            driverobj, "_spatial_stat_plot", wraps=readytask
+        ) as _spatial_stat_plot,
+    ):
+        assert driverobj.spatial_stat_plots().ready
+
+
+def test__basic_plot(driverobj, tmp_path):
+    @task
+    def postwxvx():
+        yield "postwxvx"
+        yield Asset({"v": path}, lambda: True)
+        yield None
+
+    driverobj._config["rundir"] = tmp_path
+    path = tmp_path / "a.nc"
+    assert not path.is_file()
+    xr.Dataset({"y": (["x"], [1, 2, 3])}).to_netcdf(path)
+    with patch.object(driverobj, "postwxvx", postwxvx):
+        assert driverobj._basic_plot(var="v", stat="y").ready
+    assert path.is_file()
+
+
+@mark.parametrize("optional", [True, False])
+def test__spatial_stat_plot(dataset, driverobj, optional, tmp_path):
+    for key in ["add_states", "gridlines"]:
+        driverobj._config["spatial_stat_plots"][key] = optional
+    pngpath = tmp_path / "a.png"
+    assert not pngpath.exists()
+    ncpath = tmp_path / "a.nc"
+    dataset.to_netcdf(ncpath)
+    driverobj._spatial_stat_plot(ncpath=ncpath, pngpath=pngpath)
+    assert pngpath.is_file()
+
+
+@mark.parametrize("remove_attrs", [True, False])
+def test__build_main_title(dataset, remove_attrs):
+    if remove_attrs:
+        del dataset.DIFF_v.attrs["init_time"]
+        del dataset.DIFF_v.attrs["valid_time"]
+        del dataset.attrs["Difference"]
+        expected = "variable"
+    else:
+        expected = "variable\ninit=t0 valid=t1\nDifference: fcst - obs"
+    assert visualization._build_main_title(ds=dataset, var="DIFF_v") == expected
+
+
+def test__choose_diff_var__fail(dataset):
+    del dataset["DIFF_v"]
+    with raises(AttributeError) as e:
+        visualization._choose_diff_var(dataset)
+    assert str(e.value) == "No DIFF_ var in fixture"
+
+
+def test__choose_diff_var__pass(dataset):
+    assert visualization._choose_diff_var(ds=dataset) == "DIFF_v"
+
+
+def test__finite_min_max__fail(dataset):
+    da = dataset.DIFF_v
+    da.values = np.full_like(da.values, np.nan)
+    with raises(ValueError, match="NaN/inf") as e:
+        visualization._finite_min_max(da=da)
+    assert str(e.value) == "All values are NaN/inf after masking fill values."
+
+
+def test__finite_min_max__pass(dataset):
+    assert visualization._finite_min_max(da=dataset.DIFF_v) == (11.0, 99.0)
+
+
+def test__infer_date_hour_from_path():
+    yyyymmdd, hh = "20260415", "12"
+    path = Path(f"/path/to/{yyyymmdd}/{hh}")
+    expected = (yyyymmdd, hh)
+    assert visualization._infer_date_hour_from_path(nc_path=path) == expected
+
+
+def test__infer_date_hour_from_path__alt():
+    yyyymmdd, hh = "20260415", "unknown_hour"
+    path = Path(f"/path/to/{yyyymmdd}/x")
+    expected = (yyyymmdd, hh)
+    assert visualization._infer_date_hour_from_path(nc_path=path) == expected
+
+
+def test__infer_date_hour_from_path__empty():
+    expected = ("unknown_date", "unknown_hour")
+    assert visualization._infer_date_hour_from_path(nc_path=Path()) == expected
+
+
+def test__mask_fill(dataset):
+    da = dataset.DIFF_v
+    expected = np.array([[11.0, 22.0, 33.0], [44.0, 55.0, 66.0], [77.0, 88.0, np.nan]])
+    check = lambda: assert_array_equal(visualization._mask_fill(da=da).values, expected)
+    check()
+    del da.attrs["_FillValue"]
+    check()
+
+
+def test__pick_2d():
+    expected = xr.DataArray(np.ones((1, 1)))
+    assert visualization._pick_2d(da=xr.DataArray(np.ones((1, 1, 1)))) == expected
+    assert visualization._pick_2d(da=xr.DataArray(np.ones((1, 1)))) == expected
+
+
+@mark.parametrize(("old", "new"), [(-180, -180), (0, 0), (180, -180), (360, 0)])
+def test__to_lon180(old, new):
+    expected = np.array([new])
+    actual = visualization._to_lon180(lon2d=np.array([old]))
+    assert actual == expected
+
 
 # Schema tests.
 
 
-CONFIG: dict = {
-    "visualization": {
-        "eagle_tools": {
-            "end_date": "2026-04-08T12:00:00",
-            "freq": "6h",
-            "leadtimes": {
-                "start": 0,
-                "step": 3,
-                "stop": 24,
-            },
-            "start_date": "2026-04-01T00:00:00",
-            "stat_prefix": "grid_stat_nested_global",
-            "variable_prefixes": [
-                "u10_heightAboveGround_0010",
-                "v10_heightAboveGround_0010",
-            ],
-            "work_path": "/path/to/work",
-        },
-        "name": "asdf",
-        "rundir": "/path/to/rundir",
-        "spatial_stat_plots": {
-            "add_states": True,
-            "cmap": "RdBu_r",
-            "figsize": {
-                "h": 1.1,
-                "w": 2,
-            },
-            "file_fontsize": 3.3,
-            "gridlines": True,
-            "stats_root": "/path/to/stats",
-            "suptitle_y": 4.4,
-            "title_fontsize": 5.5,
-        },
-        "stats": [
-            "RMSE",
-        ],
-        "variables": [
-            "10m_zonal_wind",
-            "10m_meridional_wind",
-        ],
-    }
-}
-
-
-def test_top(logged, tmp_path, validator, with_del, with_set):
+def test_top(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "visualization", tmp_path)
-    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -64,9 +271,9 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'object'")
 
 
-def test_visualization(logged, tmp_path, validator, with_del, with_set):
+def test_visualization(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "visualization", tmp_path, "properties", "visualization")
-    config = CONFIG["visualization"]
+    config = config["visualization"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -89,7 +296,9 @@ def test_visualization(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'string'")
 
 
-def test_visualization__eagle_tools(caplog, logged, tmp_path, validator, with_set):
+def test_visualization__eagle_tools(
+    caplog, config, logged, tmp_path, validator, with_set
+):
     ok = validator(
         __file__,
         "visualization",
@@ -99,7 +308,7 @@ def test_visualization__eagle_tools(caplog, logged, tmp_path, validator, with_se
         "properties",
         "eagle_tools",
     )
-    config = CONFIG["visualization"]["eagle_tools"]
+    config = config["visualization"]["eagle_tools"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -127,7 +336,7 @@ def test_visualization__eagle_tools(caplog, logged, tmp_path, validator, with_se
 
 
 def test_visualization__eagle_tools__leadtimes(
-    caplog, logged, tmp_path, validator, with_set
+    caplog, config, logged, tmp_path, validator, with_set
 ):
     ok = validator(
         __file__,
@@ -140,7 +349,7 @@ def test_visualization__eagle_tools__leadtimes(
         "properties",
         "leadtimes",
     )
-    config = CONFIG["visualization"]["eagle_tools"]["leadtimes"]
+    config = config["visualization"]["eagle_tools"]["leadtimes"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -159,7 +368,7 @@ def test_visualization__eagle_tools__leadtimes(
 
 
 def test_visualization__spatial_stat_plots(
-    logged, tmp_path, validator, with_del, with_set
+    config, logged, tmp_path, validator, with_del, with_set
 ):
     ok = validator(
         __file__,
@@ -170,7 +379,7 @@ def test_visualization__spatial_stat_plots(
         "properties",
         "spatial_stat_plots",
     )
-    config = CONFIG["visualization"]["spatial_stat_plots"]
+    config = config["visualization"]["spatial_stat_plots"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -207,7 +416,7 @@ def test_visualization__spatial_stat_plots(
 
 
 def test_visualization__spatial_stat_plots__figsize(
-    logged, tmp_path, validator, with_del, with_set
+    config, logged, tmp_path, validator, with_del, with_set
 ):
     ok = validator(
         __file__,
@@ -220,7 +429,7 @@ def test_visualization__spatial_stat_plots__figsize(
         "properties",
         "figsize",
     )
-    config = CONFIG["visualization"]["spatial_stat_plots"]["figsize"]
+    config = config["visualization"]["spatial_stat_plots"]["figsize"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
