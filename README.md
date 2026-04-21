@@ -25,7 +25,7 @@ ufs2arco: Tim Smith (NOAA Physical Sciences Laboratory)
 - [Github](https://github.com/NOAA-PSL/ufs2arco)
 - [Documentation](https://ufs2arco.readthedocs.io/en/latest/)
 
-Anemoi: European Centre for Medium-Range Weather Forecasts
+Anemoi: ECMWF and partner agencies
 - [anemoi-core github](https://github.com/ecmwf/anemoi-core)
 - [anemoi-inference github](https://github.com/ecmwf/anemoi-inference)
 - Documentation: [anemoi-models](https://anemoi.readthedocs.io/projects/models/en/latest/index.html), [anemoi-graphs](https://anemoi.readthedocs.io/projects/graphs/en/latest/), [anemoi-training](https://anemoi.readthedocs.io/projects/training/en/latest/), [anemoi-inference](https://anemoi.readthedocs.io/projects/inference/en/latest/)
