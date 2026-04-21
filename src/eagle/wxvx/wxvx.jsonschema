@@ -9,6 +9,9 @@
         "name": {
           "type": "string"
         },
+        "prewxvx": {
+          "type": "object"
+        },
         "rundir": {
           "type": "string"
         },
@@ -19,6 +22,7 @@
       "required": [
         "execution",
         "name",
+        "prewxvx",
         "rundir",
         "wxvx"
       ],

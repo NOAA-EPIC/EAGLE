@@ -8,9 +8,7 @@ branch = true
 omit = [ # TODO REMOVE ALL THESE
   "eagle/data/grids_and_meshes.py",
   "eagle/data/zarr.py",
-  "eagle/inference/inference.py",
   "eagle/prewxvx/prewxvx.py",
-  "eagle/training/training.py",
   "eagle/visualization/visualization.py",
 ]
 

@@ -77,7 +77,7 @@ prewxvx:
       vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
     rundir: '{{ val.vx.rundir }}'
   global:
-    prewxvx:
+    prewxvx: &prewxvx-global
       execution:
         <<: *prewxvx-common-execution
         executable: eagle-tools prewxvx prewxvx-global.yaml
@@ -95,7 +95,7 @@ prewxvx:
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
     platform: !dict '{{ app.platform }}'
   lam:
-    prewxvx:
+    prewxvx: &prewxvx-lam
       execution:
         <<: *prewxvx-common-execution
         executable: eagle-tools prewxvx prewxvx-lam.yaml
@@ -725,6 +725,8 @@ vx:
           envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c wxvx-grid2grid-global.yaml -t plots -f
         name: grid2grid-global
+        prewxvx:
+          <<: *prewxvx-global
         rundir: '{{ val.vx.rundir }}/grid2grid/global'
         wxvx: # config for the wxvx application
           <<: *wxvx-common
@@ -755,6 +757,8 @@ vx:
           envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
         name: grid2grid-lam
+        prewxvx:
+          <<: *prewxvx-lam
         rundir: '{{ val.vx.rundir }}/grid2grid/lam'
         wxvx: # config for the wxvx application
           <<: *wxvx-common
@@ -790,6 +794,8 @@ vx:
           envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c wxvx-grid2obs-global.yaml -t plots -f
         name: grid2obs-global
+        prewxvx:
+          <<: *prewxvx-global
         rundir: '{{ val.vx.rundir }}/grid2obs/global'
         wxvx: # config for the wxvx application
           <<: *wxvx-common
@@ -818,6 +824,8 @@ vx:
           envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
+        prewxvx:
+          <<: *prewxvx-lam
         rundir: '{{ val.vx.rundir }}/grid2obs/lam'
         wxvx: # config for the wxvx application
           <<: *wxvx-common

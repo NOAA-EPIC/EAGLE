@@ -1,3 +1,10 @@
+from pathlib import Path
+from unittest.mock import patch
+
+from pytest import fixture
+
+from .training import Training
+
 # Schema tests.
 
 
@@ -19,6 +26,19 @@ CONFIG = {
         "rundir": "/path/to/rundir",
     }
 }
+
+
+@fixture
+def driverobj():
+    return Training(
+        config=CONFIG,
+        batch=True,
+        schema_file=Path(__file__).parent / "training.jsonschema",
+    )
+
+
+def test_driver_name():
+    assert Training.driver_name() == "training"
 
 
 def test_top(logged, tmp_path, validator, with_del, with_set):

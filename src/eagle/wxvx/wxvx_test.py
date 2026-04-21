@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from pytest import fixture
 
+from . import wxvx
 from .wxvx import WXVX
 
 CONFIG = {
@@ -19,6 +20,12 @@ CONFIG = {
             "executable": "wxvx",
         },
         "name": "grid2grid-global",
+        "prewxvx": {
+            "rundir": "/path/to/prewxvx",
+            "eagle_tools": {
+                "output_path": "/path/to/output",
+            },
+        },
         "rundir": "/path/to/rundir",
         "wxvx": {
             # wxvx validates this block.
@@ -68,6 +75,26 @@ def driverobj():
     return WXVX(
         config=CONFIG, batch=True, schema_file=Path(__file__).parent / "wxvx.jsonschema"
     )
+
+
+def test_prewxvx(driverobj, tmp_path):
+    driverobj._config["prewxvx"]["eagle_tools"]["output_path"] = tmp_path
+    driverobj._config["prewxvx"]["rundir"] = tmp_path
+    yamlcfg = tmp_path / "prewxvx-global.yaml"
+    assert not yamlcfg.exists()
+    ncfile = tmp_path / "nested-global.test.nc"
+    assert not ncfile.exists()
+    with patch.object(wxvx, "run") as run:
+        run.side_effect = [ncfile.touch()]
+        assert driverobj.prewxvx().ready
+    logfile = tmp_path / "prewxvx.log"
+    run.assert_called_once_with(  # noqa: S604
+        f"eagle-tools prewxvx {yamlcfg} >{logfile} 2>&1",
+        check=False,
+        cwd=tmp_path,
+        shell=True,
+    )
+    assert yamlcfg.is_file()
 
 
 def test_wxvx_provisioned_rundir(driverobj, readytask, tmp_path):
