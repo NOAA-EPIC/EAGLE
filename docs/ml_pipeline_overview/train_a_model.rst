@@ -18,8 +18,7 @@ See the anemoi documentation for further information:
 - `anemoi-training <https://anemoi.readthedocs.io/projects/training/en/latest/>`_
 - `anemoi-models <https://anemoi.readthedocs.io/projects/models/en/latest/index.html>`_
 
-anemoi was created by the European Centre for Medium-Range Weather Forecasts
-(:term:`ECMWF`).
+EAGLE uses ECMWF and partner agencies' Anemoi training stack.
 
 anemoi-core Quick Tips
 ------------------------------------------------------------------------------

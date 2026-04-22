@@ -4,14 +4,6 @@
 FAQ
 ****
 
-.. contents::
-   :depth: 2
-   :local:
-
-=====================
-Using EAGLE
-=====================
-
 .. _SupportedPlatformsFAQ:
 
 What platforms are currently supported?

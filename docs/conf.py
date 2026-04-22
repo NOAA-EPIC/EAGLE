@@ -21,8 +21,8 @@ project = "eagle"
 copyright = "2025, eagle contributors"
 author = "eagle contributors"
 
-version = "main"
-release = "Main Branch Documentation"
+version = "v1.0.0"
+release = "Public v1.0.0 Documentation"
 
 numfig = True
 

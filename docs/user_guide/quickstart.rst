@@ -11,14 +11,22 @@ platform. Future development will include additional platforms.
 
    GNU ``make`` version 3.82 or higher is required.
 
-**Complete the following steps from the** ``src/`` **directory.**
+Clone the :term:`EAGLE` repository and complete the following steps from the
+``src/`` directory.
 
 .. note:: The EAGLE runtime software environment currently requires over 50 GB of disk space. Consider available space, quota, etc. when choosing where to clone the EAGLE repository and run the following steps.
 
 .. _QuickstartWorkflow:
 
-Building and Running :term:`EAGLE`
+Building and Running EAGLE
 =========================================
+
+#. Clone the EAGLE repository
+
+   .. code-block:: bash
+
+      git clone --branch release/public-v1.0.0 https://github.com/NOAA-EPIC/EAGLE.git
+      cd EAGLE/src
 
 #. Create all environments
 
