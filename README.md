@@ -60,4 +60,4 @@ eagle-tools: Tim Smith (NOAA Physical Sciences Laboratory)
 
 ## Citation 
 
-UFS Development Team, & NOAA AI for Numerical Weather Prediction (AI4NWP) Working Group. (2026, Apr. 22). nested-EAGLE (Experimental AI Global and Limited-area Ensemble Forecast System) (Version v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.19672026
+The Earth Prediction Innovation Center (EPIC) and the NOAA AI for Numerical Weather Prediction (AI4NWP) Working Group. (2026, Apr. 22). nested-EAGLE (Experimental AI Global and Limited-area Ensemble Forecast System) (Version v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.19672026
