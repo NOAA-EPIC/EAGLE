@@ -47,7 +47,7 @@ inference:
       adjust: all
       min_distance_km: 6
     end_date: !datetime '{{ app.time.start }}'
-    freq: "6"
+    freq: "6h"
     lead_time: !int '{{ app.time.leadtime_hours }}'
     output_path: '{{ inference.rundir }}/output'
     start_date: !datetime '{{ app.time.start }}'
