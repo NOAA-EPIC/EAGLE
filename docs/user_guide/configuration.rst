@@ -87,7 +87,7 @@ This configuration is used as a source for default and common configuration para
 WXVX driver when it executes ``eagle-tools prewxvx``.
 
 ``global`` and ``lam``
-   The ``global:`` and ``lam:`` blocks provide configurations for global and :term:`LAM` extents, respectively, each borrowing from ``common:``. Their ``prewxvx:`` sub-blocks are ultimately passed to the ``WXVX`` driver as the runtime configuration for ``eagle-tools``' ``prewxvx`` component.
+   The ``global:`` and ``lam:`` blocks provide configurations for global and :term:`LAM` extents, respectively, each borrowing from ``common:``. Their ``prewxvx:`` sub-blocks are ultimately passed to the ``WXVX`` driver as the runtime configuration for the ``eagle-tools``' ``prewxvx`` component.
 
 training
 ------------------------------------------------------------------------------
