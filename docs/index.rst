@@ -34,7 +34,6 @@ Table of Contents
    ml_pipeline_overview/data_creation
    ml_pipeline_overview/train_a_model
    ml_pipeline_overview/inference
-   ml_pipeline_overview/postprocessing
    ml_pipeline_overview/verification
 
 .. toctree::
