@@ -6,8 +6,6 @@ from pytest import fixture
 from . import training
 from .training import Training
 
-# Schema tests.
-
 
 @fixture
 def config():
@@ -35,6 +33,9 @@ def config():
     }
 
 
+# Driver tests.
+
+
 @fixture
 def driverobj(config):
     return Training(
@@ -45,16 +46,13 @@ def driverobj(config):
 
 
 def test_anemoi_config(driverobj, tmp_path):
-    driverobj._config["rundir"] = str(tmp_path)
+    driverobj._config["rundir"] = tmp_path
     yamlcfg = tmp_path / "training.yaml"
     assert not yamlcfg.exists()
     gencfg = tmp_path / "config.yaml"
     assert not gencfg.exists()
-    with patch.object(
-        training,
-        "run",
-        side_effect=[gencfg.write_text("{}\n")],
-    ) as run:
+    with patch.object(training, "run") as run:
+        run.side_effect = [gencfg.write_text("{}\n")]
         assert driverobj.anemoi_config().ready
     logfile = tmp_path / "config.log"
     run.assert_called_once_with(  # noqa: S604
@@ -70,7 +68,7 @@ def test_driver_name():
     assert Training.driver_name() == "training"
 
 
-def test_training_provisioned_rundir(driverobj, readytask, tmp_path):
+def test_provisioned_rundir(driverobj, readytask, tmp_path):
     driverobj._config["rundir"] = tmp_path
     runscript = tmp_path / "runscript.training"
     assert not runscript.is_file()
@@ -116,6 +114,9 @@ def test_runscript__without_remove(driverobj, tmp_path):
         driverobj._config["execution"]["executable"]
         == "anemoi-training train --config-name=training"
     )
+
+
+# Schema tests.
 
 
 def test_top(config, logged, tmp_path, validator, with_del, with_set):

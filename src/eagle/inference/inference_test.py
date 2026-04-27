@@ -1,3 +1,4 @@
+from os import utime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -44,22 +45,29 @@ def driverobj(config):
 
 def test_anemoi_config(driverobj, tmp_path):
     ckpt_dir = tmp_path / "checkpoints"
-    ckpt_subdir = ckpt_dir / "20260421"
-    ckpt_subdir.mkdir(parents=True)
-    ckptfile = ckpt_subdir / "inference-last.ckpt"
-    ckptfile.touch()
+    old_ckpt_subdir = ckpt_dir / "20260420"
+    old_ckpt_subdir.mkdir(parents=True)
+    latest_ckpt_subdir = ckpt_dir / "20260421"
+    latest_ckpt_subdir.mkdir(parents=True)
+    old_ckptfile = old_ckpt_subdir / "inference-last.ckpt"
+    latest_ckptfile = latest_ckpt_subdir / "inference-last.ckpt"
+    old_ckptfile.touch()
+    latest_ckptfile.touch()
+    utime(old_ckptfile, (1_000_000, 1_000_000))
+    utime(latest_ckptfile, (2_000_000, 2_000_000))
     driverobj._config["checkpoint_dir"] = ckpt_dir
     driverobj._config["rundir"] = tmp_path
     cfgfile = tmp_path / "inference.yaml"
     assert not cfgfile.is_file()
     driverobj.anemoi_config()
     assert cfgfile.is_file()
+    assert str(latest_ckptfile) in cfgfile.read_text()
 
 
-def test_anemoi_config_explicit_checkpoint(driverobj, tmp_path):
+def test_anemoi_config__explicit_checkpoint(driverobj, tmp_path):
     ckptfile = tmp_path / "inference-last.ckpt"
     ckptfile.touch()
-    driverobj._config["checkpoint_dir"] = None
+    del driverobj._config["checkpoint_dir"]
     driverobj._config["rundir"] = tmp_path
     driverobj._config["anemoi"]["checkpoint_path"] = str(ckptfile)
     cfgfile = tmp_path / "inference.yaml"

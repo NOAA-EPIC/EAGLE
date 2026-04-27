@@ -50,7 +50,6 @@ information about the project itself.
 wxvx Quick Tips
 ----------------------------------------------------
 
-* Run the provided :term:`PreWXVX` steps before starting verification.
 * Use the ``vx-grid-*`` targets to verify against gridded analyses.
 * Use the ``vx-obs-*`` targets to verify against PrepBUFR observations.
 * The ``global`` and ``lam`` targets are independent, so they can be run in
@@ -97,7 +96,7 @@ The most useful outputs are:
 * ``plots/`` for generated ``.png`` plots
 * ``run/<expname>/vx/*.log`` for verification logs
 
-The output for ``eagle-tools prewxvx`` can be found under: ``run/<expname>/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`
+The output for ``eagle-tools prewxvx`` can be found under: ``run/<expname>/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out``.
 
 
 Additional Visualization

@@ -111,6 +111,10 @@ def driverobj(config):
     )
 
 
+def test_driver_name():
+    assert WXVX.driver_name() == "wxvx"
+
+
 def test_prewxvx(driverobj, tmp_path):
     driverobj._config["prewxvx"]["eagle_tools"]["output_path"] = tmp_path
     driverobj._config["prewxvx"]["rundir"] = tmp_path
@@ -131,7 +135,7 @@ def test_prewxvx(driverobj, tmp_path):
     assert yamlcfg.is_file()
 
 
-def test_wxvx_provisioned_rundir(driverobj, readytask, tmp_path):
+def test_provisioned_rundir(driverobj, readytask, tmp_path):
     driverobj._config["rundir"] = tmp_path
     runscript = tmp_path / "runscript.wxvx-grid2grid-global"
     assert not runscript.is_file()
@@ -147,10 +151,6 @@ def test_wxvx_config(driverobj, tmp_path):
     assert not cfgfile.is_file()
     driverobj.wxvx_config()
     assert cfgfile.is_file()
-
-
-def test_driver_name():
-    assert WXVX.driver_name() == "wxvx"
 
 
 def test__name(driverobj):
@@ -198,12 +198,12 @@ def test_wxvx(config, logged, tmp_path, validator, with_del, with_set):
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'string'")
     # Some keys have object values:
-    for key in ["execution", "wxvx"]:
+    for key in ["execution", "prewxvx", "wxvx"]:
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'object'")
 
 
-def test_prewxvx_schema(config, logged, validator, tmp_path, with_del, with_set):
+def test_wxvx_prewxvx_schema(config, logged, validator, tmp_path, with_del, with_set):
     ok = validator(
         __file__,
         "wxvx",
@@ -232,7 +232,9 @@ def test_prewxvx_schema(config, logged, validator, tmp_path, with_del, with_set)
         assert logged("is not of type 'string'")
 
 
-def test_prewxvx__eagle_tools(config, logged, validator, tmp_path, with_del, with_set):
+def test_wxvx_prewxvx__eagle_tools(
+    config, logged, validator, tmp_path, with_del, with_set
+):
     ok = validator(
         __file__,
         "wxvx",
@@ -278,15 +280,15 @@ def test_prewxvx__eagle_tools(config, logged, validator, tmp_path, with_del, wit
         "forecast_regrid_kwargs",
         "lcc_info",
     ]:
-        assert not ok(with_set(config, None, key))
+        assert not ok(with_set(eglcfg, None, key))
         assert logged("is not of type 'object'")
     # Some keys have string values:
     for key in ["end_date", "forecast_path", "freq", "output_path", "start_date"]:
-        assert not ok(with_set(config, None, key))
+        assert not ok(with_set(eglcfg, None, key))
         assert logged("is not of type 'string'")
 
 
-def test_prewxvx__eagle_tools__forecast_regrid_kwargs(
+def test_wxvx_prewxvx__eagle_tools__forecast_regrid_kwargs(
     config, logged, validator, tmp_path, with_set
 ):
     ok = validator(
@@ -319,7 +321,7 @@ def test_prewxvx__eagle_tools__forecast_regrid_kwargs(
         assert logged("is not of type 'string'")
 
 
-def test_prewxvx__eagle_tools__forecast_regrid_kwargs__regridder_kwargs(
+def test_wxvx_prewxvx__eagle_tools__forecast_regrid_kwargs__regridder_kwargs(
     config, logged, validator, tmp_path, with_del, with_set
 ):
     ok = validator(
@@ -354,7 +356,7 @@ def test_prewxvx__eagle_tools__forecast_regrid_kwargs__regridder_kwargs(
         assert logged("is not of type 'string'")
 
 
-def test_prewxvx__eagle_tools__lcc_info(
+def test_wxvx_prewxvx__eagle_tools__lcc_info(
     config, logged, validator, tmp_path, with_del, with_set
 ):
     ok = validator(
@@ -385,7 +387,7 @@ def test_prewxvx__eagle_tools__lcc_info(
         assert logged("is not of type 'integer'")
 
 
-def test_prewxvx__eagle_tools__levels(config, logged, validator, tmp_path):
+def test_wxvx_prewxvx__eagle_tools__levels(config, logged, validator, tmp_path):
     ok = validator(
         __file__,
         "wxvx",
@@ -402,7 +404,7 @@ def test_prewxvx__eagle_tools__levels(config, logged, validator, tmp_path):
     pwxvcfg = config["wxvx"]["prewxvx"]["eagle_tools"]["levels"]
     # Basic correctness:
     assert ok(pwxvcfg)
-    # An empy list os ok:
+    # An empty list is ok:
     assert ok([])
     # Items must be numbers:
     assert ok([1, 2.2, -3])
@@ -410,7 +412,7 @@ def test_prewxvx__eagle_tools__levels(config, logged, validator, tmp_path):
     assert logged("is not of type 'number'")
 
 
-def test_prewxvx__defs__datetime(caplog, logged, tmp_path, validator):
+def test_wxvx_prewxvx__defs__datetime(caplog, logged, tmp_path, validator):
     ok = validator(__file__, "wxvx", tmp_path, "$defs", "datetime")
     for val in [datetime(2026, 4, 8, 12, tzinfo=timezone.utc), "2026-04-08T01:23:45"]:
         assert ok(val)
