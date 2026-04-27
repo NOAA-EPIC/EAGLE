@@ -7,9 +7,36 @@ from .inference import Inference
 
 
 @fixture
-def driverobj():
+def config():
+    return {
+        "inference": {
+            "anemoi": {
+                # anemoi-inference validates this block.
+            },
+            "checkpoint_dir": "/path/to/checkpoint",
+            "execution": {
+                # uwtools validates this block.
+                "batchargs": {
+                    "walltime": "01:00:00",
+                },
+                "executable": "ufs2arco",
+            },
+            "rundir": "/path/to/rundir",
+        },
+        "platform": {
+            "account": "a",
+            "scheduler": "slurm",
+        },
+    }
+
+
+# Driver tests.
+
+
+@fixture
+def driverobj(config):
     return Inference(
-        config=CONFIG,
+        config=config,
         batch=True,
         schema_file=Path(__file__).parent / "inference.jsonschema",
     )
@@ -63,31 +90,9 @@ def test_provisioned_rundir(driverobj, readytask, tmp_path):
 
 # Schema tests.
 
-CONFIG = {
-    "inference": {
-        "anemoi": {
-            # anemoi-inference validates this block.
-        },
-        "checkpoint_dir": "/path/to/checkpoint",
-        "execution": {
-            # uwtools validates this block.
-            "batchargs": {
-                "walltime": "01:00:00",
-            },
-            "executable": "ufs2arco",
-        },
-        "rundir": "/path/to/rundir",
-    },
-    "platform": {
-        "account": "a",
-        "scheduler": "slurm",
-    },
-}
 
-
-def test_top(logged, tmp_path, validator, with_del, with_set):
+def test_top(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "inference", tmp_path)
-    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -102,9 +107,9 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'object'")
 
 
-def test_inference(logged, tmp_path, validator, with_del, with_set):
+def test_inference(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "inference", tmp_path, "properties", "inference")
-    config = CONFIG["inference"]
+    config = config["inference"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:

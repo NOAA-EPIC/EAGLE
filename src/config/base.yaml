@@ -55,11 +55,6 @@ inference:
 platform: !dict '{{ app.platform }}'
 prewxvx:
   common:
-    execution: &prewxvx-common-execution
-      envcmds:
-        - source {{ val.conda }}/etc/profile.d/conda.sh
-        - conda activate prewxvx
-        - set -ex
     prewxvx: &prewxvx-common
       forecast_path: '{{ inference.anemoi.output_path }}'
       freq: '{{ app.time.freq }}'
@@ -78,9 +73,6 @@ prewxvx:
     rundir: '{{ val.vx.rundir }}'
   global:
     prewxvx: &prewxvx-global
-      execution:
-        <<: *prewxvx-common-execution
-        executable: eagle-tools prewxvx prewxvx-global.yaml
       name: global
       eagle_tools:
         <<: *prewxvx-common
@@ -93,19 +85,14 @@ prewxvx:
             method: 'conservative_normed'
           target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}'
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
-    platform: !dict '{{ app.platform }}'
   lam:
     prewxvx: &prewxvx-lam
-      execution:
-        <<: *prewxvx-common-execution
-        executable: eagle-tools prewxvx prewxvx-lam.yaml
       name: lam
       eagle_tools:
         <<: *prewxvx-common
         output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
         model_type: nested-lam
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
-    platform: !dict '{{ app.platform }}'
 training:
   anemoi:
     defaults:

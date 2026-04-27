@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,14 +15,6 @@ def config():
             "account": "a",
             "scheduler": "slurm",
         },
-        "name": "grid2grid-global",
-        "prewxvx": {
-            "rundir": "/path/to/prewxvx",
-            "eagle_tools": {
-                "output_path": "/path/to/output",
-            },
-        },
-        "rundir": "/path/to/rundir",
         "wxvx": {
             "execution": {
                 # uwtools validates this block.
@@ -31,6 +24,41 @@ def config():
                 "executable": "wxvx",
             },
             "name": "grid2grid-global",
+            "prewxvx": {
+                "eagle_tools": {
+                    "anemoi_reference_dataset_kwargs": {},
+                    "end_date": "2026-04-08T12:00:00",
+                    "forecast_path": "/path/to/forecast",
+                    "forecast_regrid_kwargs": {
+                        "open_target_kwargs": {},
+                        "regridder_kwargs": {
+                            "method": "conservative_normed",
+                        },
+                        "target_grid_path": "/path/to/target-grid",
+                    },
+                    "freq": "6h",
+                    "lam_index": 1,
+                    "lcc_info": {
+                        "n_x": 11,
+                        "n_y": 22,
+                    },
+                    "lead_time": 24,
+                    "levels": [
+                        1,
+                        2,
+                        3.5,
+                    ],
+                    "model_type": "global",
+                    "output_path": "/path/to/output",
+                    "start_date": "2026-04-01T00:00:00",
+                    "vars_of_interest": [
+                        "t",
+                        "u",
+                        "v",
+                    ],
+                },
+                "rundir": "/path/to/prewxvx",
+            },
             "rundir": "/path/to/rundir",
             "wxvx": {
                 # wxvx validates this block.
@@ -162,7 +190,7 @@ def test_wxvx(config, logged, tmp_path, validator, with_del, with_set):
     # Additional keys are not allowed:
     assert not ok(with_set(config, "foo", "bar"))
     # Certain keys are required:
-    for key in ["execution", "name", "rundir", "wxvx"]:
+    for key in ["execution", "name", "prewxvx", "rundir", "wxvx"]:
         assert not ok(with_del(config, key))
         assert logged(f"'{key}' is a required property")
     # Some keys have string values:
@@ -173,3 +201,220 @@ def test_wxvx(config, logged, tmp_path, validator, with_del, with_set):
     for key in ["execution", "wxvx"]:
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'object'")
+
+
+def test_prewxvx_schema(config, logged, validator, tmp_path, with_del, with_set):
+    ok = validator(
+        __file__,
+        "wxvx",
+        tmp_path,
+        "properties",
+        "wxvx",
+        "properties",
+        "prewxvx",
+    )
+    pwvcfg = config["wxvx"]["prewxvx"]
+    # Basic correctness:
+    assert ok(pwvcfg)
+    # Additional keys are not allowed:
+    assert not ok(with_set(pwvcfg, "foo", "bar"))
+    # Certain keys are required:
+    for key in ["eagle_tools", "rundir"]:
+        assert not ok(with_del(pwvcfg, key))
+        assert logged(f"'{key}' is a required property")
+    # Some keys have object values:
+    for key in ["eagle_tools"]:
+        assert not ok(with_set(pwvcfg, None, key))
+        assert logged("is not of type 'object'")
+    # Some keys have string values:
+    for key in ["rundir"]:
+        assert not ok(with_set(pwvcfg, None, key))
+        assert logged("is not of type 'string'")
+
+
+def test_prewxvx__eagle_tools(config, logged, validator, tmp_path, with_del, with_set):
+    ok = validator(
+        __file__,
+        "wxvx",
+        tmp_path,
+        "properties",
+        "wxvx",
+        "properties",
+        "prewxvx",
+        "properties",
+        "eagle_tools",
+    )
+    eglcfg = config["wxvx"]["prewxvx"]["eagle_tools"]
+    # Basic correctness:
+    assert ok(eglcfg)
+    # Additional keys are allowed:
+    assert ok(with_set(eglcfg, "foo", "bar"))
+    # Certain keys are required:
+    for key in [
+        "end_date",
+        "forecast_path",
+        "freq",
+        "lead_time",
+        "model_type",
+        "output_path",
+        "start_date",
+    ]:
+        assert not ok(with_del(eglcfg, key))
+        assert logged(f"'{key}' is a required property")
+    # Some keys have array values:
+    for key in ["levels"]:
+        assert not ok(with_set(eglcfg, None, key))
+        assert logged("is not of type 'array'")
+    # Some keys have enum values:
+    assert not ok(with_set(eglcfg, "foo", "model_type"))
+    assert logged("'foo' is not one of")
+    # Some keys have integer values:
+    for key in ["lam_index", "lead_time"]:
+        assert not ok(with_set(eglcfg, None, key))
+        assert logged("is not of type 'integer'")
+    # Some keys have object values:
+    for key in [
+        "anemoi_reference_dataset_kwargs",
+        "forecast_regrid_kwargs",
+        "lcc_info",
+    ]:
+        assert not ok(with_set(config, None, key))
+        assert logged("is not of type 'object'")
+    # Some keys have string values:
+    for key in ["end_date", "forecast_path", "freq", "output_path", "start_date"]:
+        assert not ok(with_set(config, None, key))
+        assert logged("is not of type 'string'")
+
+
+def test_prewxvx__eagle_tools__forecast_regrid_kwargs(
+    config, logged, validator, tmp_path, with_set
+):
+    ok = validator(
+        __file__,
+        "wxvx",
+        tmp_path,
+        "properties",
+        "wxvx",
+        "properties",
+        "prewxvx",
+        "properties",
+        "eagle_tools",
+        "properties",
+        "forecast_regrid_kwargs",
+    )
+    pwvcfg = config["wxvx"]["prewxvx"]["eagle_tools"]["forecast_regrid_kwargs"]
+    # Basic correctness:
+    assert ok(pwvcfg)
+    # Additional keys are allowed:
+    assert ok(with_set(pwvcfg, "foo", "bar"))
+    # No keys are required:
+    assert ok({})
+    # Some keys have object values:
+    for key in ["open_target_kwargs", "regridder_kwargs"]:
+        assert not ok(with_set(pwvcfg, None, key))
+        assert logged("is not of type 'object'")
+    # Some keys have string values:
+    for key in ["target_grid_path"]:
+        assert not ok(with_set(pwvcfg, None, key))
+        assert logged("is not of type 'string'")
+
+
+def test_prewxvx__eagle_tools__forecast_regrid_kwargs__regridder_kwargs(
+    config, logged, validator, tmp_path, with_del, with_set
+):
+    ok = validator(
+        __file__,
+        "wxvx",
+        tmp_path,
+        "properties",
+        "wxvx",
+        "properties",
+        "prewxvx",
+        "properties",
+        "eagle_tools",
+        "properties",
+        "forecast_regrid_kwargs",
+        "properties",
+        "regridder_kwargs",
+    )
+    pwvcfg = config["wxvx"]["prewxvx"]["eagle_tools"]["forecast_regrid_kwargs"][
+        "regridder_kwargs"
+    ]
+    # Basic correctness:
+    assert ok(pwvcfg)
+    # Additional keys are allowed:
+    assert ok(with_set(pwvcfg, "foo", "bar"))
+    # Certain keys are required:
+    for key in ["method"]:
+        assert not ok(with_del(pwvcfg, key))
+        assert logged(f"'{key}' is a required property")
+    # Some keys have string values:
+    for key in ["method"]:
+        assert not ok(with_set(pwvcfg, None, key))
+        assert logged("is not of type 'string'")
+
+
+def test_prewxvx__eagle_tools__lcc_info(
+    config, logged, validator, tmp_path, with_del, with_set
+):
+    ok = validator(
+        __file__,
+        "wxvx",
+        tmp_path,
+        "properties",
+        "wxvx",
+        "properties",
+        "prewxvx",
+        "properties",
+        "eagle_tools",
+        "properties",
+        "lcc_info",
+    )
+    pwxcfg = config["wxvx"]["prewxvx"]["eagle_tools"]["lcc_info"]
+    # Basic correctness:
+    assert ok(pwxcfg)
+    # Additional keys are allowed:
+    assert ok(with_set(pwxcfg, "foo", "bar"))
+    # Certain keys are required:
+    for key in ["n_x", "n_y"]:
+        assert not ok(with_del(pwxcfg, key))
+        assert logged(f"'{key}' is a required property")
+    # Some keys have integer values:
+    for key in ["n_x", "n_y"]:
+        assert not ok(with_set(pwxcfg, None, key))
+        assert logged("is not of type 'integer'")
+
+
+def test_prewxvx__eagle_tools__levels(config, logged, validator, tmp_path):
+    ok = validator(
+        __file__,
+        "wxvx",
+        tmp_path,
+        "properties",
+        "wxvx",
+        "properties",
+        "prewxvx",
+        "properties",
+        "eagle_tools",
+        "properties",
+        "levels",
+    )
+    pwxvcfg = config["wxvx"]["prewxvx"]["eagle_tools"]["levels"]
+    # Basic correctness:
+    assert ok(pwxvcfg)
+    # An empy list os ok:
+    assert ok([])
+    # Items must be numbers:
+    assert ok([1, 2.2, -3])
+    assert not ok([None])
+    assert logged("is not of type 'number'")
+
+
+def test_prewxvx__defs__datetime(caplog, logged, tmp_path, validator):
+    ok = validator(__file__, "wxvx", tmp_path, "$defs", "datetime")
+    for val in [datetime(2026, 4, 8, 12, tzinfo=timezone.utc), "2026-04-08T01:23:45"]:
+        assert ok(val)
+    assert not ok("foo")
+    assert "is not valid under any of the given schemas" in caplog.text
+    assert "is not of type 'datetime'" in caplog.text
+    assert logged("does not match")

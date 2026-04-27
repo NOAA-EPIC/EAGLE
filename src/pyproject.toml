@@ -8,7 +8,6 @@ branch = true
 omit = [ # TODO REMOVE ALL THESE
   "eagle/data/grids_and_meshes.py",
   "eagle/data/zarr.py",
-  "eagle/prewxvx/prewxvx.py",
 ]
 
 [tool.mypy]
