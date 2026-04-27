@@ -60,29 +60,21 @@ Run ``make`` with no arguments to list available targets.
      - Performs anemoi inference
      - training
      - inference
-   * - prewxvx-global
-     - Postprocesses global inference output
-     - inference
-     - prewxvx
-   * - prewxvx-lam
-     - Postprocesses LAM inference output
-     - inference
-     - prewxvx
    * - vx-grid-global
      - Verify global against gridded analysis
-     - prewxvx-global
+     - inference
      - wxvx
    * - vx-grid-lam
      - Verify LAM against gridded analysis
-     - prewxvx-lam
+     - inference
      - wxvx
    * - vx-obs-global
      - Verify global against obs
-     - prewxvx-global
+     - inference
      - wxvx
    * - vx-obs-lam
      - Verify LAM against obs
-     - prewxvx-lam
+     - inference
      - wxvx
    * - vis-grid-global
      - Visualize global VX results against gridded analysis

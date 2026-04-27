@@ -81,13 +81,13 @@ In the EAGLE base config, this ``uwtools``-required parameter delegates to ``app
 prewxvx
 ------------------------------------------------------------------------------
 
-Configuration for the ``PreWXVX`` driver.
+Configuration for the ``prewxvx`` execution in the ``WXVX`` driver.
 
 ``component``
    This driver executes the :ref:`Postprocessing <Postprocessing>` component.
 
 ``global`` and ``lam``
-   The ``global:`` and ``lam:`` blocks provide configurations for global and :term:`LAM` extents, respectively, each borrowing from ``common:``. Their ``prewxvx:`` sub-blocks are ultimately passed to the ``PreWXVX`` driver as its runtime configuration.
+   The ``global:`` and ``lam:`` blocks provide configurations for global and :term:`LAM` extents, respectively, each borrowing from ``common:``. Their ``prewxvx:`` sub-blocks are ultimately passed to the ``WXVX`` driver as the runtime configuration for ``eagle-tools``' ``prewxvx`` component.
 
 training
 ------------------------------------------------------------------------------
