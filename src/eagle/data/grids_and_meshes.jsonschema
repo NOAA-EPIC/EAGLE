@@ -25,7 +25,12 @@
         },
         "rundir": {
           "type": "string"
-        }
+        },
+	"conus_grid_resolution_km": {
+  		"type": "integer",
+  		"enum": [6, 15],
+  		"default": 15
+	}
       },
       "required": [
         "filenames",

@@ -16,6 +16,7 @@ from iotaa import Asset, collection, task  # provided by uwtools
 from ufs2arco import sources  # type: ignore[import-untyped]
 from uwtools.api.driver import AssetsTimeInvariant
 from xarray import Dataset
+import xarray as xr
 
 LOCK = Lock()
 
@@ -37,7 +38,12 @@ class GridsAndMeshes(AssetsTimeInvariant):
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        _conus_data_grid(self.rundir, self._conus_data_grid_logfile).to_netcdf(path)
+        resolution_km = self.config.get("conus_grid_resolution_km", 15)
+        _conus_data_grid(
+            self.rundir, 
+            self._conus_data_grid_logfile,
+            resolution_km,
+        ).to_netcdf(path)
 
     @task
     def global_data_grid(self):
@@ -124,7 +130,7 @@ def _combine_global_and_conus_meshes(
 
 
 @cache
-def _conus_data_grid(rundir: Path, logfile: Path) -> Dataset:
+def _conus_data_grid(rundir: Path, logfile: Path, resolution_km: int = 15) -> Dataset:
     with LOCK:
         with _logging_to_file(logfile):
             hrrr = sources.AWSHRRRArchive(
@@ -149,20 +155,48 @@ def _conus_data_grid(rundir: Path, logfile: Path) -> Dataset:
             hds = hds.assign_coords({f"{key}_b": corners})
             hds = hds.drop_vars(f"{key}_bounds")
         hds = hds.rename({"x_vertices": "x_b", "y_vertices": "y_b"})
-        # Get the nodes and bounds by subsampling.
-        hds = hds.isel(
-            x=slice(None, -4, None),
-            y=slice(None, -4, None),
-            x_b=slice(None, -4, None),
-            y_b=slice(None, -4, None),
-        )
-        cds: Dataset = hds.isel(
-            x=slice(2, None, 5),
-            y=slice(2, None, 5),
-            x_b=slice(0, None, 5),
-            y_b=slice(0, None, 5),
-        )
-        return cds.drop_vars("orog")
+        
+        if resolution_km == 15:
+            # Get the nodes and bounds by subsampling.
+            hds = hds.isel(
+                x=slice(None, -4, None),
+                y=slice(None, -4, None),
+                x_b=slice(None, -4, None),
+                y_b=slice(None, -4, None),
+            )
+            cds = hds.isel(
+                x=slice(2, None, 5),
+                y=slice(2, None, 5),
+                x_b=slice(0, None, 5),
+                y_b=slice(0, None, 5),
+            )
+            cds = cds.drop_vars("orog")
+        
+        elif resolution_km == 6:
+            # Centers come from every other HRRR vertex.
+            centers = hds.isel(
+                x_b=slice(1, -1, 2),
+                y_b=slice(1, -1, 2),
+            )
+            centers = centers.drop_vars(["lat", "lon", "orog"])
+            centers = centers.rename(
+                {"lat_b": "lat", "lon_b": "lon", "x_b": "x", "y_b": "y"}
+            )
+
+            bounds = hds.isel(
+                x_b=slice(0, -1, 2),
+                y_b=slice(0, -1, 2),
+            )
+            bounds = bounds.drop_vars(["lat", "lon", "orog"])
+
+            cds = xr.merge([centers, bounds])
+        else:
+            raise ValueError(
+                f"Unsupported CONUS grid resolution: {resolution_km}. "
+                "Expected 6 or 15."
+            )
+
+        return cds
 
 
 def _conus_latent_grid(cds: Dataset, trim: int = 10, coarsen: int = 2) -> Dataset:
