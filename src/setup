@@ -192,7 +192,10 @@ prep_env_inference() {
 }
 
 prep_env_nrt() {
-  prep_env nrt
+  local name
+  name=nrt
+  prep_env $name
+  write_anemoi_activation_scripts $name
 }
 
 prep_env_prewxvx() {
