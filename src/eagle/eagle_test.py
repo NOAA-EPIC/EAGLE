@@ -30,14 +30,14 @@ CONFIG: dict = {
     "grids_and_meshes": {},  # tested by eagle.data
     "inference": {},  # tested by eagle.inference
     "platform": {},  # tested by uwtools
-    "prewxvx": {},  # tested by eagle.prewxvx
+    "prewxvx": {},  # tested by eagle.wxvx
     "training": {},  # tested by eagle.training
     "ufs2arco": {},  # needs expanded schema
     "val": {  # arbitrary config container
         "baz": "qux",
     },
     "visualization": {},  # tested by eagle.visualization
-    "vx": {},  # needs expanded schema
+    "vx": {},  # tested by eagle.wxvx
     "zarrs": {},  # needs expanded schema
 }
 
