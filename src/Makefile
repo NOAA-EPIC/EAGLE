@@ -5,6 +5,8 @@ PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
+NOW      = $(shell date -uIseconds)
+INFERENCE_ENV ?= inference
 
 INSTALLDIR ?= conda
 SHELL      := $(shell which bash)
@@ -33,6 +35,7 @@ config:
 	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
+	export NOW=$(NOW)
 	@$(make) grids-and-meshes
 	@$(make) zarr-gfs
 	@$(make) zarr-hrrr
@@ -42,7 +45,7 @@ devenv:
 	EAGLEDEV=1 INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
 env:
 	$(call check,$(cudascript),cudascript)
-	INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
+	INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript) $(if $(env),env=$(env))
 
 format:
 	$(call activate,base)
@@ -58,7 +61,8 @@ else
 endif
 
 inference:
-	$(call activate,inference)
+	export NOW=$(NOW)
+	$(call activate,$(INFERENCE_ENV))
 ifeq ($(task),?)
 	$(call tasklist,inference,inference,Inference)
 else

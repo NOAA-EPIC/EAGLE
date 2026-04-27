@@ -1,0 +1,244 @@
+# This is the base EAGLE near-real time config. It currently configures the Nested EAGLE case.
+
+# yamllint disable rule:anchors rule:line-length
+
+app:
+  base: /path/to/eagle/src
+  gpu: # set by platform config
+  partitions: # set by platform config
+  platform: # set by platform config
+  rundir: '{{ app.base }}/run'
+  time:
+    # current time from env
+    now: !datetime '{{ "NOW" | env }}'
+
+    # align to previous 6-hour cycle
+    offset: !timedelta '0:0:{{ (app.time.now.timestamp() % 21600) | int }}'
+
+    # latency and offsets
+    nrt_latency: !timedelta '6'
+    multistep_input_offset: !timedelta '6'
+
+    # core times
+    start: !datetime '{{ app.time.now - app.time.offset - app.time.nrt_latency }}'
+    ic_start: !datetime '{{ app.time.start + app.time.multistep_input_offset }}'
+
+    # forecast settings
+    freq: !timedelta '6'
+    leadtime: !timedelta '360'
+    leadtime_hours: '{{ (app.time.leadtime.total_seconds() / 3600) | int }}'
+    stop: !datetime '{{ app.time.start + app.time.leadtime }}'
+  checkpoint_path: /path/to/checkpoint
+grids_and_meshes:
+  filenames:
+    hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
+    gfs_target_grid: test.nc
+    latent_mesh: test.npz
+  rundir: '{{ val.data.rundir }}'
+  conus_grid_resolution_km: 6
+inference:
+  anemoi:
+    checkpoint_path: '{{ app.checkpoint_path }}'
+    input_dataset_kwargs: &dataset-kwargs
+      cutout:
+        - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
+          trim_edge: [25, 24, 25, 26]
+        - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
+      adjust: all
+      min_distance_km: 6
+    end_date: !datetime '{{ app.time.start }}'
+    freq: "6"
+    lead_time: !int '{{ app.time.leadtime_hours }}'
+    output_path: '{{ inference.rundir }}/output'
+    start_date: !datetime '{{ app.time.start }}'
+  execution:
+    batchargs:
+      <<: *gpu-batchargs
+      export: false
+      memory: 16G
+      rundir: '{{ inference.rundir }}'
+      walltime: '00:10:00'
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate nrt
+      - set -ex
+    executable: eagle-tools inference inference.yaml
+  rundir: '{{ app.rundir }}/inference'
+platform: !dict '{{ app.platform }}'
+prewxvx:
+  common:
+    execution: &prewxvx-common-execution
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate prewxvx
+        - set -ex
+    prewxvx: &prewxvx-common
+      forecast_path: '{{ inference.anemoi.output_path }}'
+      freq: '{{ app.time.freq }}'
+      lead_time: !int '{{ app.time.leadtime }}'
+      lam_index: 64220
+      lcc_info:
+        n_x: 338
+        n_y: 190
+      levels:
+        - 250
+        - 500
+        - 850
+      start_date: !datetime '{{ app.time.inference_start }}'
+      end_date: !datetime '{{ app.time.inference_stop }}'
+      vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
+    rundir: '{{ val.vx.rundir }}'
+  global:
+    prewxvx:
+      execution:
+        <<: *prewxvx-common-execution
+        executable: eagle-tools prewxvx prewxvx-global.yaml
+      name: global
+      eagle_tools:
+        <<: *prewxvx-common
+        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}'
+        model_type: nested-global
+        anemoi_reference_dataset_kwargs:
+          <<: *dataset-kwargs
+        forecast_regrid_kwargs:
+          regridder_kwargs:
+            method: 'conservative_normed'
+          target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}'
+      rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
+    platform: !dict '{{ app.platform }}'
+  lam:
+    prewxvx:
+      execution:
+        <<: *prewxvx-common-execution
+        executable: eagle-tools prewxvx prewxvx-lam.yaml
+      name: lam
+      eagle_tools:
+        <<: *prewxvx-common
+        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
+        model_type: nested-lam
+      rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
+    platform: !dict '{{ app.platform }}'
+ufs2arco:
+  dirs:
+    cache: cache/X
+    logs: logs/X
+    zarr: X.zarr
+  mover:
+    name: mpidatamover
+  regridder:
+    method: conservative
+    reuse_weights: True
+  slices:
+    sel:
+      latitude: [89.9, -89.9]
+  source:
+    fhr:
+      start: 0
+      step: 1
+      end: 0
+    levels: !list '{{ val.levels }}'
+    t0:
+      start: '{{ app.time.ic_start.strftime("%Y-%m-%dT%H") }}'
+      freq: '{{ val.step }}h'
+      end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
+    variables: !list '{{ val.variables }}'
+  target:
+    chunks:
+      cell: -1
+      ensemble: 1
+      time: 1
+      variable: -1
+    forcings:
+      - cos_latitude
+      - sin_latitude
+      - cos_longitude
+      - sin_longitude
+      - cos_julian_day
+      - sin_julian_day
+      - cos_local_time
+      - sin_local_time
+      - insolation
+    multistep_input: 2
+    name: anemoi_inference_with_forcings
+    sort_channels_by_levels: True
+zarrs:
+  common:
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate data
+      - set -ex
+    execution:
+      batchargs:
+        cores: 4
+        export: false
+        partition: '{{ app.partitions.netaccess }}'
+        rundir: '{{ val.data.rundir }}'
+        walltime: '00:10:00'
+      envcmds: !list '{{ zarrs.common.envcmds }}'
+      mpiargs: []
+      mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
+  gfs:
+    zarr:
+      execution:
+        batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
+        envcmds: !list '{{ zarrs.common.execution.envcmds }}'
+        executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+        mpiargs: !list '{{ zarrs.common.execution.mpiargs }}'
+        mpicmd: '{{ zarrs.common.execution.mpicmd }}'
+      name: gfs
+      rundir: '{{ val.data.rundir }}'
+      ufs2arco:
+        directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
+        mover: !dict '{{ ufs2arco.mover }}'
+        source: !dict '{{ dict(ufs2arco.source, name="gfs_archive", slices=ufs2arco.slices) }}'
+        target: !dict '{{ ufs2arco.target }}'
+    platform: !dict '{{ app.platform }}'
+  hrrr:
+    zarr:
+      execution:
+        batchargs: !dict '{{ zarrs.common.execution.batchargs }}'
+        envcmds: !list '{{ zarrs.common.execution.envcmds }}'
+        executable: ufs2arco ufs2arco-hrrr.yaml --overwrite
+        mpiargs: !list '{{ zarrs.common.execution.mpiargs }}'
+        mpicmd: '{{ zarrs.common.execution.mpicmd }}'
+      name: hrrr
+      rundir: '{{ val.data.rundir }}'
+      ufs2arco:
+        directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
+        mover: !dict '{{ ufs2arco.mover }}'
+        source: !dict '{{ dict(ufs2arco.source, name="aws_hrrr_archive") }}'
+        target: !dict '{{ ufs2arco.target }}'
+        transforms:
+          horizontal_regrid:
+            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_hrrr_weights.nc") }}'
+            target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
+          rotate_vectors:
+            vector_pairs:
+              - ['u', 'v']
+              - ['u10', 'v10']
+              - ['u80', 'v80']
+    platform: !dict '{{ app.platform }}'
+val:
+  conda: '{{ app.base }}/conda'
+  data:
+    rundir: '{{ app.rundir }}/data'
+  filenames:
+    gfs_target_grid: global_one_degree.nc
+    hrrr_target_grid: hrrr_6km.nc
+  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+  step: !int '{{ (app.time.freq.total_seconds() / 3600) | int }}'
+  variables:
+      - gh
+      - u
+      - v
+      - w
+      - t
+      - q
+      - sp
+      - u10
+      - v10
+      - t2m
+      - t_surface
+      - sh2
+      - lsm
+      - orog
