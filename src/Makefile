@@ -1,8 +1,8 @@
 BASHSRCS = $(wildcard ../.github/scripts/*) format setup
-ENVS     = data inference prewxvx training visualization wxvx
-HELPERS  = prewxvx vx zarr
+ENVS     = data inference training visualization wxvx
+HELPERS  = vx zarr
 PACKAGE  = eagle
-STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
@@ -74,22 +74,6 @@ ifdef env
 else
 	$(call envloop,lint)
 endif
-
-prewxvx:
-	$(call activate,prewxvx)
-ifeq ($(task),?)
-	$(call tasklist,prewxvx,prewxvx,PreWXVX)
-else
-	$(call check,$(config),config)
-	$(call check,$(extent),extent)
-	$(call exec,prewxvx,prewxvx,PreWXVX,$(or $(task),run) --key-path prewxvx.$(extent))
-endif
-
-prewxvx-global:
-	@$(make) prewxvx extent=global
-
-prewxvx-lam:
-	@$(make) prewxvx extent=lam
 
 realize:
 	$(call check,$(config),config)

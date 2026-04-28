@@ -1,4 +1,5 @@
 from pathlib import Path
+from subprocess import run
 from typing import cast
 
 from iotaa import Asset, collection, task  # provided by uwtools
@@ -12,6 +13,33 @@ class WXVX(DriverTimeInvariant):
     lam).
     """
 
+    @task
+    def prewxvx(self):
+        """
+        Prepares netCDF files for wxvx.
+        """
+        extent = "global" if "global" in self._name else "lam"
+        yield self.taskname(f"prewxvx {extent}")
+        nc_dir = Path(self.config["prewxvx"]["eagle_tools"]["output_path"])
+        pre_dir = Path(self.config["prewxvx"]["rundir"])
+        pre_path = pre_dir / f"prewxvx-{extent}.yaml"
+        nc = f"nested-{extent}.*.nc"
+        yield {
+            "config": Asset(pre_path, pre_path.is_file),
+            "ncfiles": Asset(nc_dir, lambda: any(nc_dir.glob(nc))),
+        }
+        yield None
+        pre_path.parent.mkdir(parents=True, exist_ok=True)
+        nc_dir.mkdir(parents=True, exist_ok=True)
+        get_yaml_config(self.config["prewxvx"]["eagle_tools"]).dump(pre_path)
+        logfile = pre_dir / "prewxvx.log"
+        run(
+            "eagle-tools prewxvx %s >%s 2>&1" % (pre_path, logfile),
+            check=False,
+            cwd=pre_dir,
+            shell=True,
+        )
+
     @collection
     def provisioned_rundir(self):
         """
@@ -19,6 +47,7 @@ class WXVX(DriverTimeInvariant):
         """
         yield self.taskname(f"{self._name} provisioned run directory")
         yield [
+            self.prewxvx(),
             self.runscript(),
             self.wxvx_config(),
         ]

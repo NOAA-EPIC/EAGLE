@@ -34,8 +34,8 @@ Glossary
    MPI
       Message Passing Interface. A standard used for parallel computing across multiple processes.
 
-   PreWXVX
-      The EAGLE driver that prepares forecast output for downstream :term:`wxvx` verification steps.
+   prewxvx
+      The component used by EAGLE to prepare forecast output for :term:`wxvx` verification steps.
 
    ufs2arco
       The component used by EAGLE to prepare Zarr-formatted forecast and analysis data. See the `ufs2arco repository <https://github.com/NOAA-PSL/ufs2arco>`__.

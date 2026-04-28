@@ -4,6 +4,28 @@
 Verify Model Performance
 =========================
 
+eagle-tools Overview
+-------------------------
+
+We use the eagle-tools package for postprocessing model output and visualizing model performance.
+The eagle-tools library provides command-line utilities that are configured via
+:term:`YAML` files.
+
+This library currently supports:
+
+* Running anemoi-inference across many initial conditions at scale, for
+  example over a validation set
+* Postprocessing inference output into a format ready for the ``wxvx`` package
+* Computing aggregated error metrics such as RMSE and MAE while preserving the
+  initial-condition dimension
+* Visualizing spatial error across lead times
+* Computing power spectra
+* Visualizing predictions alongside targets through figures and GIFs
+
+At a high level, eagle-tools enables users to analyze model performance at
+scale. For more information, see the `eagle-tools GitHub repository
+<https://github.com/NOAA-PSL/eagle-tools>`_.
+
 wxvx Overview
 ----------------------------------------------------
 
@@ -20,9 +42,7 @@ and :term:`LAM` forecasts against:
 * point observations with MET's
   `point_stat <https://metplus.readthedocs.io/projects/met/en/latest/Users_Guide/point-stat.html>`_
 
-Before running verification, complete the preprocessing steps described in the
-:ref:`Quickstart Guide <QuickstartVerification>` so that forecast output has
-already been prepared for ``wxvx``.
+Before running verification, the driver runs the ``prewxvx`` component from ``eagle-tools`` to postprocess forecast output from the previous step.
 
 See the `wxvx repository <https://github.com/maddenp-cu/wxvx>`_ for further
 information about the project itself.
@@ -30,7 +50,6 @@ information about the project itself.
 wxvx Quick Tips
 ----------------------------------------------------
 
-* Run the provided :term:`PreWXVX` steps before starting verification.
 * Use the ``vx-grid-*`` targets to verify against gridded analyses.
 * Use the ``vx-obs-*`` targets to verify against PrepBUFR observations.
 * The ``global`` and ``lam`` targets are independent, so they can be run in
@@ -76,6 +95,8 @@ The most useful outputs are:
 * ``stats/`` for MET ``.stat`` files
 * ``plots/`` for generated ``.png`` plots
 * ``run/<expname>/vx/*.log`` for verification logs
+
+The output for ``eagle-tools prewxvx`` can be found under: ``run/<expname>/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out``.
 
 
 Additional Visualization

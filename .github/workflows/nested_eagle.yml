@@ -242,10 +242,6 @@ jobs:
 
           # Run verification and check artifacts.
 
-          for extent in global lam; do
-            make prewxvx-$extent config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
-          done
-
           for truth in grid obs; do
             for extent in global lam; do
               make vx-$truth-$extent config=eagle.yaml INSTALLDIR="${INSTALLDIR}"

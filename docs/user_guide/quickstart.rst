@@ -77,16 +77,6 @@ Building and Running :term:`EAGLE`
    This step performs inference, producing a forecast. It submits a batch job. Do not proceed until the batch job 
    completes successfully (see the file ``run/<expname>/inference/runscript.inference.out``.)
 
-#. Postprocess model output
-
-   .. code-block:: bash
-      
-      make prewxvx-global config=eagle.yaml
-      make prewxvx-lam config=eagle.yaml
-
-   These :term:`PreWXVX` steps prepare forecast output from the previous step for verification by :term:`wxvx`. They run locally, so it is 
-   safe to proceed when the commands return. See the files ``run/<expname>/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
-
 #. Model verification
 
    .. _QuickstartVerification:
@@ -98,6 +88,8 @@ Building and Running :term:`EAGLE`
       make vx-obs-global config=eagle.yaml
       make vx-obs-lam config=eagle.yaml
 
+   Before running verification, the :term:`WXVX` driver will run ``prewxvx`` to prepare forecast output from the previous step. See the files ``run/<expname>/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
+   
    These steps perform verification of the ``global`` or :term:`LAM` forecasts against gridded analyses (``*-grid-*``) or 
    PrepBUFR observations (``*-obs-*``) as truth. Each submits a batch job, so the four ``make`` commands can be run in quick 
    succession to get all the batch jobs running in parallel. When each batch job completes, MET ``.stat`` files and ``.png`` 
