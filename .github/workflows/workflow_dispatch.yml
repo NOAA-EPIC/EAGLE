@@ -1,0 +1,311 @@
+name: Nested EAGLE CI Pipeline (uwtools)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: nested-eagle-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  cleanup:
+    name: Clean old conda installs
+    if: >-
+      ${{
+        contains(github.event.pull_request.labels.*.name, 'eagle-ursa') &&
+        !contains(github.event.pull_request.labels.*.name, 'ci-running')
+      }}
+    runs-on: ursa
+    steps:
+      - name: Clean old conda installs
+        run: |
+          find $GITHUB_WORKSPACE/src -mindepth 1 -maxdepth 1 -regex "^.*/conda\.[0-9]+$" | sort | while read x; do
+            echo Removing $x
+            rm -rf $x
+          done
+  run_pipeline:
+    name: Run Nested EAGLE end-to-end on Ursa
+    if: >-
+      ${{
+        contains(github.event.pull_request.labels.*.name, 'eagle-ursa') &&
+        !contains(github.event.pull_request.labels.*.name, 'ci-running')
+      }}
+    runs-on: ursa
+    timeout-minutes: 1440
+    environment:
+      name: eagle-ursa
+
+    steps:
+
+      - name: Add ci-running label
+        continue-on-error: true
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: ci-running
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Perform cleanup
+        run: |
+          set -euo pipefail
+          cd $GITHUB_WORKSPACE
+          echo Running in $PWD
+          conda=src/conda
+          if [[ -d $conda ]]; then
+            mv -v $conda $conda.$(date +%s)
+          fi
+          git clean -ffdx -e "conda.*"
+        
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+          clean: false 
+
+      - name: Gate on src/ changes
+        id: gate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+
+            let page = 1;
+            const per_page = 100;
+            const files = [];
+            while (true) {
+              const resp = await github.rest.pulls.listFiles({
+                owner, repo, pull_number: pr.number, per_page, page
+              });
+              files.push(...resp.data.map(f => f.filename));
+              if (resp.data.length < per_page) break;
+              page += 1;
+            }
+
+            const relevant = files.some(f => f.startsWith("src/"));
+            core.info(`Changed files: ${files.length}`);
+            core.info(`Relevant changes: ${relevant}`);
+            core.setOutput("relevant", relevant ? "true" : "false");
+
+      - name: Skip (no relevant changes)
+        if: steps.gate.outputs.relevant != 'true'
+        run: |
+          echo "No changes under nested_eagle/ or src/. Skipping."
+          exit 0
+
+      - name: Build env and run pipeline via src/Makefile + uwtools
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          INSTALLDIR: conda
+        run: |
+          set -euo pipefail
+          export SETVARS_CALL=${SETVARS_CALL:-0}
+          cd "${GITHUB_WORKSPACE}/src"
+
+          time make env cudascript=ursa INSTALLDIR="${INSTALLDIR}"
+
+          source conda/etc/profile.d/conda.sh
+          conda activate base
+          command -v uw >/dev/null || {
+            echo "ERROR: 'uw' not found after make devenv"
+            exit 1
+          }
+          uw --version || true
+          # ---- helpers ----
+          slurm_wait() {
+            local job_id="$1"
+            local label="${2:-job}"
+            local prev=""
+            echo "Waiting for ${label} job ${job_id} ..."
+            while true; do
+              local state=""
+              state="$(squeue -h -j "$job_id" -o "%T" 2>/dev/null || true)"
+              if [[ -z "$state" ]]; then
+                state="$(sacct -j "$job_id" --format=State --noheader 2>/dev/null | head -n1 | awk '{print $1}')"
+                state="${state:-UNKNOWN}"
+              fi
+              if [[ "$state" != "$prev" ]]; then
+                echo "${label} (${job_id}) state: ${state}"
+                prev="$state"
+              fi
+              case "$state" in
+                COMPLETED)
+                  echo "${label} (${job_id}) COMPLETED"
+                  break
+                  ;;
+                FAILED*|CANCELLED*|TIMEOUT*|NODE_FAIL*|OUT_OF_MEMORY*)
+                  echo "${label} (${job_id}) terminal failure: ${state}"
+                  return 1
+                  ;;
+              esac
+              sleep 20
+            done
+            return 0
+          }
+
+          wait_runscript_batch() {
+            local dir="$1"
+            local target="$2"
+            local label="${3:-$target}"
+
+            local submit="${dir}/runscript.${target}.submit"
+            local done="${dir}/runscript.${target}.done"
+            local out="${dir}/runscript.${target}.out"
+
+            if [[ ! -d "$dir" ]]; then
+              echo "ERROR: Missing run directory: $dir"
+              exit 1
+            fi
+
+            if [[ ! -f "$submit" ]]; then
+              echo "ERROR: Missing submit file: $submit"
+              ls -la "$dir" || true
+              exit 1
+            fi
+
+            local job_id
+            job_id="$(grep -oE '[0-9]+' "$submit" | tail -n1)"
+            if [[ -z "${job_id:-}" ]]; then
+              echo "ERROR: Could not parse numeric job id from $submit"
+              cat "$submit" || true
+              exit 1
+            fi
+
+            if ! slurm_wait "$job_id" "$label"; then
+              [[ -f "$out" ]] && tail -n 200 "$out" || true
+              exit 1
+            fi
+
+            if [[ ! -f "$done" ]]; then
+              echo "ERROR: Job completed but .done marker missing: $done"
+              [[ -f "$out" ]] && tail -n 200 "$out" || true
+              exit 1
+            fi
+          }
+
+          # ---- build config ----
+          EXP="ci-pr${PR_NUM}-$(echo "$SHA" | cut -c1-7)"
+          echo "Experiment name: $EXP"
+
+          make config compose=base:ursa INSTALLDIR="${INSTALLDIR}" > eagle.yaml
+
+          SRC_ABS="${GITHUB_WORKSPACE}/src"
+          sed -i "s|^\\(  base:\\s*\\).*|\\1${SRC_ABS}|" eagle.yaml
+          sed -i "s|^\\(  experiment_name:\\s*\\).*|\\1${EXP}|" eagle.yaml
+          sed -i "s|^\\(  checkpoint_path:\\s*\\).*|\\1${SRC_ABS}/run/${EXP}/training/outputs/checkpoint|" eagle.yaml
+
+          make validate config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+
+          RUNROOT="${SRC_ABS}/run/${EXP}"
+
+          # Run data-prep and check artifacts.
+
+          make grids-and-meshes config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+
+          for datasource in gfs hrrr; do
+            make zarr-$datasource config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          done
+
+          for datasource in gfs hrrr; do
+            wait_runscript_batch "${RUNROOT}/data" "zarr-$datasource" "Zarr $datasource"
+          done
+
+          for datasource in gfs hrrr; do
+            test -d "${RUNROOT}/data/$datasource.zarr" || {
+              echo "Missing ${RUNROOT}/data/$datasource.zarr"
+              exit 1
+            }
+          done
+
+          # Run training.
+
+          make training config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          wait_runscript_batch "${RUNROOT}/training" "training" "Training"
+
+          # Run inference and check artifacts.
+
+          make inference config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+          wait_runscript_batch "${RUNROOT}/inference" "inference" "Inference"
+
+          find "${RUNROOT}/inference" -type f -name "*.nc" -print -quit | grep -q . || {
+            echo "ERROR: No inference NetCDF outputs found under ${RUNROOT}/inference"
+            exit 1
+          }
+
+          # Run verification and check artifacts.
+
+          for truth in grid obs; do
+            for extent in global lam; do
+              make vx-$truth-$extent config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
+            done
+          done
+
+          for truth in grid obs; do
+            for extent in global lam; do
+              wait_runscript_batch "$RUNROOT/vx/grid2$truth/$extent" "wxvx-grid2$truth-$extent" "VX grid2$truth $extent"
+            done
+          done
+
+          find "${RUNROOT}/vx" -type f -name "*.png" -print -quit | grep -q . || {
+            echo "ERROR: No verification PNGs found under ${RUNROOT}/vx"
+            exit 1
+          }
+
+          find "${RUNROOT}/vx" -type f -name "*.stat" -print -quit | grep -q . || {
+            echo "ERROR: No verification .stat outputs found under ${RUNROOT}/vx"
+            exit 1
+          }
+
+          # Run visualization and check artifacts.
+
+          for truth in grid obs; do
+            for extent in global lam; do
+              make vis-$truth-$extent config=eagle.yaml INSTALLDIR="$INSTALLDIR"
+            done
+          done
+
+          for truth in grid obs; do
+            for extent in global lam; do
+              dir=$RUNROOT/visualization/grid2$truth/$extent/plots-basic
+              count=$(ls -1 $dir/*.png | wc -l)
+              expected=8
+              test $count -eq $expected || {
+                echo "ERROR: Found $count PNG files in $dir, expected $expected"
+                exit 1
+              }
+            done
+          done
+
+          for extent in global lam; do
+            dir=$RUNROOT/visualization/grid2grid/$extent/plots-spatial-stats
+            count=$(ls -1 $dir/*.png | wc -l)
+            expected=40
+            test $count -eq $expected || {
+              echo "ERROR: Found $count PNG files in $dir, expected $expected"
+              exit 1
+            }
+          done
+
+          # Done.
+
+          echo Nested EAGLE CI pipeline completed successfully.
+
+  cleanup_label:
+    name: Cleanup ci-running label
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [run_pipeline]
+    steps:
+      - name: Remove ci-running label
+        continue-on-error: true
+        uses: mondeja/remove-labels-gh-action@v2.0.0
+        with:
+          labels: "ci-running"
+          token: ${{ secrets.GITHUB_TOKEN }}
