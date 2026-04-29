@@ -191,13 +191,6 @@ prep_env_inference() {
   write_anemoi_activation_scripts $name
 }
 
-prep_env_nrt() {
-  local name
-  name=nrt
-  prep_env $name
-  write_anemoi_activation_scripts $name
-}
-
 prep_env_prewxvx() {
   prep_env prewxvx
 }
@@ -247,13 +240,8 @@ MAMBAFLAGS=(--log-level error --yes)
 MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
-if [[ -n "${ARGS[env]:-}" ]]; then
-  environments=(base data "${ARGS[env]}")
-else
-  environments=(base data inference prewxvx training visualization wxvx)
-fi
-
-for name in "${environments[@]}"; do
+environments=(base data inference training visualization wxvx)
+for name in ${environments[@]}; do
   time prep_env_$name
 done
 msg Done

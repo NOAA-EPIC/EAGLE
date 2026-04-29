@@ -33,6 +33,8 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         The CONUS grid, provisioned to the rundir.
         """
+        if "hrrr_target_grid" not in self.config.get("filenames", {}):
+            return
         path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
         yield self.taskname(f"conus data grid {path}")
         yield Asset(path, path.is_file)
@@ -50,6 +52,8 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         The global grid, provisioned to the rundir.
         """
+        if "gfs_target_grid" not in self.config.get("filenames", {}):
+            return
         path = self.rundir / self.config["filenames"]["gfs_target_grid"]
         yield self.taskname(f"global data grid {path}")
         yield Asset(path, path.is_file)
@@ -65,6 +69,8 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         The latent mesh, provisioned to the rundir.
         """
+        if "latent_mesh" not in self.config.get("filenames", {}):
+            return
         path = self.rundir / self.config["filenames"]["latent_mesh"]
         yield self.taskname(f"latent mesh {path}")
         yield Asset(path, path.is_file)
@@ -83,11 +89,18 @@ class GridsAndMeshes(AssetsTimeInvariant):
         Run directory provisioned with all required content.
         """
         yield self.taskname("provisioned run directory")
-        yield [
-            self.conus_data_grid(),
-            self.global_data_grid(),
-            self.latent_mesh(),
-        ]
+        tasks = []
+
+        if "hrrr_target_grid" in self.config.get("filenames", {}):
+            tasks.append(self.conus_data_grid())
+
+        if "gfs_target_grid" in self.config.get("filenames", {}):
+            tasks.append(self.global_data_grid())
+
+        if "latent_mesh" in self.config.get("filenames", {}):
+            tasks.append(self.latent_mesh())
+        
+        yield tasks
 
     # Public methods
 
@@ -99,10 +112,12 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @property
     def _conus_data_grid_logfile(self):
-        return (self.rundir / self.config["filenames"]["hrrr_target_grid"]).with_suffix(
-            ".log"
-        )
-
+        if "hrrr_target_grid" in self.config.get("filenames", {}):
+            return (self.rundir / self.config["filenames"]["hrrr_target_grid"]).with_suffix(
+                ".log"
+            )
+        else:
+            return self.rundir / "hrrr_target_grid.log"
 
 # Private functions
 
@@ -190,11 +205,6 @@ def _conus_data_grid(rundir: Path, logfile: Path, resolution_km: int = 15) -> Da
             bounds = bounds.drop_vars(["lat", "lon", "orog"])
 
             cds = xr.merge([centers, bounds])
-        else:
-            raise ValueError(
-                f"Unsupported CONUS grid resolution: {resolution_km}. "
-                "Expected 6 or 15."
-            )
 
         return cds
 

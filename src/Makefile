@@ -6,7 +6,6 @@ STEPS    = data grids-and-meshes inference prewxvx-global prewxvx-lam training v
 TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 NOW      = $(shell date -uIseconds)
-INFERENCE_ENV ?= inference
 
 INSTALLDIR ?= conda
 SHELL      := $(shell which bash)
@@ -45,7 +44,7 @@ devenv:
 	EAGLEDEV=1 INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
 env:
 	$(call check,$(cudascript),cudascript)
-	INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript) $(if $(env),env=$(env))
+	INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
 
 format:
 	$(call activate,base)
@@ -62,7 +61,7 @@ endif
 
 inference:
 	export NOW=$(NOW)
-	$(call activate,$(INFERENCE_ENV))
+	$(call activate,inference)
 ifeq ($(task),?)
 	$(call tasklist,inference,inference,Inference)
 else

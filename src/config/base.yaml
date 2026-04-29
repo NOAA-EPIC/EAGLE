@@ -1,44 +1,58 @@
-# This is the base EAGLE config. It currently configures the Nested EAGLE case.
+# This is the base EAGLE near-real time config. It currently configures the Nested EAGLE case.
 
 # yamllint disable rule:anchors rule:line-length
 
 app:
   base: /path/to/eagle/src
-  experiment_name: default
+  checkpoint_path: /path/to/checkpoint
   gpu: # set by platform config
   partitions: # set by platform config
   platform: # set by platform config
-  rundir: '{{ app.base }}/run/{{ app.experiment_name }}'
+  rundir: '{{ app.base }}/run'
   time:
-    freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
-    inference_start: !datetime 2022-02-03T12
-    inference_stop: !datetime '{{ app.time.inference_start }}'
-    leadtime: 24
-    start: !datetime 2022-02-01T00
-    step: !timedelta 6
-    stop: !datetime 2022-02-05T12
+    # current time from env
+    now: !datetime '{{ "NOW" | env }}'
+
+    # align to previous 6-hour cycle
+    offset: !timedelta '0:0:{{ (app.time.now.timestamp() % 21600) | int }}'
+
+    # latency to make sure IC's are avilable
+    nrt_latency: !timedelta '6'
+
+    # some anemoi models require multiple IC timesteps for input
+    # nested-eagle requires 2, so we load in two IC's
+    multistep_input_offset: !timedelta '6'
+
+    # core times you are actually running inference for
+    start: !datetime '{{ app.time.now - app.time.offset - app.time.nrt_latency }}'
+    ic_start: !datetime '{{ app.time.start - app.time.multistep_input_offset }}'
+    stop: !datetime '{{ app.time.start + app.time.leadtime }}'
+
+    # forecast settings
+    freq: !timedelta '6'
+    leadtime: !timedelta '360'
 grids_and_meshes:
   filenames:
-    gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
-    latent_mesh: '{{ val.filenames.latent_mesh }}'
   rundir: '{{ val.data.rundir }}'
+  conus_grid_resolution_km: 6
 inference:
   anemoi:
-    checkpoint_path: /path/to/checkpoint # NB: If a value for inference.checkpoint_dir is provided, it will override this value with the latest checkpoint in that directory.
+    checkpoint_path: '{{ app.checkpoint_path }}'
     input_dataset_kwargs: &dataset-kwargs
       cutout:
         - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
-          trim_edge: [10, 11, 10, 11]
+          trim_edge: [25, 24, 25, 26]
         - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
       adjust: all
-      min_distance_km: 0
-    end_date: !datetime '{{ app.time.inference_stop }}'
-    freq: '{{ app.time.freq }}'
-    lead_time: !int '{{ app.time.leadtime }}'
+      min_distance_km: 6
+    end_date: !datetime '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
+    #freq only needed if you are running initializations for multiple forecasts
+    #not applicable here for nrt
+    freq: "6h"
+    lead_time: !int '{{ (app.time.leadtime.total_seconds() / 3600) | int }}'
     output_path: '{{ inference.rundir }}/output'
-    start_date: !datetime '{{ app.time.inference_start }}'
-  checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
+    start_date: !datetime '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
   execution:
     batchargs:
       <<: *gpu-batchargs
@@ -50,6 +64,7 @@ inference:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate inference
       - set -ex
+      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
     executable: eagle-tools inference inference.yaml
   rundir: '{{ app.rundir }}/inference'
 platform: !dict '{{ app.platform }}'
@@ -106,364 +121,14 @@ prewxvx:
         model_type: nested-lam
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
     platform: !dict '{{ app.platform }}'
-training:
-  anemoi:
-    defaults:
-      - data: zarr
-      - dataloader: native_grid
-      - diagnostics: evaluation
-      - system: slurm
-      - graph: encoder_decoder_only
-      - model: transformer
-      - training: stretched
-      - _self_
-    # Blocks to customize default Anemoi training config.
-    data:
-      datasets:
-        data:
-          diagnostic:
-            - accum_tp
-            - u80
-            - v80
-          forcing:
-            - cos_latitude
-            - sin_latitude
-            - cos_longitude
-            - sin_longitude
-            - cos_julian_day
-            - sin_julian_day
-            - cos_local_time
-            - sin_local_time
-            - insolation
-            - lsm
-            - orog
-          processors:
-            normalizer:
-              _target_: anemoi.models.preprocessing.normalizer.InputNormalizer
-              config:
-                default: mean-std
-                max:
-                  - orog
-                none:
-                  - cos_latitude
-                  - sin_latitude
-                  - cos_longitude
-                  - sin_longitude
-                  - cos_julian_day
-                  - sin_julian_day
-                  - cos_local_time
-                  - sin_local_time
-                  - insolation
-                  - lsm
-                std:
-                  - accum_tp
-                  - sh2
-                  - q_100
-                  - q_150
-                  - q_200
-                  - q_250
-                  - q_300
-                  - q_400
-                  - q_500
-                  - q_600
-                  - q_700
-                  - q_850
-                  - q_925
-                  - q_1000
-    dataloader:
-      batch_size:
-        test: 1
-        training: 1
-        validation: 1
-      dataset:
-        <<: *dataset-kwargs
-      limit_batches:
-        training: null
-        validation: null
-      prefetch_factor: 1
-      num_workers:
-        test: 1
-        training: 1
-        validation: 1
-      test:
-        datasets:
-          data:
-            dataset_config:
-              dataset: ${dataloader.dataset}
-              frequency: ${data.frequency}
-            start: '{{ (app.time.start + app.time.step * 16).strftime("%Y-%m-%d") }}'
-            end: '{{ (app.time.start + app.time.step * 20).strftime("%Y-%m-%d") }}'
-      training:
-        datasets:
-          data:
-            dataset_config:
-              dataset: ${dataloader.dataset}
-              frequency: ${data.frequency}
-            start: '{{ app.time.start.strftime("%Y-%m-%d") }}'
-            end: '{{ (app.time.start + app.time.step * 4).strftime("%Y-%m-%d") }}'
-      validation:
-        datasets:
-          data:
-            dataset_config:
-              dataset: ${dataloader.dataset}
-              frequency: ${data.frequency}
-            start: '{{ (app.time.start + app.time.step * 8).strftime("%Y-%m-%d") }}'
-            end: '{{ (app.time.start + app.time.step * 12).strftime("%Y-%m-%d") }}'
-    diagnostics:
-      log:
-        mlflow:
-          enabled: True
-          offline: True
-          _target_: anemoi.training.diagnostics.mlflow.logger.AnemoiMLflowLogger
-          log_model: False
-          authentication: False
-          tracking_uri: null
-          expand_hyperparams:
-            - config
-          experiment_name: Nested-EAGLE-1deg15km-deterministic
-          http_max_retries: 35
-          on_resume_create_child: True
-          project_name: Nested-EAGLE
-          run_name: null
-          system: False
-          terminal: True
-          save_dir: ${system.output.logs.mlflow}
-        wandb:
-          enabled: false
-          entity: null+
-          _target_: pytorch_lightning.loggers.wandb.WandbLogger
-          offline: False
-          log_model: False
-          project: placeholder
-          gradients: False
-          parameters: False
-          interval: ${diagnostics.log.interval}
-      plot:
-        datasets_to_plot: ["data"]
-        asynchronous: false
-        callbacks:
-          - _target_: anemoi.training.diagnostics.callbacks.plot.PlotLoss
-            dataset_names: ${diagnostics.plot.datasets_to_plot}
-            every_n_batches: ${diagnostics.plot.frequency.batch}
-            parameter_groups:
-              moisture:
-                - accum_tp
-              sfc_wind:
-                - u10
-                - v10
-          - _target_: anemoi.training.diagnostics.callbacks.plot.PlotSample
-            dataset_names: ${diagnostics.plot.datasets_to_plot}
-            output_steps: ${training.multistep_output}
-            accumulation_levels_plot:
-              - 0
-              - 0.05
-              - 0.1
-              - 0.25
-              - 0.5
-              - 1
-              - 1.5
-              - 2
-              - 3
-              - 4
-              - 5
-              - 6
-              - 7
-              - 100
-            colormaps: ${diagnostics.plot.colormaps}
-            every_n_batches: ${diagnostics.plot.frequency.batch}
-            parameters: ${diagnostics.plot.parameters}
-            per_sample: 6
-            precip_and_related_fields: ${diagnostics.plot.precip_and_related_fields}
-            sample_idx: ${diagnostics.plot.sample_idx}
-          - _target_: anemoi.training.diagnostics.callbacks.plot.PlotHistogram
-            dataset_names: ${diagnostics.plot.datasets_to_plot}
-            output_steps: ${training.multistep_output}
-            every_n_batches: ${diagnostics.plot.frequency.batch}
-            parameters:
-              - gh_500
-              - accum_tp
-              - t2m
-              - u10
-              - v10
-            precip_and_related_fields: ${diagnostics.plot.precip_and_related_fields}
-            sample_idx: ${diagnostics.plot.sample_idx}
-        frequency:
-          batch: 50
-          epoch: 1
-        parameters:
-          - gh_500
-          - t_850
-          - u_850
-          - v_850
-          - t2m
-          - sh2
-          - u10
-          - v10
-          - sp
-          - accum_tp
-        precip_and_related_fields:
-          - accum_tp
-    graph:
-      overwrite: True
-      nodes:
-        data:
-          node_builder:
-            _target_: anemoi.graphs.nodes.AnemoiDatasetNodes
-            dataset: ${dataloader.training.datasets.data.dataset_config}
-          attributes: ${graph.attributes.nodes}
-        hidden:
-          node_builder:
-            _target_: anemoi.graphs.nodes.NPZFileNodes
-            npz_file: ${system.input.latent_mesh}
-            lat_key: lat
-            lon_key: lon
-      edges:
-        # Encoder
-        - source_name: data
-          target_name: hidden
-          edge_builders:
-            - _target_: anemoi.graphs.edges.KNNEdges
-              num_nearest_neighbours: 12
-              source_mask_attr_name: null
-              target_mask_attr_name: null
-          attributes: ${graph.attributes.edges}
-        # Decoder
-        - source_name: hidden
-          target_name: data
-          edge_builders:
-            - _target_: anemoi.graphs.edges.KNNEdges
-              num_nearest_neighbours: 3
-              source_mask_attr_name: null
-              target_mask_attr_name: null
-          attributes: ${graph.attributes.edges}
-      attributes:
-        nodes:
-          # Attributes for data nodes
-          cutout_mask:
-            _target_: anemoi.graphs.nodes.attributes.CutOutMask
-          boundary_mask:
-            _target_: anemoi.graphs.nodes.attributes.BooleanNot
-            masks:
-              _target_: anemoi.graphs.nodes.attributes.CutOutMask
-          area_weight:
-            _target_: anemoi.graphs.nodes.attributes.SphericalAreaWeights
-            norm: unit-max
-            fill_value: 0
-          lam_area_weight:
-            _target_: anemoi.graphs.nodes.attributes.MaskedPlanarAreaWeights
-            mask_node_attr_name: cutout_mask
-            norm: unit-max
-        edges:
-          edge_length:
-            _target_: anemoi.graphs.edges.attributes.EdgeLength
-            norm: unit-max
-          edge_dirs:
-            _target_: anemoi.graphs.edges.attributes.EdgeDirection
-            norm: unit-std
-    system:
-      input:
-        global_dataset: '{{ val.data.rundir }}/gfs.zarr'
-        graph: '{{ val.data.rundir }}/graph.latentx2.spongex1.12knn.pt'
-        lam_dataset: '{{ val.data.rundir }}/hrrr.zarr'
-        latent_mesh: '{{ val.data.rundir }}/latentx2.spongex1.combined.sorted.npz'
-      hardware:
-        num_gpus_per_model: 1
-      output:
-        root: '{{ training.rundir }}/outputs/'
-        logs:
-          root: logs
-          mlflow: mlflow
-        checkpoints:
-          root: checkpoint
-    model:
-      bounding:
-        - _target_: anemoi.models.layers.bounding.ReluBounding
-          variables: !list '{{ training.anemoi.data.datasets.data.processors.normalizer.config.std }}'
-      num_channels: 512
-      processor:
-        window_size: 4320
-    training:
-      multistep_input: 1
-      optimizer:
-        _target_: torch.optim.AdamW
-        betas: [0.9, 0.95]
-        weight_decay: 0.01
-      lr:
-        iterations: ${training.max_steps}
-        min: 3.e-7
-        rate: 0.0000625
-        warmup: 2
-      max_steps: 20
-      metrics:
-        datasets:
-          data:
-            - gh_500
-            - t_850
-            - u_850
-            - v_850
-      model_task: anemoi.training.train.tasks.GraphForecaster
-      scalers:
-        datasets:
-          data:
-            general_variable:
-              _target_: anemoi.training.losses.scalers.GeneralVariableLossScaler
-              weights:
-                accum_tp: 0.025
-                default: 1
-                gh: 12
-                q: 0.6
-                sp: 10
-                t: 6
-                u: 0.8
-                u10: 0.1
-                v: 0.5
-                v10: 0.1
-                w: 0.001
-            node_weights:
-              weight_frac_of_total: 0.1
-      training_loss:
-        datasets:
-          data:
-            _target_: anemoi.training.losses.MSELoss
-            ignore_nans: false
-            scalers: ["general_variable", "nan_mask_weights", "node_weights"]
-      variable_groups:
-        datasets:
-          data:
-            default: sfc
-            pl:
-              param:
-                - gh
-                - q
-                - t
-                - u
-                - v
-                - w
-  execution:
-    batchargs:
-      <<: *gpu-batchargs
-      export: false
-      memory: 128G
-      rundir: '{{ training.rundir }}'
-      walltime: '01:00:00'
-    envcmds:
-      - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate training
-      - set -ex
-      - export SLURM_GPUS_PER_NODE=1
-      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-    executable: anemoi-training train --config-name=training
-  remove:
-    # Dot-separated config keys paths to delete from the composed runtime config.
-    - graph.nodes.hidden.node_builder.grid
-  rundir: '{{ app.rundir }}/training'
 ufs2arco:
   dirs:
     cache: cache/X
     logs: logs/X
     zarr: X.zarr
   mover:
-    name: mpidatamover
+    name: datamover
+    batch_size: 2
   regridder:
     method: conservative
     reuse_weights: True
@@ -471,34 +136,22 @@ ufs2arco:
     sel:
       latitude: [89.9, -89.9]
   source:
-    analysis:
-      fhr:
-        start: 0
-        step: !int '{{ val.step }}'
-        end: 0
-      levels: !list '{{ val.levels }}'
-      t0:
-        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ val.step }}h'
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ val.variables.analysis }}'
-    forecast:
-      fhr:
-        start: 6
-        step: !int '{{ val.step }}'
-        end: 6
-      t0:
-        start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ val.step }}h'
-        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ val.variables.forecast }}'
+    fhr:
+      start: 0
+      step: 1
+      end: 0
+    levels: !list '{{ val.levels }}'
+    t0:
+      start: '{{ app.time.ic_start.strftime("%Y-%m-%dT%H") }}'
+      freq: '{{ val.step }}h'
+      end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
+    variables: !list '{{ val.variables }}'
   target:
     chunks:
       cell: -1
       ensemble: 1
       time: 1
       variable: -1
-    compute_temporal_residual_statistics: True
     forcings:
       - cos_latitude
       - sin_latitude
@@ -509,328 +162,9 @@ ufs2arco:
       - cos_local_time
       - sin_local_time
       - insolation
-    name: anemoi
+    multistep_input: 2
+    name: anemoi_inference_with_forcings
     sort_channels_by_levels: True
-    statistics_period:
-      start: '{{ ufs2arco.source.analysis.t0.start }}'
-      end: '{{ (app.time.start + app.time.step + val.statsdelta.aligned).strftime("%Y-%m-%dT%H") }}'
-val:
-  conda: '{{ app.base }}/conda'
-  data:
-    rundir: '{{ app.rundir }}/data'
-  filenames:
-    gfs_target_grid: global_one_degree.nc
-    hrrr_target_grid: hrrr_15km.nc
-    latent_mesh: latentx2.spongex1.combined.sorted.npz
-  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
-  statsdelta:
-    aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'
-    raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
-  step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
-  variables:
-    analysis:
-      # 3D Prognostic
-      - gh
-      - u
-      - v
-      - w
-      - t
-      - q
-      # 2D Prognostic
-      - sp
-      - u10
-      - v10
-      - t2m
-      - t_surface
-      - sh2
-      # Diagnostic
-      - u80
-      - v80
-      # Forcing
-      - lsm
-      - orog
-    forecast:
-      # Diagnostic
-      - accum_tp
-  visualization:
-    rundir: '{{ app.rundir }}/visualization'
-  vx:
-    rundir: '{{ app.rundir }}/vx'
-visualization:
-  common:
-    postwxvx: &postwxvx-common
-      start_date: !datetime '{{ app.time.inference_start }}'
-      end_date: !datetime '{{ app.time.inference_stop }}'
-      freq: '{{ app.time.freq }}'
-      leadtimes:
-        start: 0
-        end: 24
-        step: !int '{{ val.step }}'
-      variable_prefixes: # These names are from the wxvx output.
-        - 2t_heightAboveGround_0002
-        - 10u_heightAboveGround_0010
-        - 10v_heightAboveGround_0010
-        - gh_isobaricInhPa_0500
-        - t_isobaricInhPa_0850
-        - u_isobaricInhPa_0250
-        - v_isobaricInhPa_0250
-        - sp_surface
-    spatial_stat_plots:
-      add_states: false
-      cmap: RdBu_r
-      figsize: {h: 9.75, w: 4.875}
-      file_fontsize: 8.0
-      gridlines: false
-      stats_root: '{{ val.vx.rundir }}/grid2grid/%s/run/stats'
-      suptitle_y: 0.995
-      title_fontsize: 11.0
-    stats:
-      - RMSE
-    variables: # These names are from the postwxvx output.
-      - 2m_temperature
-      - 10m_zonal_wind
-      - 10m_meridional_wind
-      - 500hpa_geopotential_height
-      - 850hpa_temperature
-      - 250hpa_zonal_wind
-      - 250hpa_meridional_wind
-      - surface_pressure
-  grid2grid:
-    global:
-      visualization:
-        eagle_tools:
-          <<: *postwxvx-common
-          stat_prefix: grid_stat_nested_global
-          work_path: '{{ val.vx.rundir }}/grid2grid/global'
-        name: grid-global
-        rundir: '{{ val.visualization.rundir }}/grid2grid/global'
-        spatial_stat_plots: !dict '{{ visualization.common.spatial_stat_plots }}'
-        stats: !list '{{ visualization.common.stats }}'
-        variables: !list '{{ visualization.common.variables }}'
-    lam:
-      visualization:
-        eagle_tools:
-          <<: *postwxvx-common
-          stat_prefix: grid_stat_nested_lam
-          work_path: '{{ val.vx.rundir }}/grid2grid/lam'
-        name: grid-lam
-        rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
-        spatial_stat_plots: !dict '{{ visualization.common.spatial_stat_plots }}'
-        stats: !list '{{ visualization.common.stats }}'
-        variables: !list '{{ visualization.common.variables }}'
-  grid2obs:
-    global:
-      visualization:
-        eagle_tools:
-          <<: *postwxvx-common
-          stat_prefix: point_stat_nested_global
-          work_path: '{{ val.vx.rundir }}/grid2obs/global/'
-        name: obs-global
-        rundir: '{{ val.visualization.rundir }}/grid2obs/global'
-        stats: !list '{{ visualization.common.stats }}'
-        variables: !list '{{ visualization.common.variables }}'
-    lam:
-      visualization:
-        eagle_tools:
-          <<: *postwxvx-common
-          stat_prefix: point_stat_nested_lam
-          work_path: '{{ val.vx.rundir }}/grid2obs/lam/'
-        name: obs-lam
-        rundir: '{{ val.visualization.rundir }}/grid2obs/lam'
-        stats: !list '{{ visualization.common.stats }}'
-        variables: !list '{{ visualization.common.variables }}'
-vx:
-  common:
-    execution:
-      batchargs: &wxvx-common-batchargs
-        cores: 1
-        export: false
-        partition: '{{ app.partitions.netaccess }}'
-        walltime: '00:30:00'
-      envcmds:
-        - source {{ val.conda }}/etc/profile.d/conda.sh
-        - conda activate wxvx
-        - set -ex
-    paths_grid:
-      grids:
-        forecast: '{{ val.vx.rundir }}/TRUTH/EXTENT/grids/forecast'
-        truth: '{{ val.vx.rundir }}/TRUTH/EXTENT/grids/truth'
-      run: '{{ val.vx.rundir }}/TRUTH/EXTENT/run'
-    paths_obs:
-      grids:
-        forecast: '{{ val.vx.rundir }}/TRUTH/EXTENT/forecast'
-      obs: '{{ val.vx.rundir }}/TRUTH/EXTENT/obs'
-      run: '{{ val.vx.rundir }}/TRUTH/EXTENT/run'
-    wxvx: &wxvx-common
-      cycles:
-        start: !datetime '{{ app.time.inference_start }}'
-        step: 0
-        stop: !datetime '{{ app.time.inference_stop }}'
-      forecast:
-        coords:
-          latitude: latitude
-          level: level
-          longitude: longitude
-          time:
-            inittime: forecast_reference_time
-            validtime: time
-      leadtimes:
-        start: 0
-        step: '{{ app.time.step }}'
-        stop: '{{ app.time.leadtime }}'
-      meta:
-        workdir: '{{ val.vx.rundir }}/TRUTH/EXTENT'
-        grids: '{{ val.vx.rundir }}/TRUTH/EXTENT/grids'
-        post_files: '{{ val.vx.rundir }}/postprocessed_files/EXTENT'
-      variables:
-        t2m:
-          level_type: heightAboveGround
-          levels: [2]
-          name: 2t
-        gh:
-          level_type: isobaricInhPa
-          levels: [500]
-          name: gh
-        sp:
-          level_type: surface
-          name: sp
-        t:
-          level_type: isobaricInhPa
-          levels: [850]
-          name: t
-        u:
-          level_type: isobaricInhPa
-          levels: [250]
-          name: u
-        u10:
-          level_type: heightAboveGround
-          levels: [10]
-          name: 10u
-        v:
-          level_type: isobaricInhPa
-          levels: [250]
-          name: v
-        v10:
-          level_type: heightAboveGround
-          levels: [10]
-          name: 10v
-  grid2grid:
-    global:
-      platform: !dict '{{ app.platform }}'
-      wxvx: # config for the EAGLE driver
-        execution:
-          batchargs:
-            <<: *wxvx-common-batchargs
-            rundir: '{{ vx.grid2grid.global.wxvx.rundir }}'
-          envcmds: !list '{{ vx.common.execution.envcmds }}'
-          executable: wxvx -c wxvx-grid2grid-global.yaml -t plots -f
-        name: grid2grid-global
-        rundir: '{{ val.vx.rundir }}/grid2grid/global'
-        wxvx: # config for the wxvx application
-          <<: *wxvx-common
-          truth:
-            name: GFS
-            type: grid
-            url: https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{{ yyyymmdd }}/{{ hh }}/atmos/gfs.t{{ hh }}z.pgrb2.0p25.f{{ "%03d" % fh }}
-          forecast:
-            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
-            name: nested_global
-            # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
-            projection:
-              proj: latlon
-          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
-          ncdiffs: true
-          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
-          regrid:
-            method: NEAREST
-            to: forecast
-    lam:
-      platform: !dict '{{ app.platform }}'
-      wxvx: # config for the EAGLE driver
-        execution:
-          batchargs:
-            <<: *wxvx-common-batchargs
-            rundir: '{{ vx.grid2grid.lam.wxvx.rundir }}'
-          envcmds: !list '{{ vx.common.execution.envcmds }}'
-          executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
-        name: grid2grid-lam
-        rundir: '{{ val.vx.rundir }}/grid2grid/lam'
-        wxvx: # config for the wxvx application
-          <<: *wxvx-common
-          truth:
-            name: HRRR
-            type: grid
-            url: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.{{ yyyymmdd }}/conus/hrrr.t{{ hh }}z.wrfprsf{{ "%02d" % fh }}.grib2
-          forecast:
-            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
-            name: nested_lam
-            # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
-            projection:
-              a: 6371229
-              b: 6371229
-              lat_0: 38.5
-              lat_1: 38.5
-              lat_2: 38.5
-              lon_0: 262.5
-              proj: lcc
-          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
-          ncdiffs: !bool '{{ vx.grid2grid.global.wxvx.wxvx.ncdiffs }}'
-          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
-          regrid: !dict '{{ vx.grid2grid.global.wxvx.wxvx.regrid }}'
-  grid2obs:
-    global:
-      platform: !dict '{{ app.platform }}'
-      wxvx: # config for the EAGLE driver
-        execution:
-          batchargs:
-            <<: *wxvx-common-batchargs
-            rundir: '{{ vx.grid2obs.global.wxvx.rundir }}'
-          envcmds: !list '{{ vx.common.execution.envcmds }}'
-          executable: wxvx -c wxvx-grid2obs-global.yaml -t plots -f
-        name: grid2obs-global
-        rundir: '{{ val.vx.rundir }}/grid2obs/global'
-        wxvx: # config for the wxvx application
-          <<: *wxvx-common
-          truth:
-            name: PREPBUFR
-            type: point
-            url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
-          forecast:
-            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
-            name: '{{ vx.grid2grid.global.wxvx.wxvx.forecast.name }}'
-            # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
-            projection: !dict '{{ vx.grid2grid.global.wxvx.wxvx.forecast.projection }}'
-          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
-          paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
-          regrid:
-            method: BILIN
-            to: G104
-    lam:
-      platform: !dict '{{ app.platform }}'
-      wxvx: # config for the EAGLE driver
-        execution:
-          batchargs:
-            <<: *wxvx-common-batchargs
-            rundir: '{{ vx.grid2obs.lam.wxvx.rundir }}'
-          envcmds: !list '{{ vx.common.execution.envcmds }}'
-          executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
-        name: grid2obs-lam
-        rundir: '{{ val.vx.rundir }}/grid2obs/lam'
-        wxvx: # config for the wxvx application
-          <<: *wxvx-common
-          truth: !dict '{{ vx.grid2obs.global.wxvx.wxvx.truth }}'
-          forecast:
-            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
-            name: '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.name }}'
-            # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
-            projection: !dict '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.projection }}'
-          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
-          paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
-          regrid: !dict '{{ vx.grid2obs.global.wxvx.wxvx.regrid }}'
 zarrs:
   common:
     envcmds:
@@ -839,11 +173,11 @@ zarrs:
       - set -ex
     execution:
       batchargs:
-        cores: 4
+        cores: 1
         export: false
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
-        walltime: '00:10:00'
+        walltime: '00:20:00'
       envcmds: !list '{{ zarrs.common.envcmds }}'
       mpiargs: []
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
@@ -860,14 +194,8 @@ zarrs:
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "gfs") }}'
         mover: !dict '{{ ufs2arco.mover }}'
-        multisource:
-          - source: !dict '{{ dict(ufs2arco.source.analysis, name="gfs_archive", slices=ufs2arco.slices) }}'
-          - source: !dict '{{ dict(ufs2arco.source.forecast, name="gfs_archive", slices=ufs2arco.slices) }}'
+        source: !dict '{{ dict(ufs2arco.source, name="gfs_archive", slices=ufs2arco.slices) }}'
         target: !dict '{{ ufs2arco.target }}'
-        transforms:
-          horizontal_regrid:
-            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_719x1440_180x360.nc") }}'
-            target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
     platform: !dict '{{ app.platform }}'
   hrrr:
     zarr:
@@ -882,18 +210,38 @@ zarrs:
       ufs2arco:
         directories: !dict '{{ ufs2arco.dirs | replace("X", "hrrr") }}'
         mover: !dict '{{ ufs2arco.mover }}'
-        multisource:
-          - source: !dict '{{ dict(ufs2arco.source.analysis, name="aws_hrrr_archive") }}'
-            transforms:
-              rotate_vectors:
-                vector_pairs:
-                  - ['u', 'v']
-                  - ['u10', 'v10']
-                  - ['u80', 'v80']
-          - source: !dict '{{ dict(ufs2arco.source.forecast, name="aws_hrrr_archive") }}'
+        source: !dict '{{ dict(ufs2arco.source, name="aws_hrrr_archive") }}'
         target: !dict '{{ ufs2arco.target }}'
         transforms:
           horizontal_regrid:
-            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
+            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_hrrr_weights.nc") }}'
             target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
+          rotate_vectors:
+            vector_pairs:
+              - ['u', 'v']
+              - ['u10', 'v10']
     platform: !dict '{{ app.platform }}'
+val:
+  conda: '{{ app.base }}/conda'
+  data:
+    rundir: '{{ app.rundir }}/data'
+  filenames:
+    gfs_target_grid: global_one_degree.nc
+    hrrr_target_grid: hrrr_6km.nc
+  levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+  step: !int '{{ (app.time.freq.total_seconds() / 3600) | int }}'
+  variables:
+      - gh
+      - u
+      - v
+      - w
+      - t
+      - q
+      - sp
+      - u10
+      - v10
+      - t2m
+      - t_surface
+      - sh2
+      - lsm
+      - orog

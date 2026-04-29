@@ -17,9 +17,7 @@
             }
           },
           "required": [
-            "gfs_target_grid",
-            "hrrr_target_grid",
-            "latent_mesh"
+            "hrrr_target_grid"
           ],
           "type": "object"
         },
@@ -28,8 +26,7 @@
         },
 	"conus_grid_resolution_km": {
   		"type": "integer",
-  		"enum": [6, 15],
-  		"default": 15
+  		"enum": [6, 15]
 	}
       },
       "required": [
