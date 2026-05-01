@@ -17,6 +17,15 @@ app:
     start: !datetime 2022-02-01T00
     step: !timedelta 6
     stop: !datetime 2022-02-05T12
+  nrt:
+    multistep_input_offset: !timedelta 6 # for anemoi models that require more than one timestep for IC
+    now: !datetime '{{ "NOW" | env }}'
+    nrt_ic_start: !datetime '{{ app.nrt.nrt_inference_start - app.nrt.multistep_input_offset }}'
+    nrt_inference_start: !datetime '{{ app.nrt.now - app.nrt.offset - app.nrt.nrt_latency }}'
+    nrt_latency: !timedelta 6
+    nrt_leadtime: !timedelta 48
+    offset: !timedelta '0:0:{{ (app.nrt.now.timestamp() % 21600) | int }}'
+    stop: !datetime '{{ app.nrt.nrt_inference_start + app.nrt.nrt_leadtime }}'
 grids_and_meshes:
   filenames:
     gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'

@@ -9,6 +9,11 @@ VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 INSTALLDIR ?= conda
 SHELL      := $(shell which bash)
 
+NOW = $(shell date -uIseconds)
+ifeq ($(nrt),true)
+export NOW
+endif
+
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
 envloop  = @set -e && for env in $(PACKAGE) $(ENVS); do $(make) env=$$env $(1); done
