@@ -80,7 +80,7 @@ realize:
 	$(call activate,base)
 	@(set -x && uw config realize$(VERBOSE) --input-file $(config))
 
-rocoto: env config
+rocoto:
 	$(call check,$(compose),compose)
 	$(call activate,base)
 	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),eagle/rocoto/rocoto_$(x).yaml) > rocoto_run.yaml)
