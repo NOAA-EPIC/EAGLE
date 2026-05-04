@@ -15,6 +15,8 @@ app:
     stop: !datetime '{{ app.nrt.stop }}'
     leadtime: !int '{{ (app.nrt.nrt_leadtime.total_seconds() / 3600) | int }}'
   experiment_name: 'nrt/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
+inference:
+  checkpoint_dir: !remove
 training: !remove
 ufs2arco:
   mover:
@@ -34,7 +36,7 @@ ufs2arco:
       end: '{{ (app.time.stop).strftime("%Y-%m-%dT%H") }}'
     variables: !list '{{ val.variables }}'
   target:
-    name: anemoi_inference_with_forcing
+    name: anemoi_inference_with_forcings
     multistep_input: !int '{{ app.time.multistep_input }}' 
     statistics_period: !remove
 val:
