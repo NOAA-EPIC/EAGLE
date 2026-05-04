@@ -8,33 +8,25 @@ workflow:
   log:
     value: '{{ common.rocotodir }}/rocoto.log'
   tasks:
-#    task_env:
-#      attrs:
-#        cycledefs: *cycledef
-#      join: '{{ common.rocotodir }}/env.slurm'
-#    task_config:
-#      attrs:
-#        cycledefs: *cycledef
-#      join: '{{ common.rocotodir }}/config.slurm'
     task_grids_and_meshes:
       attrs:
         cycledefs: *cycledef
-      command: "make grids-and-meshes config=eagle.yaml"
+      command: 'make grids-and-meshes config={{ common.config }}'
       join: '{{ common.rocotodir }}/grids_and_meshes.slurm'
     task_zarr_gfs:
       attrs:
         cycledefs: *cycledef
-      command: "make zarr-gfs config=eagle.yaml"
+      command: 'make zarr-gfs config={{ common.config }}'
       join: '{{ common.rocotodir }}/zarr_gfs.slurm'
     task_zarr_hrrr:
       attrs:
         cycledefs: *cycledef
-      command: "make zarr-hrrr config=eagle.yaml"
+      command: 'make zarr-hrrr config={{ common.config }}'
       join: '{{ common.rocotodir }}/zarr_hrrr.slurm'
     task_training:
       attrs:
         cycledefs: *cycledef
-      command: "make training config=eagle.yaml"
+      command: 'make training config={{ common.config }}'
       join: '{{ common.rocotodir }}/training.slurm'
       dependency:
         and:
@@ -50,7 +42,7 @@ workflow:
     task_inference:
       attrs:
         cycledefs: *cycledef
-      command: "make inference config=eagle.yaml"
+      command: 'make inference config={{ common.config }}'
       join: '{{ common.rocotodir }}/inference.slurm'
       dependency:
         and:
@@ -60,7 +52,7 @@ workflow:
     task_vx_grid_global:
       attrs:
         cycledefs: *cycledef
-      command: "make vx-grid-global config=eagle.yaml"
+      command: 'make vx-grid-global config={{ common.config }}'
       join: '{{ common.rocotodir }}/vx_grid_global.slurm'
       dependency:
         and:
@@ -70,7 +62,7 @@ workflow:
     task_vx_grid_lam:
       attrs:
         cycledefs: *cycledef
-      command: "make vx-grid-lam config=eagle.yaml"
+      command: 'make vx-grid-lam config={{ common.config }}'
       join: '{{ common.rocotodir }}/vx_grid_lam.slurm'
       dependency:
         and:
@@ -80,7 +72,7 @@ workflow:
     task_vx_obs_global:
       attrs:
         cycledefs: *cycledef
-      command: "make vx-obs-global config=eagle.yaml"
+      command: 'make vx-obs-global config={{ common.config }}'
       join: '{{ common.rocotodir }}/vx_obs_global.slurm'
       dependency:
         and:
@@ -90,7 +82,7 @@ workflow:
     task_vx_obs_lam:
       attrs:
         cycledefs: *cycledef
-      command: "make vx-obs-lam config=eagle.yaml"
+      command: 'make vx-obs-lam config={{ common.config }}'
       join: '{{ common.rocotodir }}/vx_obs_lam.slurm'
       dependency:
         and:
@@ -100,7 +92,7 @@ workflow:
     task_vis_grid_global:
       attrs:
         cycledefs: *cycledef
-      command: "make vis-grid-global config=eagle.yaml"
+      command: 'make vis-grid-global config={{ common.config }}'
       join: '{{ common.rocotodir }}/vis_grid_global.slurm'
       dependency:
         and:
@@ -110,7 +102,7 @@ workflow:
     task_vis_grid_lam:
       attrs:
         cycledefs: *cycledef
-      command: "make vis-grid-lam config=eagle.yaml"
+      command: 'make vis-grid-lam config={{ common.config }}'
       join: '{{ common.rocotodir }}/vis_grid_lam.slurm'
       dependency:
         and:
@@ -120,7 +112,7 @@ workflow:
     task_vis_obs_global:
       attrs:
         cycledefs: *cycledef
-      command: "make vis-obs-global config=eagle.yaml"
+      command: 'make vis-obs-global config={{ common.config }}'
       join: '{{ common.rocotodir }}/vis_obs_global.slurm'
       dependency:
         and:
@@ -130,7 +122,7 @@ workflow:
     task_vis_obs_lam:
       attrs:
         cycledefs: *cycledef
-      command: "make vis-obs-lam config=eagle.yaml"
+      command: 'make vis-obs-lam config={{ common.config }}'
       join: '{{ common.rocotodir }}/vis_obs_lam.slurm'
       dependency:
         and:

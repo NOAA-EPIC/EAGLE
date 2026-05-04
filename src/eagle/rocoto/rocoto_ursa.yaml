@@ -1,5 +1,6 @@
 common:
   rocotodir: /scratch4/NCEPDEV/nems/David.Burrows/eagle/apr28/EAGLE/src/slurm
+  config: eagle.yaml
 common_netaccess: &common_netaccess
   nodes: 1:ppn=1
   partition: u1-service
@@ -21,14 +22,6 @@ workflow:
   attrs:
     scheduler: slurm
   tasks:
-#    task_env:
-#      <<: *common_netaccess
-#      command: "make env cudascript=ursa"
-#      memory: 10G
-#      walltime: 01:00:00
-#    task_config:
-#      <<: *common_cpu
-#      command: "make config compose=base:ursa >eagle.yaml"
     task_grids_and_meshes:
       <<: *common_netaccess
     task_zarr_gfs:
