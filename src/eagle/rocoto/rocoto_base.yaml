@@ -1,0 +1,139 @@
+workflow:
+  attrs:
+    realtime: false
+  cycledef:
+    - attrs:
+        group: &cycledef 6hrly
+      spec: 202202010000 202202010000 06:00:00
+  log:
+    value: '{{ common.rocotodir }}/rocoto.log'
+  tasks:
+#    task_env:
+#      attrs:
+#        cycledefs: *cycledef
+#      join: '{{ common.rocotodir }}/env.slurm'
+#    task_config:
+#      attrs:
+#        cycledefs: *cycledef
+#      join: '{{ common.rocotodir }}/config.slurm'
+    task_grids_and_meshes:
+      attrs:
+        cycledefs: *cycledef
+      command: "make grids-and-meshes config=eagle.yaml"
+      join: '{{ common.rocotodir }}/grids_and_meshes.slurm'
+    task_zarr_gfs:
+      attrs:
+        cycledefs: *cycledef
+      command: "make zarr-gfs config=eagle.yaml"
+      join: '{{ common.rocotodir }}/zarr_gfs.slurm'
+    task_zarr_hrrr:
+      attrs:
+        cycledefs: *cycledef
+      command: "make zarr-hrrr config=eagle.yaml"
+      join: '{{ common.rocotodir }}/zarr_hrrr.slurm'
+    task_training:
+      attrs:
+        cycledefs: *cycledef
+      command: "make training config=eagle.yaml"
+      join: '{{ common.rocotodir }}/training.slurm'
+      dependency:
+        and:
+          taskdep_grids_and_meshes:
+            attrs:
+              task: grids_and_meshes
+          taskdep_zarr_gfs:
+            attrs:
+              task: zarr_gfs
+          taskdep_zarr_hrrr:
+            attrs:
+              task: zarr_hrrr
+    task_inference:
+      attrs:
+        cycledefs: *cycledef
+      command: "make inference config=eagle.yaml"
+      join: '{{ common.rocotodir }}/inference.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: training
+    task_vx_grid_global:
+      attrs:
+        cycledefs: *cycledef
+      command: "make vx-grid-global config=eagle.yaml"
+      join: '{{ common.rocotodir }}/vx_grid_global.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: inference
+    task_vx_grid_lam:
+      attrs:
+        cycledefs: *cycledef
+      command: "make vx-grid-lam config=eagle.yaml"
+      join: '{{ common.rocotodir }}/vx_grid_lam.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: inference
+    task_vx_obs_global:
+      attrs:
+        cycledefs: *cycledef
+      command: "make vx-obs-global config=eagle.yaml"
+      join: '{{ common.rocotodir }}/vx_obs_global.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: inference
+    task_vx_obs_lam:
+      attrs:
+        cycledefs: *cycledef
+      command: "make vx-obs-lam config=eagle.yaml"
+      join: '{{ common.rocotodir }}/vx_obs_lam.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: inference
+    task_vis_grid_global:
+      attrs:
+        cycledefs: *cycledef
+      command: "make vis-grid-global config=eagle.yaml"
+      join: '{{ common.rocotodir }}/vis_grid_global.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: vx_grid_global
+    task_vis_grid_lam:
+      attrs:
+        cycledefs: *cycledef
+      command: "make vis-grid-lam config=eagle.yaml"
+      join: '{{ common.rocotodir }}/vis_grid_lam.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: vx_grid_lam
+    task_vis_obs_global:
+      attrs:
+        cycledefs: *cycledef
+      command: "make vis-obs-global config=eagle.yaml"
+      join: '{{ common.rocotodir }}/vis_obs_global.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: vx_obs_global
+    task_vis_obs_lam:
+      attrs:
+        cycledefs: *cycledef
+      command: "make vis-obs-lam config=eagle.yaml"
+      join: '{{ common.rocotodir }}/vis_obs_lam.slurm'
+      dependency:
+        and:
+          taskdep:
+            attrs:
+              task: vx_obs_lam

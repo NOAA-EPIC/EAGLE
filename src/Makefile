@@ -3,7 +3,7 @@ ENVS     = data inference training visualization wxvx
 HELPERS  = vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
-TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
+TOOLING  = config devenv env format lint realize rocoto shellcheck test typecheck unittest validate yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
 INSTALLDIR ?= conda
@@ -79,6 +79,14 @@ realize:
 	$(call check,$(config),config)
 	$(call activate,base)
 	@(set -x && uw config realize$(VERBOSE) --input-file $(config))
+
+rocoto: env config
+	$(call check,$(compose),compose)
+	$(call activate,base)
+	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),eagle/rocoto/rocoto_$(x).yaml) > rocoto_run.yaml)
+#	@(set -x && uw config validate --input-file rocoto_run.yaml --schema-file eagle/rocoto/rocoto.jsonschema)
+	@(set -x && uw rocoto realize --config-file rocoto_run.yaml --output-file rocoto_run.xml)
+#	@(set -x && uw rocoto iterate --cycle 2022-09-29T00 -d rocoto_run.db -w rocoto_run.xml --task env)
 
 shellcheck:
 	$(call activate,base)

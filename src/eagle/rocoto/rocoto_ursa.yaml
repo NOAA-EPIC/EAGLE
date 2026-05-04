@@ -1,0 +1,57 @@
+common:
+  rocotodir: /scratch4/NCEPDEV/nems/David.Burrows/eagle/apr28/EAGLE/src/slurm
+common_netaccess: &common_netaccess
+  nodes: 1:ppn=1
+  partition: u1-service
+  queue: batch
+  walltime: 00:10:00
+common_cpu: &common_cpu
+  nodes: 1:ppn=1
+  partition: u1-compute
+  queue: batch
+  walltime: 00:10:00
+common_gpu: &common_gpu
+  nodes: 1:ppn=1
+  partition: u1-h100
+  queue: gpuwf
+  native:
+        - "--gres=gpu:h100:1"
+  walltime: 00:20:00
+workflow:
+  attrs:
+    scheduler: slurm
+  tasks:
+#    task_env:
+#      <<: *common_netaccess
+#      command: "make env cudascript=ursa"
+#      memory: 10G
+#      walltime: 01:00:00
+#    task_config:
+#      <<: *common_cpu
+#      command: "make config compose=base:ursa >eagle.yaml"
+    task_grids_and_meshes:
+      <<: *common_netaccess
+    task_zarr_gfs:
+      <<: *common_netaccess
+    task_zarr_hrrr:
+      <<: *common_netaccess
+    task_training:
+      <<: *common_gpu
+    task_inference:
+      <<: *common_gpu
+    task_vx_grid_global:
+      <<: *common_cpu
+    task_vx_grid_lam:
+      <<: *common_cpu
+    task_vx_obs_global:
+      <<: *common_cpu
+    task_vx_obs_lam:
+      <<: *common_cpu
+    task_vis_grid_global:
+      <<: *common_cpu
+    task_vis_grid_lam:
+      <<: *common_cpu
+    task_vis_obs_global:
+      <<: *common_cpu
+    task_vis_obs_lam:
+      <<: *common_cpu
