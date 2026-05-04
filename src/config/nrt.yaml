@@ -1,0 +1,76 @@
+app:
+  nrt:
+    multistep_input_offset: !timedelta 6
+    now: !datetime '{{ "NOW" | env }}'
+    nrt_ic_start: !datetime '{{ app.nrt.nrt_inference_start - app.nrt.multistep_input_offset }}'
+    nrt_inference_start: !datetime '{{ app.nrt.now - app.nrt.offset - app.nrt.nrt_latency }}'
+    nrt_latency: !timedelta 6
+    nrt_leadtime: !timedelta 48
+    offset: !timedelta '0:0:{{ (app.nrt.now.timestamp() % 21600) | int }}'
+    stop: !datetime '{{ app.nrt.nrt_inference_start + app.nrt.nrt_leadtime }}'
+  time:
+    inference_start: !datetime '{{ app.nrt.nrt_inference_start }}'
+    inference_stop: !datetime '{{ app.time.inference_start }}'
+    start: !datetime '{{ app.nrt.nrt_ic_start }}'
+    stop: !datetime '{{ app.nrt.stop }}'
+    leadtime: !int '{{ (app.nrt.nrt_leadtime.total_seconds() / 3600) | int }}'
+  experiment_name: 'nrt/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
+training: !remove
+ufs2arco:
+  mover:
+    name: datamover
+    batch_size: 2
+  source:
+    analysis: !remove
+    forecast: !remove
+    fhr:
+      start: 0
+      step: !int '{{ val.step }}'
+      end: 0
+    levels: !list '{{ val.levels }}'
+    t0:
+      start: '{{ (app.time.start).strftime("%Y-%m-%dT%H") }}'
+      freq: '{{ val.step }}h'
+      end: '{{ (app.time.stop).strftime("%Y-%m-%dT%H") }}'
+    variables: !list '{{ val.variables }}'
+  target:
+    name: anemoi_inference_with_forcing
+    multistep_input: !int '{{ app.time.multistep_input }}' 
+    statistics_period: !remove
+val:
+  statsdelta: !remove
+  variables:
+      - gh
+      - u
+      - v
+      - w
+      - t
+      - q
+      - sp
+      - u10
+      - v10
+      - t2m
+      - t_surface
+      - sh2
+      - lsm
+      - orog
+zarrs:
+  common:
+    execution:
+      batchargs:
+        cores: 1
+  gfs:
+    zarr:
+      ufs2arco:
+        multisource: !remove
+        source: !dict '{{ dict(ufs2arco.source, name="gfs_archive", slices=ufs2arco.slices) }}'
+  hrrr:
+    zarr:
+      ufs2arco:
+        multisource: !remove
+        source: !dict '{{ dict(ufs2arco.source, name="aws_hrrr_archive") }}'
+        transforms:
+          rotate_vectors:
+            vector_pairs:
+              - ['u', 'v']
+              - ['u10', 'v10']

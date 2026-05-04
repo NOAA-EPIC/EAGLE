@@ -8,8 +8,8 @@ VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
 INSTALLDIR ?= conda
 SHELL      := $(shell which bash)
+NOW        := $(shell date -uIseconds)
 
-NOW = $(shell date -uIseconds)
 ifeq ($(nrt),true)
 export NOW
 endif
@@ -38,7 +38,9 @@ config:
 	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
-	@$(make) grids-and-meshes
+ifneq ($(skip_grids),true)
+	@$(MAKE) grids-and-meshes
+endif
 	@$(make) zarr-gfs
 	@$(make) zarr-hrrr
 
