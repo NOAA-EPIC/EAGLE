@@ -1,3 +1,5 @@
+# yamllint disable rule:line-length
+
 app:
   nrt:
     multistep_input_offset: !timedelta 6
