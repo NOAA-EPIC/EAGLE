@@ -8,11 +8,9 @@ VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
 INSTALLDIR ?= conda
 SHELL      := $(shell which bash)
-NOW        := $(shell date -uIseconds)
 
-ifeq ($(nrt),true)
+NOW        := $(shell date -uIseconds)
 export NOW
-endif
 
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
@@ -38,9 +36,7 @@ config:
 	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
-ifneq ($(skip_grids),true)
 	@$(MAKE) grids-and-meshes
-endif
 	@$(make) zarr-gfs
 	@$(make) zarr-hrrr
 
