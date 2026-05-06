@@ -4,6 +4,7 @@ channels:
   - oar-gsl
   - ufs-community
 dependencies:
+  - pip
   - python 3.13
   - uwtools 2.14.*
   - wxvx >=0.7.2

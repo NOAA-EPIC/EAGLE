@@ -8,6 +8,7 @@ dependencies:
   - mpi4py 4.1.*
   - numpy 1.26.4
   - pandas 2.3.3
+  - pip
   - setuptools 81.0.*
   - types-pyyaml
   - ufs2arco 0.19.*

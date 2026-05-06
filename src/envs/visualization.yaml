@@ -6,6 +6,7 @@ dependencies:
   - cartopy 0.25.*
   - matplotlib 3.10.*
   - numpy 2.2.6
+  - pip
   - python 3.13
   - uwtools 2.14.*
   - xarray 2026.2.0
