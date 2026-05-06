@@ -10,4 +10,4 @@ dependencies:
   - wxvx >=0.7.2
   - xesmf 0.8.*
   - pip:
-      - eagle-tools
+      - eagle-tools==0.8.1
