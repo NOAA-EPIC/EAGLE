@@ -15,7 +15,7 @@ export NOW
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
 checkenv = $(if $(filter $(PACKAGE),$(1)),base,$(if $(filter inference training,$(1)),anemoi,$(1)))
-checkloop = @set -e && for pkg in $(PACKAGE) $(MODULES); do $(make) pkg=$$pkg $(1); done
+modloop  = @set -e && for pkg in $(PACKAGE) $(MODULES); do $(make) pkg=$$pkg $(1); done
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
@@ -76,7 +76,7 @@ ifdef pkg
 	$(call activate,$(call checkenv,$(pkg)))
 	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
 else
-	$(call checkloop,lint)
+	$(call modloop,lint)
 endif
 
 realize:
@@ -106,7 +106,7 @@ ifdef pkg
 	$(call activate,$(call checkenv,$(pkg)))
 	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
 else
-	$(call checkloop,typecheck)
+	$(call modloop,typecheck)
 endif
 
 unittest:
@@ -115,7 +115,7 @@ ifdef pkg
 	$(call activate,$(call checkenv,$(pkg)))
 	pytest $(if $(filter $(PACKAGE),$(pkg)),,--cov=$(PACKAGE).$(pkg) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
 else
-	$(call checkloop,unittest)
+	$(call modloop,unittest)
 endif
 
 validate:
