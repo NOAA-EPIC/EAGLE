@@ -1,0 +1,76 @@
+common: &common
+  nodes: 1:ppn=1
+  walltime: 00:02:00
+  account: '{{ app.platform.account }}'
+  partition: '{{ app.partitions.compute }}'
+  queue: batch
+  command: 'make {{ jobname }} config=eagle.yaml'
+  join: '{{ app.base }}/{{ app.platform.scheduler }}/{{ jobname }}.{{ app.platform.scheduler }}'
+workflow:
+  attrs:
+    realtime: false
+    scheduler: '{{ app.platform.scheduler }}'
+  cycledef: 
+    - attrs: 
+        group: cyc
+      spec: '{{ app.time.inference_start.strftime("%Y%m%d%H%M") }} {{ app.time.inference_start.strftime("%Y%m%d%H%M") }} 06:00:00'
+  log:
+    value: '{{ app.base }}/{{ app.platform.scheduler }}/rocoto.{{ app.platform.scheduler }}'
+  tasks:
+    task_grids_and_meshes:
+      <<: *common
+      jobname: grids-and-meshes
+      partition: '{{ app.partitions.netaccess }}'
+    task_zarr_gfs:
+      <<: *common
+      jobname: zarr-gfs
+      dependency:
+        taskdep_grids_and_meshes:
+          attrs:
+            task: grids_and_meshes
+    task_zarr_hrrr:
+      <<: *common
+      jobname: zarr-hrrr
+      dependency:
+        taskdep_grids_and_meshes:
+          attrs: 
+            task: grids_and_meshes
+    task_training:
+      <<: *common
+      jobname: training
+      dependency:
+        and:
+          taskdep_grids_and_meshes:
+            attrs:
+              task: grids_and_meshes
+          datadep_zarr_gfs:
+            value: 'run/{{ app.experiment_name }}/data/runscript.zarr-gfs.done'
+          datadep_zarr_hrrr:
+            value: 'run/{{ app.experiment_name }}/data/runscript.zarr-hrrr.done'
+    task_inference:
+      <<: *common
+      jobname: inference
+      dependency:
+          datadep_training:
+            value: 'run/{{ app.experiment_name }}/training/runscript.training.done'
+    metatask_vx:
+      var:
+        extent: global global lam lam
+        metric: grid obs grid obs
+      task_vx_#metric#_#extent#:
+        <<: *common
+        jobname: vx-#metric#-#extent#
+        dependency:
+          datadep_inference:
+            value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'
+    metatask_vis:
+      var:
+        extent: global global lam lam
+        metric: grid obs grid obs 
+      task_vis_#metric#_#extent#:
+        <<: *common
+        jobname: vis-#metric#-#extent#
+        dependency:
+          metataskdep:
+            attrs:
+              metatask: vx

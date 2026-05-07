@@ -3,7 +3,7 @@ ENVS     = data inference training visualization wxvx
 HELPERS  = vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
-TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
+TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate workflow yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
 INSTALLDIR ?= conda
@@ -164,6 +164,12 @@ vx-obs-global:
 
 vx-obs-lam:
 	@$(make) vx truth=obs extent=lam
+
+workflow:
+	$(call check,$(config),config)
+	$(call activate,base)
+	@(set -x && uw rocoto realize -c $(config) -o eagle.xml)
+	@(set -x && uw rocoto iterate -w eagle.xml -d eagle.db --cycle 2021-02-01T12 --task grids_and_meshes)
 
 yamllint:
 	$(call activate,base)

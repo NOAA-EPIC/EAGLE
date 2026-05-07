@@ -11,6 +11,7 @@ app:
       queue: gpuwf
   partitions:
     netaccess: u1-service
+    compute: u1-compute
   platform: &platform
     account: epic
     scheduler: slurm
