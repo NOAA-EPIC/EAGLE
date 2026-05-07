@@ -5,6 +5,7 @@ channels:
 dependencies:
   - flash-attn 2.8.*
   - numpy 2.2.6.*
+  - pip
   - python 3.12
   - setuptools 81.0.*
   - uwtools 2.14.*
