@@ -14,11 +14,18 @@ export NOW
 
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
-checkenv = $(if $(filter $(PACKAGE),$(1)),base,$(if $(filter inference training,$(1)),anemoi,$(1)))
-modloop  = @set -e && for pkg in $(PACKAGE) $(MODULES); do $(make) pkg=$$pkg $(1); done
+modenv   = $(env4mod_$(1))
+modloop  = @set -e && for mod in $(PACKAGE) $(MODULES); do $(make) mod=$$mod $(1); done
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
+
+env4mod_data          = data
+env4mod_$(PACKAGE)    = base
+env4mod_inference     = anemoi
+env4mod_training      = anemoi
+env4mod_visualization = visualization
+env4mod_wxvx          = wxvx
 
 .ONESHELL:
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
@@ -71,10 +78,10 @@ else
 endif
 
 lint:
-ifdef pkg
-	@echo "=> Linting package: $$pkg"
-	$(call activate,$(call checkenv,$(pkg)))
-	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
+ifdef mod
+	@echo "=> Linting package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
 	$(call modloop,lint)
 endif
@@ -101,19 +108,19 @@ else
 endif
 
 typecheck:
-ifdef pkg
-	@echo "=> Typechecking package: $$pkg"
-	$(call activate,$(call checkenv,$(pkg)))
-	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
+ifdef mod
+	@echo "=> Typechecking package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
 	$(call modloop,typecheck)
 endif
 
 unittest:
-ifdef pkg
-	@echo "=> Unit testing package: $$pkg"
-	$(call activate,$(call checkenv,$(pkg)))
-	pytest $(if $(filter $(PACKAGE),$(pkg)),,--cov=$(PACKAGE).$(pkg) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
+ifdef mod
+	@echo "=> Unit testing package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	pytest $(if $(filter $(PACKAGE),$(mod)),,--cov=$(PACKAGE).$(mod) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
 	$(call modloop,unittest)
 endif
