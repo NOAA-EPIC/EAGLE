@@ -109,41 +109,43 @@ Building and Running :term:`EAGLE`
 
    For the grid-based ``vis-grid-global`` and ``vis-grid-lam`` targets, additional error plots (forecast vs truth differences) will be created under ``run/<expname>/visualization/grid2grid/{global,lam}/plots-spatial-stats/``. These plots depend on 1. The config value at key-path ``vx.grid2grid.{global,lam}.wxvx.wxvx.ncdiffs`` being set to ``true``, which instructs MET to produce netCDF difference files during verification; and 2. The config block at key-path ``visualization.grid2grid.{global,lam}.visualization.spatial_stat_plots``, which enables and configures plot generation, being present.
 
-   #. Run inference in near-real-time (NRT)
+#. Run inference in near-real-time (NRT)
 
-   1. Create the EAGLE NRT config 
+   a. Create the EAGLE NRT config 
    
    .. code-block:: bash
 
       make config compose=base:ursa:nrt > nrt-composed.yaml
 
-   2. Set the ``app.base`` value in ``nrt-composed.yaml`` to the absolute path to the current ``src/`` directory.
+   b. Set the ``app.base`` value in ``nrt-composed.yaml`` to the absolute path to the current ``src/`` directory.
 
    This should match the path used when generating the main EAGLE config above.
    
    Two additional paths may require attention:
-      - inference.checkpoint_dir
-      - grids-and-meshes.rundir
+      - inference.anemoi.checkpoint_dir
+      - grids_and_meshes.rundir
 
    If you are following only the quickstart workflow, you do not need to modify these values. The config automatically pulls both paths from 
    the quickstart run. However, if you ran multiple experiments or stored outputs in a different location, update these paths so they point 
    to the correct directories.
 
-   3. Realize the EAGLE NRT config
+   c. Realize the EAGLE NRT config
 
    .. code-block:: bash
    
       make realize config=nrt-composed.yaml > nrt.yaml
 
-   This creates the final config to begin a NRT inference run.
-
-   4. Load current initial conditions
+   This creates the final config to begin a NRT run. It is required because it freezes the ``NOW`` environment 
+   variable across the entire configuration. Since jobs may be submitted at different times, this ensures a 
+   consistent timestamp is used throughout the run.
+   
+   d. Load current initial conditions
    
    .. code-block:: bash
       
       make data config=nrt.yaml
 
-   5. Run inference
+   e. Run inference
 
    .. code-block:: bash
       
