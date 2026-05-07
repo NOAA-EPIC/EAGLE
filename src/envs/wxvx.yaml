@@ -4,9 +4,11 @@ channels:
   - oar-gsl
   - ufs-community
 dependencies:
+  - pip
   - python 3.13
   - uwtools 2.14.*
   - wxvx >=0.7.2
   - xesmf 0.8.*
+  - zarr 2.18.*
   - pip:
-      - eagle-tools
+      - eagle-tools==0.8.1

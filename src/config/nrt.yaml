@@ -1,0 +1,93 @@
+# yamllint disable rule:line-length
+
+app:
+  nrt:
+    multistep_input_offset: !timedelta 0
+    now: !datetime '{{ "NOW" | env }}'
+    ic_start: !datetime '{{ app.nrt.inference_start - app.nrt.multistep_input_offset }}'
+    inference_start: !datetime '{{ app.nrt.now - app.nrt.offset - app.nrt.latency }}'
+    latency: !timedelta 6
+    leadtime: !timedelta 48
+    offset: !timedelta '0:0:{{ (app.nrt.now.timestamp() % 21600) | int }}'
+    stop: !datetime '{{ app.nrt.inference_start + app.nrt.leadtime }}'
+  time:
+    inference_start: !datetime '{{ app.nrt.inference_start }}'
+    inference_stop: !datetime '{{ app.time.inference_start }}'
+    start: !datetime '{{ app.nrt.ic_start }}'
+    stop: !datetime '{{ app.nrt.stop }}'
+    leadtime: !int '{{ (app.nrt.leadtime.total_seconds() / 3600) | int }}'
+  rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
+grids_and_meshes:
+  rundir: '{{ app.base }}/run/{{ app.experiment_name }}/data'
+inference:
+  anemoi:
+    input_dataset_kwargs:
+      cutout:
+        - dataset: '{{ val.data.rundir }}/hrrr.zarr'
+          trim_edge: [10, 11, 10, 11]
+        - dataset: '{{ val.data.rundir }}/gfs.zarr'
+  checkpoint_dir: '{{ app.base }}/run/{{ app.experiment_name }}/training/outputs/checkpoint'
+training: !remove
+ufs2arco:
+  mover:
+    name: datamover
+    batch_size: 2
+  source:
+    analysis: !remove
+    forecast: !remove
+    fhr:
+      start: 0
+      step: !int '{{ val.step }}'
+      end: 0
+    levels: !list '{{ val.levels }}'
+    t0:
+      start: '{{ (app.time.start).strftime("%Y-%m-%dT%H") }}'
+      freq: '{{ val.step }}h'
+      end: '{{ (app.time.stop).strftime("%Y-%m-%dT%H") }}'
+    variables: !list '{{ val.variables }}'
+  target:
+    name: anemoi_inference_with_forcings
+    multistep_input: !int '{{ app.time.multistep_input }}'
+    statistics_period: !remove
+val:
+  statsdelta: !remove
+  variables:
+    - gh
+    - u
+    - v
+    - w
+    - t
+    - q
+    - sp
+    - u10
+    - v10
+    - t2m
+    - t_surface
+    - sh2
+    - lsm
+    - orog
+zarrs:
+  common:
+    execution:
+      batchargs:
+        cores: 1
+  gfs:
+    zarr:
+      ufs2arco:
+        multisource: !remove
+        source: !dict '{{ dict(ufs2arco.source, name="gfs_archive", slices=ufs2arco.slices) }}'
+        transforms:
+          horizontal_regrid:
+            target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'
+  hrrr:
+    zarr:
+      ufs2arco:
+        multisource: !remove
+        source: !dict '{{ dict(ufs2arco.source, name="aws_hrrr_archive") }}'
+        transforms:
+          horizontal_regrid:
+            target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.hrrr_target_grid }}'
+          rotate_vectors:
+            vector_pairs:
+              - ['u', 'v']
+              - ['u10', 'v10']

@@ -8,6 +8,9 @@ VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
 INSTALLDIR ?= conda
 SHELL      := $(shell which bash)
+NOW        := $(shell date -uIseconds)
+
+export NOW
 
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))

@@ -3,5 +3,4 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
-  - pip
   - uwtools 2.14.*

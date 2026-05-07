@@ -108,3 +108,47 @@ Building and Running :term:`EAGLE`
    These steps will first call ``eagle-tools``'s ``postwxvx`` tool to create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of basic plots (provided by `DataArray.plot() <https://docs.xarray.dev/en/latest/generated/xarray.DataArray.plot.html#xarray.DataArray.plot>`_ from the ``xarray`` library) in the ``run/<expname>/visualization/grid2{grid,obs}/{global,lam}/plots-basic`` directory.
 
    For the grid-based ``vis-grid-global`` and ``vis-grid-lam`` targets, additional error plots (forecast vs truth differences) will be created under ``run/<expname>/visualization/grid2grid/{global,lam}/plots-spatial-stats/``. These plots depend on 1. The config value at key-path ``vx.grid2grid.{global,lam}.wxvx.wxvx.ncdiffs`` being set to ``true``, which instructs MET to produce netCDF difference files during verification; and 2. The config block at key-path ``visualization.grid2grid.{global,lam}.visualization.spatial_stat_plots``, which enables and configures plot generation, being present.
+
+#. Run inference in near-real-time (NRT)
+
+   a. Create the EAGLE NRT config 
+   
+   .. code-block:: bash
+
+      make config compose=base:ursa:nrt > nrt-composed.yaml
+
+   b. Set the ``app.base`` value in ``nrt-composed.yaml`` to the absolute path to the current ``src/`` directory.
+
+   This should match the path used when generating the main EAGLE config above.
+   
+   Two additional paths may require attention:
+      - inference.anemoi.checkpoint_dir
+      - grids_and_meshes.rundir
+
+   If you are following only the quickstart workflow, you do not need to modify these values. The config automatically pulls both paths from 
+   the quickstart run. However, if you ran multiple experiments or stored outputs in a different location, update these paths so they point 
+   to the correct directories.
+
+   c. Realize the EAGLE NRT config
+
+   .. code-block:: bash
+   
+      make realize config=nrt-composed.yaml > nrt.yaml
+
+   This creates the final config to begin a NRT run. It is required because it freezes the ``NOW`` environment 
+   variable across the entire configuration. Since jobs may be submitted at different times, this ensures a 
+   consistent timestamp is used throughout the run.
+   
+   d. Load current initial conditions
+   
+   .. code-block:: bash
+      
+      make data config=nrt.yaml
+
+   e. Run inference
+
+   .. code-block:: bash
+      
+      make inference config=nrt.yaml
+
+   Your forecast will save to ``path/to/eagle/src/run/default/nrt_inference/YYYY/MM/DD/HH/inference``.
