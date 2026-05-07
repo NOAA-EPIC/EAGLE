@@ -1,7 +1,8 @@
 BASHSRCS = $(wildcard ../.github/scripts/*) format setup
-ENVS     = data inference visualization wxvx
+ENVS     = anemoi data visualization wxvx
 HELPERS  = vx zarr
 PACKAGE  = eagle
+PKGENVS  = data inference training visualization wxvx
 STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
@@ -15,6 +16,7 @@ export NOW
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
 envloop  = @set -e && for env in $(PACKAGE) $(ENVS); do $(make) env=$$env $(1); done
+pkgloop  = @set -e && for env in $(PACKAGE) $(PKGENVS); do $(make) env=$$env $(1); done
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
