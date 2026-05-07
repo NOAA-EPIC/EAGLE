@@ -6,8 +6,10 @@ dependencies:
   - flash-attn 2.8.*
   - numpy 2.2.6.*
   - python 3.12
+  - setuptools 81.0.*
   - uwtools 2.14.*
   - pip:
       - anemoi-inference==0.10.*
       - anemoi-models==0.13.*
+      - anemoi-training==0.10.*
       - eagle-tools==0.8.1

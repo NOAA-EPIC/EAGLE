@@ -144,6 +144,13 @@ EOF
   )
 }
 
+prep_env_anemoi() {
+  local name
+  name=anemoi
+  prep_env $name
+  write_anemoi_activation_scripts $name
+}
+
 prep_env_base() {
   local name
   name=base
@@ -184,20 +191,6 @@ EOF
   )
 }
 
-prep_env_inference() {
-  local name
-  name=inference
-  prep_env $name
-  write_anemoi_activation_scripts $name
-}
-
-prep_env_training() {
-  local name
-  name=training
-  prep_env $name
-  write_anemoi_activation_scripts $name
-}
-
 prep_env_visualization() {
   prep_env visualization
 }
@@ -236,7 +229,7 @@ MAMBAFLAGS=(--log-level error --yes)
 MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
-environments=(base data inference training visualization wxvx)
+environments=(anemoi base data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
 done

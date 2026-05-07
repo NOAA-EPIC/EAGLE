@@ -1,5 +1,5 @@
 BASHSRCS = $(wildcard ../.github/scripts/*) format setup
-ENVS     = data inference training visualization wxvx
+ENVS     = data inference visualization wxvx
 HELPERS  = vx zarr
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
@@ -58,7 +58,7 @@ else
 endif
 
 inference:
-	$(call activate,inference)
+	$(call activate,anemoi)
 ifeq ($(task),?)
 	$(call tasklist,inference,inference,Inference)
 else
@@ -88,7 +88,7 @@ shellcheck:
 test: lint shellcheck typecheck yamllint unittest
 
 training:
-	$(call activate,training)
+	$(call activate,anemoi)
 ifeq ($(task),?)
 	$(call tasklist,training,training,Training)
 else
