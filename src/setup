@@ -148,7 +148,7 @@ prep_env_anemoi() {
   local name
   name=anemoi
   prep_env $name
-    (
+  (
     env_activate $name
     # NB: Append to the existing script:
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh

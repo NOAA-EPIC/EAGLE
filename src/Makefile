@@ -1,6 +1,6 @@
 BASHSRCS = $(wildcard ../.github/scripts/*) format setup
-ENVS     = anemoi data visualization wxvx
 HELPERS  = vx zarr
+MODULES  = data inference training visualization wxvx
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
@@ -14,7 +14,8 @@ export NOW
 
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
-envloop  = @set -e && for env in $(PACKAGE) $(ENVS); do $(make) env=$$env $(1); done
+checkenv = $(if $(filter $(PACKAGE),$(1)),base,$(if $(filter inference training,$(1)),anemoi,$(1)))
+checkloop = @set -e && for pkg in $(PACKAGE) $(MODULES); do $(make) pkg=$$pkg $(1); done
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
@@ -70,12 +71,12 @@ else
 endif
 
 lint:
-ifdef env
-	@echo "=> Linting package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef pkg
+	@echo "=> Linting package: $$pkg"
+	$(call activate,$(call checkenv,$(pkg)))
+	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
 else
-	$(call envloop,lint)
+	$(call checkloop,lint)
 endif
 
 realize:
@@ -100,21 +101,21 @@ else
 endif
 
 typecheck:
-ifdef env
-	@echo "=> Typechecking package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef pkg
+	@echo "=> Typechecking package: $$pkg"
+	$(call activate,$(call checkenv,$(pkg)))
+	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
 else
-	$(call envloop,typecheck)
+	$(call checkloop,typecheck)
 endif
 
 unittest:
-ifdef env
-	@echo "=> Unit testing package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	pytest $(if $(filter $(PACKAGE),$(env)),,--cov=$(PACKAGE).$(env) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef pkg
+	@echo "=> Unit testing package: $$pkg"
+	$(call activate,$(call checkenv,$(pkg)))
+	pytest $(if $(filter $(PACKAGE),$(pkg)),,--cov=$(PACKAGE).$(pkg) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(pkg)),*.py,$(pkg))
 else
-	$(call envloop,unittest)
+	$(call checkloop,unittest)
 endif
 
 validate:
