@@ -33,10 +33,8 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         The CONUS grid, provisioned to the rundir.
         """
-        if "hrrr_target_grid" not in self.config.get("filenames", {}):
-            return
         res = self.config["conus_grid_resolution_km"]
-        if res == 3:
+        if res == 3 or "hrrr_target_grid" not in self.config["filenames"]:
             return
         path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
         yield self.taskname(f"conus data grid {path}")
@@ -52,17 +50,15 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         The global grid, provisioned to the rundir.
         """
-        if "gfs_target_grid" not in self.config.get("filenames", {}):
-            return
-        resolution = self.config["global_grid_resolution_deg"]
-        if resolution == 0.25:
+        res = self.config["global_grid_resolution_deg"]
+        if res == 0.25 or "gfs_target_grid" not in self.config["filenames"]:
             return
         path = self.rundir / self.config["filenames"]["gfs_target_grid"]
         yield self.taskname(f"global data grid {path}")
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        ds = xesmf.util.grid_global(resolution, resolution, cf=True, lon1=360)
+        ds = xesmf.util.grid_global(res, res, cf=True, lon1=360)
         ds = ds.drop_vars("latitude_longitude")
         ds = ds.sortby("lat", ascending=False)  # GFS goes north -> south
         ds.to_netcdf(path)
@@ -72,7 +68,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         The latent mesh, provisioned to the rundir.
         """
-        if "latent_mesh" not in self.config.get("filenames", {}):
+        if "latent_mesh" not in self.config["filenames"]:
             return
         path = self.rundir / self.config["filenames"]["latent_mesh"]
         yield self.taskname(f"latent mesh {path}")
@@ -96,13 +92,13 @@ class GridsAndMeshes(AssetsTimeInvariant):
         yield self.taskname("provisioned run directory")
         tasks = []
 
-        if "hrrr_target_grid" in self.config.get("filenames", {}):
+        if "hrrr_target_grid" in self.config["filenames"]:
             tasks.append(self.conus_data_grid())
 
-        if "gfs_target_grid" in self.config.get("filenames", {}):
+        if "gfs_target_grid" in self.config["filenames"]:
             tasks.append(self.global_data_grid())
 
-        if "latent_mesh" in self.config.get("filenames", {}):
+        if "latent_mesh" in self.config["filenames"]:
             tasks.append(self.latent_mesh())
 
         yield tasks
