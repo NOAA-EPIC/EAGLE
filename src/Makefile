@@ -1,6 +1,6 @@
 BASHSRCS = $(wildcard ../.github/scripts/*) format setup
-ENVS     = data inference training visualization wxvx
 HELPERS  = vx zarr
+MODULES  = data inference training visualization wxvx
 PACKAGE  = eagle
 STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
 TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
@@ -14,10 +14,18 @@ export NOW
 
 activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
 check    = @$(if $(1),,$(error $(2)= argument required))
-envloop  = @set -e && for env in $(PACKAGE) $(ENVS); do $(make) env=$$env $(1); done
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
+modenv   = $(env4mod_$(1))
+modloop  = @set -e && for mod in $(PACKAGE) $(MODULES); do $(make) mod=$$mod $(1); done
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
+
+env4mod_data          = data
+env4mod_$(PACKAGE)    = base
+env4mod_inference     = anemoi
+env4mod_training      = anemoi
+env4mod_visualization = visualization
+env4mod_wxvx          = wxvx
 
 .ONESHELL:
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
@@ -61,7 +69,7 @@ else
 endif
 
 inference:
-	$(call activate,inference)
+	$(call activate,anemoi)
 ifeq ($(task),?)
 	$(call tasklist,inference,inference,Inference)
 else
@@ -70,12 +78,12 @@ else
 endif
 
 lint:
-ifdef env
-	@echo "=> Linting package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef mod
+	@echo "=> Linting package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
-	$(call envloop,lint)
+	$(call modloop,lint)
 endif
 
 realize:
@@ -91,7 +99,7 @@ shellcheck:
 test: lint shellcheck typecheck yamllint unittest
 
 training:
-	$(call activate,training)
+	$(call activate,anemoi)
 ifeq ($(task),?)
 	$(call tasklist,training,training,Training)
 else
@@ -100,21 +108,21 @@ else
 endif
 
 typecheck:
-ifdef env
-	@echo "=> Typechecking package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef mod
+	@echo "=> Typechecking package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
-	$(call envloop,typecheck)
+	$(call modloop,typecheck)
 endif
 
 unittest:
-ifdef env
-	@echo "=> Unit testing package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	pytest $(if $(filter $(PACKAGE),$(env)),,--cov=$(PACKAGE).$(env) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef mod
+	@echo "=> Unit testing package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	pytest $(if $(filter $(PACKAGE),$(mod)),,--cov=$(PACKAGE).$(mod) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
-	$(call envloop,unittest)
+	$(call modloop,unittest)
 endif
 
 validate:
