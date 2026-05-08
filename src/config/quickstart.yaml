@@ -40,9 +40,6 @@ workflow:
       jobname: training
       dependency:
         and:
-          taskdep_grids_and_meshes:
-            attrs:
-              task: grids_and_meshes
           datadep_zarr_gfs:
             value: 'run/{{ app.experiment_name }}/data/runscript.zarr-gfs.done'
           datadep_zarr_hrrr:
@@ -71,6 +68,5 @@ workflow:
         <<: *common
         jobname: vis-#metric#-#extent#
         dependency:
-          metataskdep:
-            attrs:
-              metatask: vx
+          datadep_inference:
+            value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'

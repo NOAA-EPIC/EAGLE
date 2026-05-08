@@ -1,6 +1,8 @@
 channels:
   - nodefaults
   - conda-forge
+  - oar-gsl
   - ufs-community
 dependencies:
   - uwtools 2.14.*
+  - rocoto 1.3.*
