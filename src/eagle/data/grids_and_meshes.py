@@ -182,9 +182,10 @@ def _conus_data_grid(rundir: Path, logfile: Path, resolution_km: int = 15) -> Da
                 x_b=slice(None, -trim),
                 y_b=slice(None, -trim),
             )
+        cds: Dataset
         if stride % 2 == 1:
             # Odd stride: centers align with original centers (e.g. 15km, stride=5)
-            cds: Dataset = hds.isel(
+            cds = hds.isel(
                 x=slice(stride // 2, None, stride),
                 y=slice(stride // 2, None, stride),
                 x_b=slice(0, None, stride),
@@ -200,7 +201,7 @@ def _conus_data_grid(rundir: Path, logfile: Path, resolution_km: int = 15) -> Da
                 {"lat_b": "lat", "lon_b": "lon", "x_b": "x", "y_b": "y"}
             )
             bounds = hds.isel(x_b=slice(0, None, stride), y_b=slice(0, None, stride))
-            cds: Dataset = xr.merge([centers, bounds.drop_vars(["lat", "lon", "orog"])])
+            cds = xr.merge([centers, bounds.drop_vars(["lat", "lon", "orog"])])
         return cds
 
 
