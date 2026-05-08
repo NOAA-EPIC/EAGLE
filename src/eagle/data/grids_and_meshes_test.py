@@ -62,7 +62,7 @@ def test_grids_and_meshes(logged, tmp_path, validator, with_del, with_set):
 
 
 def test_grids_and_meshes__conus_grid_resolution_km(
-    logged, tmp_path, validator, with_set
+    logged, tmp_path, validator
 ):
     ok = validator(
         __file__,

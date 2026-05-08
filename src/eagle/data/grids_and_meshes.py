@@ -121,8 +121,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
             return (
                 self.rundir / self.config["filenames"]["hrrr_target_grid"]
             ).with_suffix(".log")
-        else:
-            return self.rundir / "hrrr_target_grid.log"
+        return self.rundir / "hrrr_target_grid.log"
 
 
 # Private functions
