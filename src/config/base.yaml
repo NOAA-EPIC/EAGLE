@@ -895,6 +895,6 @@ zarrs:
         target: !dict '{{ ufs2arco.target }}'
         transforms:
           horizontal_regrid:
-            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_weights_hrrr.nc"") }}'
+            regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_weights_hrrr.nc") }}'
             target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
     platform: !dict '{{ app.platform }}'
