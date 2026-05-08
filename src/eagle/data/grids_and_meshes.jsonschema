@@ -16,20 +16,55 @@
               "type": "string"
             }
           },
-          "required": [
-            "gfs_target_grid",
-            "hrrr_target_grid",
-            "latent_mesh"
-          ],
           "type": "object"
         },
         "rundir": {
           "type": "string"
+        },
+        "conus_grid_resolution_km": {
+          "description": "The resolution of the CONUS grid in km. Must be a multiple of 3km (HRRR native resolution).",
+          "type": "integer",
+          "minimum": 3,
+          "multipleOf": 3
+        },
+        "global_grid_resolution_deg": {
+          "description": "The global GFS target grid resolution in degrees. Supported values are native 0.25 or regridded 1.0.",
+          "type": "number",
+          "enum": [0.25, 1.0]
+        },
+        "latent_mesh_global_resolution_deg": {
+          "description": "The global resolution in degrees used to build the global latent mesh component.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "latent_mesh_conus_coarsen_factor": {
+          "description": "Coarsening factor used to subsample CONUS bounds for latent mesh generation.",
+          "type": "integer",
+          "minimum": 1
         }
       },
       "required": [
+        "conus_grid_resolution_km",
         "filenames",
+        "global_grid_resolution_deg",
         "rundir"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "filenames": {
+                "required": ["latent_mesh"]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "latent_mesh_global_resolution_deg",
+              "latent_mesh_conus_coarsen_factor"
+            ]
+          }
+        }
       ],
       "type": "object"
     }
