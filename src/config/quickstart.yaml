@@ -50,16 +50,29 @@ workflow:
       dependency:
           datadep_training:
             value: 'run/{{ app.experiment_name }}/training/runscript.training.done'
-    metatask_vx:
+    metatask_vx_grid:
       var:
-        extent: global global lam lam
-        metric: grid obs grid obs
+        extent: global lam
+        metric: grid grid
       task_vx_#metric#_#extent#:
         <<: *common
         jobname: vx-#metric#-#extent#
         dependency:
           datadep_inference:
             value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'
+    metatask_vx_lam: 
+      var:
+        extent: global lam
+        metric: obs obs
+      task_vx_#metric#_#extent#:
+        <<: *common
+        jobname: vx-#metric#-#extent#
+        dependency:
+          and:
+            datadep_vx_global:
+              value: 'run/{{ app.experiment_name }}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done'
+            datadep_vx_lam:
+              value: 'run/{{ app.experiment_name }}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done'
     metatask_vis:
       var:
         extent: global global lam lam
@@ -70,3 +83,17 @@ workflow:
         dependency:
           datadep_inference:
             value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'
+    task_close_workflow:
+      <<: *common
+      jobname: close_workflow
+      command: 'echo "Quick start workflow complete"'
+      dependency:
+        and:
+          datadep_vx_grid2grid_global:
+            value: 'run/{{ app.experiment_name }}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done'
+          datadep_vx_grid2grid_lam:
+            value: 'run/{{ app.experiment_name }}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done'
+          datadep_vx_grid2obs_global:
+            value: 'run/{{ app.experiment_name }}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done'
+          datadep_vx_grid2obs_lam:
+            value: 'run/{{ app.experiment_name }}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done'

@@ -172,7 +172,7 @@ workflow:
 	$(call check,$(config),config)
 	$(call activate,base)
 	@(set -x && uw rocoto realize -c $(config) -o eagle.xml)
-	@(set -x && uw rocoto iterate -w eagle.xml -d eagle.db --cycle 2022-02-03T12 --task vis)
+	@(set -x && uw rocoto iterate -w eagle.xml -d eagle.db --cycle 2022-02-03T12 --task close_workflow)
 
 yamllint:
 	$(call activate,base)
