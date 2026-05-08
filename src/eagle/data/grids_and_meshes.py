@@ -7,6 +7,7 @@ from threading import Lock
 
 import cf_xarray as cfxr
 import numpy as np
+import xarray as xr
 import xesmf  # type: ignore[import-untyped]
 from anemoi.graphs.generate.utils import (  # type: ignore[import-untyped]
     get_coordinates_ordering,
@@ -16,7 +17,6 @@ from iotaa import Asset, collection, task  # provided by uwtools
 from ufs2arco import sources  # type: ignore[import-untyped]
 from uwtools.api.driver import AssetsTimeInvariant
 from xarray import Dataset
-import xarray as xr
 
 LOCK = Lock()
 
@@ -229,7 +229,9 @@ def _global_latent_grid(resolution_deg: float) -> Dataset:
     data grid is on an xESMF generated grid, it works out just fine to generate another
     xESMF grid here.
     """
-    mesh: Dataset = xesmf.util.grid_global(resolution_deg, resolution_deg, cf=True, lon1=360)
+    mesh: Dataset = xesmf.util.grid_global(
+        resolution_deg, resolution_deg, cf=True, lon1=360
+    )
     return mesh.drop_vars("latitude_longitude")
 
 

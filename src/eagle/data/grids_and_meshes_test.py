@@ -61,9 +61,7 @@ def test_grids_and_meshes(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'string'")
 
 
-def test_grids_and_meshes__conus_grid_resolution_km(
-    logged, tmp_path, validator
-):
+def test_grids_and_meshes__conus_grid_resolution_km(logged, tmp_path, validator):
     ok = validator(
         __file__,
         "grids_and_meshes",
@@ -85,9 +83,7 @@ def test_grids_and_meshes__conus_grid_resolution_km(
     assert logged("is not of type 'integer'")
 
 
-def test_grids_and_meshes__global_grid_resolution_deg(
-    logged, tmp_path, validator
-):
+def test_grids_and_meshes__global_grid_resolution_deg(logged, tmp_path, validator):
     ok = validator(
         __file__,
         "grids_and_meshes",
