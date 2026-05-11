@@ -7,6 +7,7 @@ from threading import Lock
 
 import cf_xarray as cfxr
 import numpy as np
+import xarray as xr
 import xesmf  # type: ignore[import-untyped]
 from anemoi.graphs.generate.utils import (  # type: ignore[import-untyped]
     get_coordinates_ordering,
@@ -32,24 +33,32 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         The CONUS grid, provisioned to the rundir.
         """
+        res = self.config["conus_grid_resolution_km"]
+        if res == 3 or "hrrr_target_grid" not in self.config["filenames"]:
+            return
         path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
         yield self.taskname(f"conus data grid {path}")
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        _conus_data_grid(self.rundir, self._conus_data_grid_logfile).to_netcdf(path)
+        _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res).to_netcdf(
+            path
+        )
 
     @task
     def global_data_grid(self):
         """
         The global grid, provisioned to the rundir.
         """
+        res = self.config["global_grid_resolution_deg"]
+        if res == 0.25 or "gfs_target_grid" not in self.config["filenames"]:
+            return
         path = self.rundir / self.config["filenames"]["gfs_target_grid"]
         yield self.taskname(f"global data grid {path}")
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        ds = xesmf.util.grid_global(1, 1, cf=True, lon1=360)
+        ds = xesmf.util.grid_global(res, res, cf=True, lon1=360)
         ds = ds.drop_vars("latitude_longitude")
         ds = ds.sortby("lat", ascending=False)  # GFS goes north -> south
         ds.to_netcdf(path)
@@ -59,14 +68,18 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         The latent mesh, provisioned to the rundir.
         """
+        if "latent_mesh" not in self.config["filenames"]:
+            return
         path = self.rundir / self.config["filenames"]["latent_mesh"]
         yield self.taskname(f"latent mesh {path}")
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        gmesh = _global_latent_grid()
+        res = self.config["conus_grid_resolution_km"]
+        gmesh = _global_latent_grid(self.config["latent_mesh_global_resolution_deg"])
         cmesh = _conus_latent_grid(
-            _conus_data_grid(self.rundir, self._conus_data_grid_logfile)
+            _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res),
+            coarsen=self.config["latent_mesh_conus_coarsen_factor"],
         )
         coords = _combine_global_and_conus_meshes(gmesh, cmesh)
         np.savez(path, lon=coords["lon"], lat=coords["lat"])
@@ -77,11 +90,18 @@ class GridsAndMeshes(AssetsTimeInvariant):
         Run directory provisioned with all required content.
         """
         yield self.taskname("provisioned run directory")
-        yield [
-            self.conus_data_grid(),
-            self.global_data_grid(),
-            self.latent_mesh(),
-        ]
+        tasks = []
+
+        if "hrrr_target_grid" in self.config["filenames"]:
+            tasks.append(self.conus_data_grid())
+
+        if "gfs_target_grid" in self.config["filenames"]:
+            tasks.append(self.global_data_grid())
+
+        if "latent_mesh" in self.config["filenames"]:
+            tasks.append(self.latent_mesh())
+
+        yield tasks
 
     # Public methods
 
@@ -93,9 +113,11 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @property
     def _conus_data_grid_logfile(self):
-        return (self.rundir / self.config["filenames"]["hrrr_target_grid"]).with_suffix(
-            ".log"
-        )
+        if "hrrr_target_grid" in self.config["filenames"]:
+            return (
+                self.rundir / self.config["filenames"]["hrrr_target_grid"]
+            ).with_suffix(".log")
+        return self.rundir / "hrrr_target_grid.log"
 
 
 # Private functions
@@ -124,7 +146,7 @@ def _combine_global_and_conus_meshes(
 
 
 @cache
-def _conus_data_grid(rundir: Path, logfile: Path) -> Dataset:
+def _conus_data_grid(rundir: Path, logfile: Path, resolution_km: int = 15) -> Dataset:
     with LOCK:
         with _logging_to_file(logfile):
             hrrr = sources.AWSHRRRArchive(
@@ -149,20 +171,38 @@ def _conus_data_grid(rundir: Path, logfile: Path) -> Dataset:
             hds = hds.assign_coords({f"{key}_b": corners})
             hds = hds.drop_vars(f"{key}_bounds")
         hds = hds.rename({"x_vertices": "x_b", "y_vertices": "y_b"})
+
+        stride = resolution_km // 3
         # Get the nodes and bounds by subsampling.
-        hds = hds.isel(
-            x=slice(None, -4, None),
-            y=slice(None, -4, None),
-            x_b=slice(None, -4, None),
-            y_b=slice(None, -4, None),
-        )
-        cds: Dataset = hds.isel(
-            x=slice(2, None, 5),
-            y=slice(2, None, 5),
-            x_b=slice(0, None, 5),
-            y_b=slice(0, None, 5),
-        )
-        return cds.drop_vars("orog")
+        trim = stride - 1
+        if trim > 0:
+            hds = hds.isel(
+                x=slice(None, -trim),
+                y=slice(None, -trim),
+                x_b=slice(None, -trim),
+                y_b=slice(None, -trim),
+            )
+        cds: Dataset
+        if stride % 2 == 1:
+            # Odd stride: centers align with original centers (e.g. 15km, stride=5)
+            cds = hds.isel(
+                x=slice(stride // 2, None, stride),
+                y=slice(stride // 2, None, stride),
+                x_b=slice(0, None, stride),
+                y_b=slice(0, None, stride),
+            ).drop_vars("orog")
+        else:
+            # Even stride: centers align with original vertices (e.g. 6km, stride=2)
+            centers = hds.isel(
+                x_b=slice(stride // 2, None, stride),
+                y_b=slice(stride // 2, None, stride),
+            )
+            centers = centers.drop_vars(["lat", "lon", "orog"]).rename(
+                {"lat_b": "lat", "lon_b": "lon", "x_b": "x", "y_b": "y"}
+            )
+            bounds = hds.isel(x_b=slice(0, None, stride), y_b=slice(0, None, stride))
+            cds = xr.merge([centers, bounds.drop_vars(["lat", "lon", "orog"])])
+        return cds
 
 
 def _conus_latent_grid(cds: Dataset, trim: int = 10, coarsen: int = 2) -> Dataset:
@@ -180,13 +220,15 @@ def _conus_latent_grid(cds: Dataset, trim: int = 10, coarsen: int = 2) -> Datase
     )
 
 
-def _global_latent_grid() -> Dataset:
+def _global_latent_grid(resolution_deg: float) -> Dataset:
     """
     For the high-res version, this will process the original grid. However, since the
     data grid is on an xESMF generated grid, it works out just fine to generate another
     xESMF grid here.
     """
-    mesh: Dataset = xesmf.util.grid_global(2, 2, cf=True, lon1=360)
+    mesh: Dataset = xesmf.util.grid_global(
+        resolution_deg, resolution_deg, cf=True, lon1=360
+    )
     return mesh.drop_vars("latitude_longitude")
 
 
