@@ -98,7 +98,7 @@ def test_grids_and_meshes__global_grid_resolution_deg(logged, tmp_path, validato
     assert ok(1.0)
     # Invalid values:
     assert not ok(2.0)
-    assert logged("is not one of [0.25, 1.0]")
+    assert logged(r"is not one of \[0.25, 1.0\]")
     assert not ok("1.0")
     assert logged("is not of type 'number'")
 
