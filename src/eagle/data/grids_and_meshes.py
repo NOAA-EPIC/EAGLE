@@ -113,7 +113,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
 
     @property
     def _conus_data_grid_logfile(self):
-        if "hrrr_target_grid" in self.config.get("filenames", {}):
+        if "hrrr_target_grid" in self.config["filenames"]:
             return (
                 self.rundir / self.config["filenames"]["hrrr_target_grid"]
             ).with_suffix(".log")
