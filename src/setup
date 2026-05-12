@@ -144,6 +144,31 @@ EOF
   )
 }
 
+prep_env_anemoi() {
+  local name
+  name=anemoi
+  prep_env $name
+  (
+    env_activate $name
+    # NB: Append to the existing script:
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
+modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
+if [[ -n "\$modules" ]]; then
+  export EAGLE_OLD_MODULES="\$modules"
+fi
+$(cat $(cuda_command_file))
+EOF
+    # NB: Append to the existing script:
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
+module purge 2>/dev/null
+if [[ -v EAGLE_OLD_MODULES ]]; then
+  module load \$EAGLE_OLD_MODULES
+  unset EAGLE_OLD_MODULES
+fi
+EOF
+  )
+}
+
 prep_env_base() {
   local name
   name=base
@@ -184,49 +209,12 @@ EOF
   )
 }
 
-prep_env_inference() {
-  local name
-  name=inference
-  prep_env $name
-  write_anemoi_activation_scripts $name
-}
-
-prep_env_training() {
-  local name
-  name=training
-  prep_env $name
-  write_anemoi_activation_scripts $name
-}
-
 prep_env_visualization() {
   prep_env visualization
 }
 
 prep_env_wxvx() {
   prep_env wxvx
-}
-
-write_anemoi_activation_scripts() {
-  local name=$1
-  (
-    env_activate $name
-    # NB: Append to the existing script:
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
-modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
-if [[ -n "\$modules" ]]; then
-  export EAGLE_OLD_MODULES="\$modules"
-fi
-$(cat $(cuda_command_file))
-EOF
-    # NB: Append to the existing script:
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
-module purge 2>/dev/null
-if [[ -v EAGLE_OLD_MODULES ]]; then
-  module load \$EAGLE_OLD_MODULES
-  unset EAGLE_OLD_MODULES
-fi
-EOF
-  )
 }
 
 parse_kvargs $@
@@ -236,7 +224,7 @@ MAMBAFLAGS=(--log-level error --yes)
 MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
-environments=(base data inference training visualization wxvx)
+environments=(anemoi base data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
 done
