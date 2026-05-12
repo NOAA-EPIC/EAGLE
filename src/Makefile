@@ -20,6 +20,13 @@ exec        = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(
 make        = $(MAKE) --no-print-directory
 tasklist    = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
 
+env4mod_data          = data
+env4mod_$(PACKAGE)    = base
+env4mod_inference     = anemoi
+env4mod_training      = anemoi
+env4mod_visualization = visualization
+env4mod_wxvx          = wxvx
+
 .ONESHELL:
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
 
@@ -64,7 +71,7 @@ else
 endif
 
 inference:
-	$(call activate,inference)
+	$(call activate,anemoi)
 ifeq ($(task),?)
 	$(call tasklist,inference,inference,Inference)
 else
@@ -73,12 +80,12 @@ else
 endif
 
 lint:
-ifdef env
-	@echo "=> Linting package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef mod
+	@echo "=> Linting package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	ruff check $(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
-	$(call envloop,lint)
+	$(call modloop,lint)
 endif
 
 realize:
@@ -94,7 +101,7 @@ shellcheck:
 test: lint shellcheck typecheck yamllint unittest
 
 training:
-	$(call activate,training)
+	$(call activate,anemoi)
 ifeq ($(task),?)
 	$(call tasklist,training,training,Training)
 else
@@ -103,21 +110,21 @@ else
 endif
 
 typecheck:
-ifdef env
-	@echo "=> Typechecking package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef mod
+	@echo "=> Typechecking package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	mypy $(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
-	$(call envloop,typecheck)
+	$(call modloop,typecheck)
 endif
 
 unittest:
-ifdef env
-	@echo "=> Unit testing package: $$env"
-	$(call activate,$(if $(filter $(PACKAGE),$(env)),base,$(env)))
-	pytest $(if $(filter $(PACKAGE),$(env)),,--cov=$(PACKAGE).$(env) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(env)),*.py,$(env))
+ifdef mod
+	@echo "=> Unit testing package: $$mod"
+	$(call activate,$(call modenv,$(mod)))
+	pytest $(if $(filter $(PACKAGE),$(mod)),,--cov=$(PACKAGE).$(mod) )$(PACKAGE)/$(if $(filter $(PACKAGE),$(mod)),*.py,$(mod))
 else
-	$(call envloop,unittest)
+	$(call modloop,unittest)
 endif
 
 validate:

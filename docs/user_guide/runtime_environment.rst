@@ -55,11 +55,11 @@ Run ``make`` with no arguments to list available targets.
    * - training
      - Performs anemoi training
      - data
-     - training
+     - anemoi
    * - inference
      - Performs anemoi inference
      - training
-     - inference
+     - anemoi
    * - vx-grid-global
      - Verify global against gridded analysis
      - inference
