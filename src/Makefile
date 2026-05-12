@@ -25,9 +25,6 @@ tasklist    = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py 
 
 export NOW
 
-pm:
-	$(info $(BATCH))
-
 all:
 	@echo Available targets:
 	@echo
