@@ -1,11 +1,19 @@
 common: &common
   nodes: 1:ppn=1
-  walltime: 00:02:00
+  walltime: 00:10:00
   account: '{{ app.platform.account }}'
   partition: '{{ app.partitions.compute }}'
-  queue: batch
+  queue: '{{ app.queues.batch }}'
   command: 'make {{ jobname }} config=eagle.yaml'
   join: '{{ app.base }}/{{ app.platform.scheduler }}/{{ jobname }}.{{ app.platform.scheduler }}'
+common_netaccess: &common_netaccess
+  <<: *common
+  partition: '{{ app.partitions.netaccess }}'
+common_gpu: &common_gpu
+  <<: *common
+  partition: '{{ app.gpu.batchargs.partition }}'
+  queue: '{{ app.gpu.batchargs.queue }}'
+command_nobatch: &command_nobatch 'make {{ jobname }} config=eagle.yaml batch=false'
 workflow:
   attrs:
     realtime: false
@@ -15,29 +23,37 @@ workflow:
         group: cyc
       spec: '{{ app.time.inference_start.strftime("%Y%m%d%H%M") }} {{ app.time.inference_start.strftime("%Y%m%d%H%M") }} 06:00:00'
   log:
-    value: '{{ app.base }}/{{ app.platform.scheduler }}/rocoto.{{ app.platform.scheduler }}'
+    value:
+      cyclestr:
+        value: '{{ app.base }}/{{ app.platform.scheduler }}/rocoto.@Y@m@d@H.{{ app.platform.scheduler }}'
   tasks:
     task_grids_and_meshes:
-      <<: *common
+      <<: *common_netaccess
       jobname: grids-and-meshes
-      partition: '{{ app.partitions.netaccess }}'
+      command: *command_nobatch
     task_zarr_gfs:
-      <<: *common
+      <<: *common_netaccess
       jobname: zarr-gfs
+      command: *command_nobatch
+      memory: 8G
       dependency:
         taskdep_grids_and_meshes:
           attrs:
             task: grids_and_meshes
     task_zarr_hrrr:
-      <<: *common
+      <<: *common_netaccess
       jobname: zarr-hrrr
+      command: *command_nobatch
+      memory: 10G
       dependency:
         taskdep_grids_and_meshes:
           attrs: 
             task: grids_and_meshes
     task_training:
-      <<: *common
+      <<: *common_gpu
       jobname: training
+      native: --gres gpu:h100:1
+      command: *command_nobatch
       dependency:
         and:
           datadep_zarr_gfs:
@@ -45,34 +61,23 @@ workflow:
           datadep_zarr_hrrr:
             value: 'run/{{ app.experiment_name }}/data/runscript.zarr-hrrr.done'
     task_inference:
-      <<: *common
+      <<: *common_gpu
       jobname: inference
+      command: *command_nobatch
       dependency:
           datadep_training:
             value: 'run/{{ app.experiment_name }}/training/runscript.training.done'
-    metatask_vx_grid:
+    metatask_vx:
       var:
-        extent: global lam
-        metric: grid grid
+        extent: global global lam lam
+        metric: grid obs grid obs
       task_vx_#metric#_#extent#:
-        <<: *common
+        <<: *common_netaccess
         jobname: vx-#metric#-#extent#
+        command: *command_nobatch
         dependency:
           datadep_inference:
             value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'
-    metatask_vx_lam: 
-      var:
-        extent: global lam
-        metric: obs obs
-      task_vx_#metric#_#extent#:
-        <<: *common
-        jobname: vx-#metric#-#extent#
-        dependency:
-          and:
-            datadep_vx_global:
-              value: 'run/{{ app.experiment_name }}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done'
-            datadep_vx_lam:
-              value: 'run/{{ app.experiment_name }}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done'
     metatask_vis:
       var:
         extent: global global lam lam
@@ -80,20 +85,7 @@ workflow:
       task_vis_#metric#_#extent#:
         <<: *common
         jobname: vis-#metric#-#extent#
+        command: *command_nobatch
         dependency:
           datadep_inference:
             value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'
-    task_close_workflow:
-      <<: *common
-      jobname: close_workflow
-      command: 'echo "Quick start workflow complete"'
-      dependency:
-        and:
-          datadep_vx_grid2grid_global:
-            value: 'run/{{ app.experiment_name }}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done'
-          datadep_vx_grid2grid_lam:
-            value: 'run/{{ app.experiment_name }}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done'
-          datadep_vx_grid2obs_global:
-            value: 'run/{{ app.experiment_name }}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done'
-          datadep_vx_grid2obs_lam:
-            value: 'run/{{ app.experiment_name }}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done'
