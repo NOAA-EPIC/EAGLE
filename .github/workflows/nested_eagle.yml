@@ -294,9 +294,24 @@ jobs:
             }
           done
 
+          # Add nrt-eagle steps (#9 from https://epic-eagle.readthedocs.io/en/latest/user_guide/quickstart.html)
+          
+          make config compose=base:ursa:nrt > nrt-composed.yaml
+
+          sed -i "s|^\\(  base:\\s*\\).*|\\1${SRC_ABS}|" nrt-composed.yaml
+          sed -i "s|^\\(  experiment_name:\\s*\\).*|\\1${EXP}|" nrt-composed.yaml
+          sed -i "s|^\\(  checkpoint_path:\\s*\\).*|\\1${SRC_ABS}/run/${EXP}/training/outputs/checkpoint|" nrt-composed.yaml
+
+          make realize config=nrt-composed.yaml > nrt.yaml
+
+          make data config=nrt.yaml
+          wait_runscript_batch "${RUNROOT}/data" "data" "Data"
+
+          make inference config=nrt.yaml
+          
           # Done.
 
-          echo Nested EAGLE CI pipeline completed successfully.
+          echo NRT EAGLE CI pipeline completed successfully.
 
   cleanup_label:
     name: Cleanup ci-running label
