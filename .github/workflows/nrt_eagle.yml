@@ -1,4 +1,4 @@
-name: Nested EAGLE CI Pipeline (uwtools)
+name: NRT EAGLE CI Pipeline (uwtools)
 
 on:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
             rm -rf $x
           done
   run_pipeline:
-    name: Run Nested EAGLE end-to-end on Ursa
+    name: Run NRT EAGLE end-to-end on Ursa
     if: >-
       ${{
         contains(github.event.pull_request.labels.*.name, 'eagle-ursa') &&
