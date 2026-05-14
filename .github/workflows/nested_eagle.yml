@@ -1,4 +1,4 @@
-name: Nested EAGLE CI Pipeline (uwtools)
+name: NRT EAGLE CI Pipeline (uwtools)
 
 on:
   pull_request:
