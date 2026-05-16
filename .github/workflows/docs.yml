@@ -14,7 +14,7 @@ jobs:
   documentation:
 
     permissions:
-      pull-requests: 'write'
+      pull-requests: write
 
     runs-on: ubuntu-22.04
     name: Build and deploy documentation
@@ -23,18 +23,16 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.12"
+        python-version: 3.12
 
     - name: Install (upgrade) python dependencies
-      run: |
-        pip install --upgrade pip sphinx sphinx-gallery sphinx_rtd_theme sphinxcontrib-bibtex
+      run: pip install --upgrade pip sphinx sphinx-gallery sphinx_rtd_theme sphinxcontrib-bibtex
 
     - name: Checkout
       uses: actions/checkout@v3
 
     - name: Build documentation
-      run: |
-        bash .github/scripts/build_docs.sh
+      run: .github/scripts/build-docs
 
     - name: Upload documentation (on success)
       uses: actions/upload-artifact@v4

@@ -24,11 +24,7 @@ jobs:
     runs-on: ursa
     steps:
       - name: Clean old conda installs
-        run: |
-          find $GITHUB_WORKSPACE/src -mindepth 1 -maxdepth 1 -regex "^.*/conda\.[0-9]+$" | sort | while read x; do
-            echo Removing $x
-            rm -rf $x
-          done
+        run: .github/scripts/clean-old-conda-installs
   run_pipeline:
     name: Run Nested EAGLE end-to-end on Ursa
     if: >-
@@ -51,16 +47,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform cleanup
-        run: |
-          set -euo pipefail
-          cd $GITHUB_WORKSPACE
-          echo Running in $PWD
-          conda=src/conda
-          if [[ -d $conda ]]; then
-            mv -v $conda $conda.$(date +%s)
-          fi
-          git clean -ffdx -e "conda.*"
-        
+        run: .github/scripts/cleanup
+
       - name: Checkout PR head
         uses: actions/checkout@v4
         with:
@@ -96,9 +84,7 @@ jobs:
 
       - name: Skip (no relevant changes)
         if: steps.gate.outputs.relevant != 'true'
-        run: |
-          echo "No changes under nested_eagle/ or src/. Skipping."
-          exit 0
+        run: echo No changes under nested_eagle/ or src/. Skipping. && exit 0
 
       - name: Build env and run pipeline via src/Makefile + uwtools
         env:
@@ -308,5 +294,5 @@ jobs:
         continue-on-error: true
         uses: mondeja/remove-labels-gh-action@v2.0.0
         with:
-          labels: "ci-running"
+          labels: ci-running
           token: ${{ secrets.GITHUB_TOKEN }}

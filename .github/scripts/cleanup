@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+cd $GITHUB_WORKSPACE
+echo Running in $PWD
+conda=src/conda
+if [[ -d $conda ]]; then
+  mv -v $conda $conda.$(date +%s)
+fi
+git clean -ffdx -e "conda.*"

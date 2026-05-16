@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+find $GITHUB_WORKSPACE/src -mindepth 1 -maxdepth 1 -regex "^.*/conda\.[0-9]+$" | sort | while read x; do
+  echo Removing $x
+  rm -rf $x
+done
