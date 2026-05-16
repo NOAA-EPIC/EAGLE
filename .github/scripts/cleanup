@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# shellcheck disable=2046,2086
+
 set -euo pipefail
 cd $GITHUB_WORKSPACE
 echo Running in $PWD
