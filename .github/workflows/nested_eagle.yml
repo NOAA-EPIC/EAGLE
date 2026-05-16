@@ -1,4 +1,4 @@
-name: Nested EAGLE CI Pipeline (uwtools)
+name: NRT EAGLE CI Pipeline (uwtools)
 
 on:
   pull_request:
@@ -294,9 +294,30 @@ jobs:
             }
           done
 
+          # Add nrt-eagle steps (#9 from https://epic-eagle.readthedocs.io/en/latest/user_guide/quickstart.html)
+          
+          make config compose=base:ursa:nrt > nrt-composed.yaml
+
+          sed -i "s|^\\(  base:\\s*\\).*|\\1${SRC_ABS}|" nrt-composed.yaml
+          sed -i "s|^\\(  experiment_name:\\s*\\).*|\\1${EXP}|" nrt-composed.yaml
+          sed -i "s|^\\(  checkpoint_path:\\s*\\).*|\\1${SRC_ABS}/run/${EXP}/training/outputs/checkpoint|" nrt-composed.yaml
+
+          make realize config=nrt-composed.yaml > nrt.yaml
+
+          nrtdir="$(cat nrt.yaml | grep 'rundir' | grep -v 'vx' | grep -v 'vis' | grep 'nrt_i' | grep -v '/inf' | grep -v 'data'| sed -e 's/^  rundir: //' ) "
+
+          for datasource in gfs hrrr; do
+            wait_runscript_batch "${nrtdir}/data" "zarr-$datasource" "Zarr $datasource"
+          done
+
+          make data config=nrt.yaml
+          wait_runscript_batch "${nrtdir}/data" "data" "Data"
+
+          make inference config=nrt.yaml
+          
           # Done.
 
-          echo Nested EAGLE CI pipeline completed successfully.
+          echo NRT EAGLE CI pipeline completed successfully.
 
   cleanup_label:
     name: Cleanup ci-running label
