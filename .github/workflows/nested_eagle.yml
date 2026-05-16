@@ -304,7 +304,7 @@ jobs:
 
           make realize config=nrt-composed.yaml > nrt.yaml
 
-          nrtdir="$(cat nrt.yaml | grep 'rundir' | grep -v 'vx' | grep -v 'vis' | grep 'nrt_i' | grep -v '/inf' | grep -v 'data'| sed -e 's/^  rundir: //'"
+ nrtdir="$(cat nrt.yaml | grep 'rundir' | grep -v 'vx' | grep -v 'vis' | grep 'nrt_i' | grep -v '/inf' | grep -v 'data'| sed -e 's/^  rundir: //')"
 
           for datasource in gfs hrrr; do
             wait_runscript_batch "${nrtdir}/data" "zarr-$datasource" "Zarr $datasource"
