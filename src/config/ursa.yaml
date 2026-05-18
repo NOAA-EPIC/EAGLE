@@ -9,6 +9,7 @@ app:
       nodes: 1
       partition: u1-h100
       queue: gpuwf
+      native: '--gres gpu:h100:1'
   partitions:
     netaccess: u1-service
     compute: u1-compute
@@ -22,6 +23,7 @@ zarrs:
     execution:
       batchargs:
         --mem-per-cpu: 3G
+        memory: 8G
       envcmds: !list '{{ ["source /etc/profile.d/profile-slurm.sh"] + zarrs.common.envcmds }}'
       mpiargs:
         - "--export=ALL"

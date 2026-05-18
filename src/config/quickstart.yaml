@@ -13,6 +13,7 @@ common_gpu: &common_gpu
   <<: *common
   partition: '{{ app.gpu.batchargs.partition }}'
   queue: '{{ app.gpu.batchargs.queue }}'
+  native: '{{ app.gpu.batchargs.native }}'
 command_nobatch: &command_nobatch 'make {{ jobname }} config=eagle.yaml batch=false'
 workflow:
   attrs:
@@ -35,7 +36,7 @@ workflow:
       <<: *common_netaccess
       jobname: zarr-gfs
       command: *command_nobatch
-      memory: 8G
+      memory: '{{ zarrs.common.execution.batchargs.memory }}'
       dependency:
         taskdep_grids_and_meshes:
           attrs:
@@ -44,7 +45,7 @@ workflow:
       <<: *common_netaccess
       jobname: zarr-hrrr
       command: *command_nobatch
-      memory: 10G
+      memory:  '{{ zarrs.common.execution.batchargs.memory }}'
       dependency:
         taskdep_grids_and_meshes:
           attrs: 
@@ -52,7 +53,6 @@ workflow:
     task_training:
       <<: *common_gpu
       jobname: training
-      native: --gres gpu:h100:1
       command: *command_nobatch
       dependency:
         and:
