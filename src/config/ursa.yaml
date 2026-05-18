@@ -5,19 +5,26 @@
 app:
   gpu:
     batchargs: &gpu-batchargs
-      gres: 'gpu:h100:1'
+      --gres: 'gpu:h100:1'
       nodes: 1
-      partition: u1-h100
-      queue: gpuwf
+      partition: '{{ app.partitions.gpu }}'
+      queue: '{{ app.queues.gpu }}'
       native: '--gres gpu:h100:1'
   partitions:
     netaccess: u1-service
-    compute: u1-compute
+    cpu: u1-compute
+    gpu: u1-h100
+  queues:
+    netaccess: batch
+    cpu: batch
+    gpu: gpuwf
   platform: &platform
     account: epic
     scheduler: slurm
-  queues:
-    batch: batch
+  workflow:
+    quickstart:
+      walltime: 00:10:00
+      nodes: 1:ppn=1
 zarrs:
   common:
     execution:

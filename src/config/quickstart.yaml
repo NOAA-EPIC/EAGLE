@@ -1,20 +1,19 @@
-common: &common
-  nodes: 1:ppn=1
-  walltime: 00:10:00
+submit_common: &submit_common
+  nodes: '{{ app.workflow.quickstart.nodes }}'
+  walltime: '{{ app.workflow.quickstart.walltime }}'
   account: '{{ app.platform.account }}'
-  partition: '{{ app.partitions.compute }}'
-  queue: '{{ app.queues.batch }}'
-  command: 'make {{ jobname }} config=eagle.yaml'
+  partition: '{{ app.partitions.cpu }}'
+  queue: '{{ app.queues.cpu }}'
+  command: 'make {{ jobname }} config=eagle.yaml batch=false'
   join: '{{ app.base }}/{{ app.platform.scheduler }}/{{ jobname }}.{{ app.platform.scheduler }}'
-common_netaccess: &common_netaccess
-  <<: *common
+submit_netaccess: &submit_netaccess
+  <<: *submit_common
   partition: '{{ app.partitions.netaccess }}'
-common_gpu: &common_gpu
-  <<: *common
+submit_gpu: &submit_gpu
+  <<: *submit_common
   partition: '{{ app.gpu.batchargs.partition }}'
   queue: '{{ app.gpu.batchargs.queue }}'
   native: '{{ app.gpu.batchargs.native }}'
-command_nobatch: &command_nobatch 'make {{ jobname }} config=eagle.yaml batch=false'
 workflow:
   attrs:
     realtime: false
@@ -29,31 +28,27 @@ workflow:
         value: '{{ app.base }}/{{ app.platform.scheduler }}/rocoto.@Y@m@d@H.{{ app.platform.scheduler }}'
   tasks:
     task_grids_and_meshes:
-      <<: *common_netaccess
+      <<: *submit_netaccess
       jobname: grids-and-meshes
-      command: *command_nobatch
     task_zarr_gfs:
-      <<: *common_netaccess
+      <<: *submit_netaccess
       jobname: zarr-gfs
-      command: *command_nobatch
       memory: '{{ zarrs.common.execution.batchargs.memory }}'
       dependency:
         taskdep_grids_and_meshes:
           attrs:
             task: grids_and_meshes
     task_zarr_hrrr:
-      <<: *common_netaccess
+      <<: *submit_netaccess
       jobname: zarr-hrrr
-      command: *command_nobatch
       memory:  '{{ zarrs.common.execution.batchargs.memory }}'
       dependency:
         taskdep_grids_and_meshes:
           attrs: 
             task: grids_and_meshes
     task_training:
-      <<: *common_gpu
+      <<: *submit_gpu
       jobname: training
-      command: *command_nobatch
       dependency:
         and:
           datadep_zarr_gfs:
@@ -61,9 +56,8 @@ workflow:
           datadep_zarr_hrrr:
             value: 'run/{{ app.experiment_name }}/data/runscript.zarr-hrrr.done'
     task_inference:
-      <<: *common_gpu
+      <<: *submit_gpu
       jobname: inference
-      command: *command_nobatch
       dependency:
           datadep_training:
             value: 'run/{{ app.experiment_name }}/training/runscript.training.done'
@@ -72,9 +66,8 @@ workflow:
         extent: global global lam lam
         metric: grid obs grid obs
       task_vx_#metric#_#extent#:
-        <<: *common_netaccess
+        <<: *submit_netaccess
         jobname: vx-#metric#-#extent#
-        command: *command_nobatch
         dependency:
           datadep_inference:
             value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'
@@ -83,9 +76,8 @@ workflow:
         extent: global global lam lam
         metric: grid obs grid obs 
       task_vis_#metric#_#extent#:
-        <<: *common
+        <<: *submit_common
         jobname: vis-#metric#-#extent#
-        command: *command_nobatch
         dependency:
           datadep_inference:
             value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'
