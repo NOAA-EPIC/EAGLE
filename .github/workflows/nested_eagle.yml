@@ -315,7 +315,7 @@ jobs:
           EOF
           uw config realize -i nrt-composed.yaml -o nrt.yaml -u update.yaml
 
-          NRTDIR = "$(uw config realize -i nrt.yaml --key-path app.rundir)"
+          NRTDIR="$(uw config realize -i nrt.yaml --key-path app.rundir)"
           
           for datasource in gfs hrrr; do
             wait_runscript_batch "$NRTDIR/data" "zarr-$datasource" "Zarr $datasource"
