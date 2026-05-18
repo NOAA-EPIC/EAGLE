@@ -198,9 +198,16 @@ jobs:
           make config compose=base:ursa INSTALLDIR="${INSTALLDIR}" > eagle.yaml
 
           SRC_ABS="${GITHUB_WORKSPACE}/src"
-          sed -i "s|^\\(  base:\\s*\\).*|\\1${SRC_ABS}|" eagle.yaml
-          sed -i "s|^\\(  experiment_name:\\s*\\).*|\\1${EXP}|" eagle.yaml
-          sed -i "s|^\\(  checkpoint_path:\\s*\\).*|\\1${SRC_ABS}/run/${EXP}/training/outputs/checkpoint|" eagle.yaml
+
+          cat <<EOF >update.yaml
+          app:
+            base: "${SRC_ABS}"
+            experiment_name: "${EXP}"
+          inference:
+            anemoi:
+              checkpoint_path: "${SRC_ABS}/run/{$EXP}/training/outputs/checkpoint|"
+          EOF
+          uw config realize -i eagle.yaml -o eagle.yaml -u update.yaml
 
           make validate config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
 
@@ -298,14 +305,20 @@ jobs:
           
           make config compose=base:ursa:nrt > nrt-composed.yaml
 
-          sed -i "s|^\\(  base:\\s*\\).*|\\1${SRC_ABS}|" nrt-composed.yaml
-          sed -i "s|^\\(  experiment_name:\\s*\\).*|\\1${EXP}|" nrt-composed.yaml
-          sed -i "s|^\\(  checkpoint_path:\\s*\\).*|\\1${SRC_ABS}/run/${EXP}/training/outputs/checkpoint|" nrt-composed.yaml
+          cat <<EOF >update.yaml
+          app:
+            base: "${SRC_ABS}"
+            experiment_name: "${EXP}"
+          inference:
+            anemoi:
+              checkpoint_path: "${SRC_ABS}/run/{$EXP}/training/outputs/checkpoint"
+          EOF
+          uw config realize -i nrt-composed.yaml -o nrt-composed.yaml -u update.yaml
 
           make realize config=nrt-composed.yaml > nrt.yaml
 
-          nrtdir="$(cat nrt.yaml | grep 'rundir' | grep -v 'vx' | grep -v 'vis' | grep 'nrt_i' | grep -v '/inf' | grep -v 'data'| sed -e 's/^  rundir: //' | xargs) "
-
+          nrtdir = "$(uw config realize -i nrt.yaml --key-path app.rundir)"
+          
           for datasource in gfs hrrr; do
             wait_runscript_batch "${nrtdir}/data" "zarr-$datasource" "Zarr $datasource"
           done
@@ -318,6 +331,7 @@ jobs:
           # Done.
 
           echo NRT EAGLE CI pipeline completed successfully.
+          echo "NRT run directory: ${nrtdir}"
 
   cleanup_label:
     name: Cleanup ci-running label
