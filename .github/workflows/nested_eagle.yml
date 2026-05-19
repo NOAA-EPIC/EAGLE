@@ -318,15 +318,19 @@ jobs:
           # Define NRTDIR as run directory for "NOW" forecast (changes every run)
           NRTDIR="$(uw config realize -i nrt.yaml --key-path app.rundir)"
           
+          make data config=nrt.yaml
           for datasource in gfs hrrr; do
             wait_runscript_batch "$NRTDIR/data" "zarr-$datasource" "Zarr $datasource"
           done
 
-          make data config=nrt.yaml
-          wait_runscript_batch "$NRTDIR/data" "data" "Data"
-
           make inference config=nrt.yaml
-          
+          wait_runscript_batch "$NRTDIR/inference" "inference" "NRT Inference"
+
+          find "$NRTDIR/inference/output" -type f -name "*.nc" -print -quit | grep -q . || {
+            echo "ERROR: No inference NetCDF outputs found under $NRTDIR/inference"
+            exit 1
+          }
+
           # Done.
 
           echo NRT EAGLE CI pipeline completed successfully.
