@@ -315,6 +315,7 @@ jobs:
           EOF
           uw config realize -i nrt-composed.yaml -o nrt.yaml -u update.yaml
 
+          # Define NRTDIR as run directory for "NOW" forecast (changes every run)
           NRTDIR="$(uw config realize -i nrt.yaml --key-path app.rundir)"
           
           for datasource in gfs hrrr; do
