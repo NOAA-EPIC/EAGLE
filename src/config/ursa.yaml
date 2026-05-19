@@ -30,7 +30,7 @@ zarrs:
     execution:
       batchargs:
         --mem-per-cpu: 3G
-        memory: 8G
+        native: '--mem-per-cpu 3G'
       envcmds: !list '{{ ["source /etc/profile.d/profile-slurm.sh"] + zarrs.common.envcmds }}'
       mpiargs:
         - "--export=ALL"

@@ -3,7 +3,7 @@
 # yamllint disable rule:anchors rule:line-length
 
 app:
-  base: /scratch4/NCEPDEV/nems/David.Burrows/eagle/may12/rocoto/EAGLE/src
+  base: /path/to/eagle/src
   experiment_name: default
   gpu: # set by platform config
   partitions: # set by platform config

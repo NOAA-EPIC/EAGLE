@@ -33,7 +33,7 @@ workflow:
     task_zarr_gfs:
       <<: *submit_netaccess
       jobname: zarr-gfs
-      memory: '{{ zarrs.common.execution.batchargs.memory }}'
+      native: '{{ zarrs.common.execution.batchargs.native }}'
       dependency:
         taskdep_grids_and_meshes:
           attrs:
@@ -41,7 +41,7 @@ workflow:
     task_zarr_hrrr:
       <<: *submit_netaccess
       jobname: zarr-hrrr
-      memory:  '{{ zarrs.common.execution.batchargs.memory }}'
+      native: '{{ zarrs.common.execution.batchargs.native }}'
       dependency:
         taskdep_grids_and_meshes:
           attrs: 
