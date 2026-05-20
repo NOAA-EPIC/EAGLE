@@ -303,19 +303,19 @@ jobs:
 
           # Generate NRT config, realize it, run data prep, and run inference.
           
-          make config compose=base:ursa:nrt > nrt-composed.yaml
+          make config compose=base:ursa:nrt >nrt-composed.yaml
+          make realize config=nrt-composed.yaml >nrt.yaml
 
           cat <<EOF >update.yaml
           app:
-            base: "$SRC_ABS"
-            experiment_name: "$EXP"
+            base: $SRC_ABS
+            experiment_name: $EXP
           inference:
             anemoi:
-              checkpoint_path: "$SRC_ABS/run/$EXP/training/outputs/checkpoint"
+              checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
           EOF
-          uw config realize -i nrt-composed.yaml -o nrt.yaml -u update.yaml
-
-          # Define NRTDIR as run directory for "NOW" forecast (changes every run)
+          
+          uw config realize -i nrt.yaml -o nrt.yaml -u update.yaml
           NRTDIR="$(uw config realize -i nrt.yaml --key-path app.rundir)"
           
           make data config=nrt.yaml
