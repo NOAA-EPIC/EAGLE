@@ -20,8 +20,8 @@ modenv   = $(env4mod_$(1))
 modloop  = @set -e && for mod in $(PACKAGE) $(MODULES); do $(make) mod=$$mod $(1); done
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
 
-env4mod_data          = data
 env4mod_$(PACKAGE)    = base
+env4mod_data          = data
 env4mod_inference     = anemoi
 env4mod_training      = anemoi
 env4mod_visualization = visualization
@@ -89,7 +89,7 @@ endif
 realize:
 	$(call check,$(config),config)
 	$(call activate,base)
-	@(set -x && uw config realize$(VERBOSE) --input-file $(config))
+	@(set -x && uw config realize$(VERBOSE) --input-file $(config)$(if $(update), --update-file $(update)))
 
 shellcheck:
 	$(call activate,base)

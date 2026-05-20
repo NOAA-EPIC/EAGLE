@@ -171,6 +171,14 @@ out using Jinja2.
 Note that the realized config may still contain some Jinja2 expressions that can only be realized at run time by the 
 component using a particular config block.
 
+It is also possible to update a config while realizing it. To do so, create a YAML file (e.g. ``updates.yaml``) defining the required updates; see the ``uwtools`` documentation for `an example <https://uwtools.readthedocs.io/en/stable/sections/user_guide/cli/tools/config.html#id2>`_ and run:
+
+.. code-block:: bash
+
+    make realize config=eagle.yaml update=updates.yaml
+
+The updates are applied first, then Jinja2 content is realized.
+
 .. _ConfigValidation:
 
 Config Validation
