@@ -9,7 +9,6 @@ app:
       nodes: 1
       partition: '{{ app.partitions.gpu }}'
       queue: '{{ app.queues.gpu }}'
-      native: '--gres gpu:h100:1'
   partitions:
     netaccess: u1-service
     cpu: u1-compute
@@ -25,12 +24,15 @@ app:
     quickstart:
       walltime: 00:10:00
       nodes: 1:ppn=1
+    gpu:
+      native: '--gres gpu:h100:1'
+    zarr:
+      native: '--mem-per-cpu 3G'
 zarrs:
   common:
     execution:
       batchargs:
         --mem-per-cpu: 3G
-        native: '--mem-per-cpu 3G'
       envcmds: !list '{{ ["source /etc/profile.d/profile-slurm.sh"] + zarrs.common.envcmds }}'
       mpiargs:
         - "--export=ALL"

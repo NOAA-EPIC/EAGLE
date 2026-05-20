@@ -13,7 +13,7 @@ submit_gpu: &submit_gpu
   <<: *submit_common
   partition: '{{ app.gpu.batchargs.partition }}'
   queue: '{{ app.gpu.batchargs.queue }}'
-  native: '{{ app.gpu.batchargs.native }}'
+  native: '{{ workflow.gpu.native }}'
 workflow:
   attrs:
     realtime: false
@@ -33,7 +33,7 @@ workflow:
     task_zarr_gfs:
       <<: *submit_netaccess
       jobname: zarr-gfs
-      native: '{{ zarrs.common.execution.batchargs.native }}'
+      native: '{{ workflow.zarr.native }}'
       dependency:
         taskdep_grids_and_meshes:
           attrs:
@@ -41,7 +41,7 @@ workflow:
     task_zarr_hrrr:
       <<: *submit_netaccess
       jobname: zarr-hrrr
-      native: '{{ zarrs.common.execution.batchargs.native }}'
+      native: '{{ workflow.zarr.native }}'
       dependency:
         taskdep_grids_and_meshes:
           attrs: 
