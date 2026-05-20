@@ -335,7 +335,7 @@ jobs:
           # Done.
 
           echo NRT EAGLE CI pipeline completed successfully.
-          echo "NRT run directory: ${nrtdir}"
+          echo "NRT run directory: $NRTDIR"
 
   cleanup_label:
     name: Cleanup ci-running label
