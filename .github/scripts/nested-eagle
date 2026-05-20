@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# shellcheck disable=1091,2086
+
 set -euo pipefail
 export SETVARS_CALL=${SETVARS_CALL:-0}
 cd "$GITHUB_WORKSPACE/src"
@@ -29,18 +31,18 @@ slurm_wait() {
       state="${state:-UNKNOWN}"
     fi
     if [[ "$state" != "$prev" ]]; then
-      echo $label ($job_id) state: $state
+      echo "$label ($job_id) state: $state"
       prev="$state"
     fi
     case "$state" in
-      COMPLETED)
-        echo $label ($job_id) COMPLETED
-        break
-        ;;
-      FAILED*|CANCELLED*|TIMEOUT*|NODE_FAIL*|OUT_OF_MEMORY*)
-        echo $label ($job_id) terminal failure: $state
-        return 1
-        ;;
+    COMPLETED)
+      echo "$label ($job_id) COMPLETED"
+      break
+      ;;
+    FAILED* | CANCELLED* | TIMEOUT* | NODE_FAIL* | OUT_OF_MEMORY*)
+      echo "$label ($job_id) terminal failure: $state"
+      return 1
+      ;;
     esac
     sleep 20
   done
@@ -179,7 +181,7 @@ done
 for truth in grid obs; do
   for extent in global lam; do
     dir=$RUNROOT/visualization/grid2$truth/$extent/plots-basic
-    count=$(ls -1 $dir/*.png | wc -l)
+    count=$(find $dir -type f -name "*.png" | wc -l)
     expected=8
     test $count -eq $expected || {
       echo ERROR: Found $count PNG files in $dir, expected $expected
@@ -190,7 +192,7 @@ done
 
 for extent in global lam; do
   dir=$RUNROOT/visualization/grid2grid/$extent/plots-spatial-stats
-  count=$(ls -1 $dir/*.png | wc -l)
+  count=$(find $dir -type f -name "*.png" | wc -l)
   expected=40
   test $count -eq $expected || {
     echo ERROR: Found $count PNG files in $dir, expected $expected
