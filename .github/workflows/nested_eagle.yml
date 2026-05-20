@@ -23,6 +23,8 @@ jobs:
       }}
     runs-on: ursa
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Clean old conda installs
         run: .github/scripts/clean-old-conda-installs
   run_pipeline:
