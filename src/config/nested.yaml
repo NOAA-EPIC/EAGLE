@@ -1,3 +1,7 @@
+grids_and_meshes:
+  filenames:
+    hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
+    latent_mesh: '{{ val.filenames.latent_mesh }}'
 training:
   anemoi:
     # Blocks to customize default Anemoi training config.
