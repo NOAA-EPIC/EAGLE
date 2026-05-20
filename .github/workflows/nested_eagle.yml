@@ -1,4 +1,4 @@
-name: Nested EAGLE CI Pipeline (uwtools)
+name: NRT EAGLE CI Pipeline (uwtools)
 
 on:
   pull_request:
@@ -184,9 +184,16 @@ jobs:
           make config compose=base:ursa INSTALLDIR="${INSTALLDIR}" > eagle.yaml
 
           SRC_ABS="${GITHUB_WORKSPACE}/src"
-          sed -i "s|^\\(  base:\\s*\\).*|\\1${SRC_ABS}|" eagle.yaml
-          sed -i "s|^\\(  experiment_name:\\s*\\).*|\\1${EXP}|" eagle.yaml
-          sed -i "s|^\\(  checkpoint_path:\\s*\\).*|\\1${SRC_ABS}/run/${EXP}/training/outputs/checkpoint|" eagle.yaml
+
+          cat <<EOF >update.yaml
+          app:
+            base: "$SRC_ABS"
+            experiment_name: "$EXP"
+          inference:
+            anemoi:
+              checkpoint_path: "$SRC_ABS/run/$EXP/training/outputs/checkpoint"
+          EOF
+          uw config realize -i eagle.yaml -o eagle.yaml -u update.yaml
 
           make validate config=eagle.yaml INSTALLDIR="${INSTALLDIR}"
 
@@ -280,9 +287,41 @@ jobs:
             }
           done
 
+          # Generate NRT config, realize it, run data prep, and run inference.
+          make config compose=base:ursa:nrt >nrt-composed.yaml
+          
+          cat <<EOF >update.yaml
+          app:
+            base: $SRC_ABS
+            experiment_name: $EXP
+          inference:
+            anemoi:
+              checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
+          EOF
+          uw config realize -i nrt-composed.yaml -o nrt-composed.yaml -u update.yaml
+          
+          make realize config=nrt-composed.yaml >nrt.yaml
+
+          #Define NRTDIR in terms of NOW variable (changes every run)
+          NRTDIR="$(uw config realize -i nrt.yaml --key-path app.rundir)"
+          
+          make data config=nrt.yaml
+          for datasource in gfs hrrr; do
+            wait_runscript_batch "$NRTDIR/data" "zarr-$datasource" "Zarr $datasource"
+          done
+
+          make inference config=nrt.yaml
+          wait_runscript_batch "$NRTDIR/inference" "inference" "NRT Inference"
+
+          find "$NRTDIR/inference/output" -type f -name "*.nc" -print -quit | grep -q . || {
+            echo "ERROR: No inference NetCDF outputs found under $NRTDIR/inference"
+            exit 1
+          }
+
           # Done.
 
-          echo Nested EAGLE CI pipeline completed successfully.
+          echo NRT EAGLE CI pipeline completed successfully.
+          echo "NRT run directory: $NRTDIR"
 
   cleanup_label:
     name: Cleanup ci-running label
