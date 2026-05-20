@@ -314,8 +314,9 @@ jobs:
             anemoi:
               checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
           EOF
-          
           uw config realize -i nrt.yaml -o nrt.yaml -u update.yaml
+
+          # Define NRTDIR by the NOW varaible (changes every run)
           NRTDIR="$(uw config realize -i nrt.yaml --key-path app.rundir)"
           
           make data config=nrt.yaml
