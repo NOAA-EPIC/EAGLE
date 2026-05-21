@@ -1,4 +1,6 @@
 submit_common: &submit_common
+  attrs:
+    maxtries: 3
   nodes: '{{ app.quickstart.nodes }}'
   walltime: '{{ app.quickstart.walltime }}'
   account: '{{ app.platform.account }}'
