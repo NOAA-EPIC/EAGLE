@@ -20,10 +20,9 @@ app:
   platform: &platform
     account: epic
     scheduler: slurm
-  workflow:
-    quickstart:
-      walltime: 00:10:00
-      nodes: 1:ppn=1
+  quickstart:
+    walltime: 00:10:00
+    nodes: 1:ppn=1
     gpu:
       native: '--gres gpu:h100:1'
     zarr:
