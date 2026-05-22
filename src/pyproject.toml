@@ -5,8 +5,7 @@ skip_covered = true
 
 [tool.coverage.run]
 branch = true
-omit = [ # TODO REMOVE ALL THESE
-  "eagle/data/grids_and_meshes.py",
+omit = [ # TODO REMOVE THIS
   "eagle/data/zarr.py",
 ]
 

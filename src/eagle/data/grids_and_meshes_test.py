@@ -1,24 +1,64 @@
+from pathlib import Path
+import numpy as np
+import xarray as xr
+from pytest import fixture
+from unittest.mock import patch
+
+from .grids_and_meshes import GridsAndMeshes
+from . import grids_and_meshes
+
+
+@fixture
+def config(tmp_path):
+    return {
+        "grids_and_meshes": {
+            "filenames": {
+                "gfs_target_grid": "%s/global_one_degree.nc" % tmp_path,
+                "hrrr_target_grid": "%s/hrrr_15km.nc" % tmp_path,
+                "latent_mesh": "%s/latentx2.spongex1.combined.sorted.npz" % tmp_path,
+            },
+            "conus_grid_resolution_km": 15,
+            "global_grid_resolution_deg": 1.0,
+            "latent_mesh_global_resolution_deg": 2.0,
+            "latent_mesh_conus_coarsen_factor": 2,
+            "rundir": "%s/rundir" % tmp_path,
+        }
+    }
+
+
+# Driver tests.
+
+
+@fixture
+def driverobj(config):
+    return GridsAndMeshes(
+        config=config, schema_file=Path(__file__).parent / "grids_and_meshes.jsonschema"
+    )
+
+
+def test_conus_data_grid(driverobj):
+    pass
+
+
+def test__conus_data_grid(tmp_path):
+    logfile = tmp_path / "logfile"
+    ds = xr.Dataset(
+        data_vars={
+            "latitude": (["y", "x"], np.ones((3,3))),
+            "longitude": (["y", "x"], np.ones((3,3))),
+            "orog": (["y", "x"], np.ones((3,3))),
+        },
+    )
+    with patch.object(grids_and_meshes.sources, "AWSHRRRArchive") as AWSHRRRArchive:
+        AWSHRRRArchive().open_sample_dataset.return_value = ds
+        cds = grids_and_meshes._conus_data_grid(rundir=tmp_path, logfile=logfile)
+
+
 # Schema tests.
 
-CONFIG = {
-    "grids_and_meshes": {
-        "filenames": {
-            "gfs_target_grid": "/path/to/global_one_degree.nc",
-            "hrrr_target_grid": "/path/to/hrrr_15km.nc",
-            "latent_mesh": "/path/to/latentx2.spongex1.combined.sorted.npz",
-        },
-        "conus_grid_resolution_km": 15,
-        "global_grid_resolution_deg": 1.0,
-        "latent_mesh_global_resolution_deg": 2.0,
-        "latent_mesh_conus_coarsen_factor": 2,
-        "rundir": "/path/to/rundir",
-    },
-}
 
-
-def test_top(logged, tmp_path, validator, with_del, with_set):
+def test_top(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "grids_and_meshes", tmp_path)
-    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -33,11 +73,11 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'object'")
 
 
-def test_grids_and_meshes(logged, tmp_path, validator, with_del, with_set):
+def test_grids_and_meshes(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(
         __file__, "grids_and_meshes", tmp_path, "properties", "grids_and_meshes"
     )
-    config = CONFIG["grids_and_meshes"]
+    config = config["grids_and_meshes"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -148,7 +188,9 @@ def test_grids_and_meshes__latent_mesh_conus_coarsen_factor(
     assert logged("is not of type 'integer'")
 
 
-def test_grids_and_meshes__filenames(logged, tmp_path, validator, with_del, with_set):
+def test_grids_and_meshes__filenames(
+    config, logged, tmp_path, validator, with_del, with_set
+):
     ok = validator(
         __file__,
         "grids_and_meshes",
@@ -158,7 +200,7 @@ def test_grids_and_meshes__filenames(logged, tmp_path, validator, with_del, with
         "properties",
         "filenames",
     )
-    config = CONFIG["grids_and_meshes"]["filenames"]
+    config = config["grids_and_meshes"]["filenames"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -173,12 +215,12 @@ def test_grids_and_meshes__filenames(logged, tmp_path, validator, with_del, with
 
 
 def test_grids_and_meshes__latent_mesh_settings_conditional_required(
-    logged, tmp_path, validator, with_del, with_set
+    config, logged, tmp_path, validator, with_del, with_set
 ):
     ok = validator(
         __file__, "grids_and_meshes", tmp_path, "properties", "grids_and_meshes"
     )
-    config = CONFIG["grids_and_meshes"]
+    config = config["grids_and_meshes"]
     # If latent mesh is requested, latent mesh settings are required.
     assert not ok(with_del(config, "latent_mesh_global_resolution_deg"))
     assert logged("'latent_mesh_global_resolution_deg' is a required property")
