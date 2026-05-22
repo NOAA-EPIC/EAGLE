@@ -35,15 +35,18 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         res = self.config["conus_grid_resolution_km"]
         if res == 3 or "hrrr_target_grid" not in self.config["filenames"]:
-            return
-        path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
-        yield self.taskname(f"conus data grid {path}")
-        yield Asset(path, path.is_file)
-        yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res).to_netcdf(
-            path
-        )
+            yield self.taskname("CONUS data grid (skipping)")
+            yield Asset(None, lambda: True)
+            yield None
+        else:
+            path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
+            yield self.taskname(f"CONUS data grid {path}")
+            yield Asset(path, path.is_file)
+            yield None
+            path.parent.mkdir(parents=True, exist_ok=True)
+            _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res).to_netcdf(
+                path
+            )
 
     @task
     def global_data_grid(self):

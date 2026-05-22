@@ -27,7 +27,16 @@ def config(tmp_path):
     }
 
 
-# Driver tests.
+@fixture
+def dataset():
+    data = np.arange(150000).reshape((300, 500))
+    return xr.Dataset(
+        data_vars={
+            "latitude": (["y", "x"], data),
+            "longitude": (["y", "x"], data),
+            "orog": (["y", "x"], data),
+        }
+    )
 
 
 @fixture
@@ -37,23 +46,42 @@ def driverobj(config):
     )
 
 
-def test_conus_data_grid(driverobj):
-    pass
+@fixture
+def hrrr_target_grid(driverobj):
+    return driverobj.rundir / driverobj.config["filenames"]["hrrr_target_grid"]
+
+
+# Driver tests.
+
+
+def test_conus_data_grid(dataset, driverobj, hrrr_target_grid):
+    assert not hrrr_target_grid.exists()
+    with patch.object(grids_and_meshes, "_conus_data_grid") as _conus_data_grid:
+        _conus_data_grid.return_value = dataset
+        task = driverobj.conus_data_grid()
+    assert hrrr_target_grid.is_file()
+    assert task.ready
+
+
+def test_conus_data_grid__bad_res(driverobj, hrrr_target_grid):
+    driverobj._config["conus_grid_resolution_km"] = 3
+    task = driverobj.conus_data_grid()
+    assert task.ready
+    assert not hrrr_target_grid.exists()
+
+
+def test_conus_data_grid__bad_filenames(driverobj, hrrr_target_grid):
+    driverobj._config["filenames"] = {}
+    task = driverobj.conus_data_grid()
+    assert task.ready
+    assert not hrrr_target_grid.exists()
 
 
 @mark.parametrize("resolution_km", [None, 3, 60])
-def test__conus_data_grid(resolution_km, tmp_path):
+def test__conus_data_grid(dataset, resolution_km, tmp_path):
     logfile = tmp_path / "logfile"
-    data = np.arange(150000).reshape((300, 500))
-    ds = xr.Dataset(
-        data_vars={
-            "latitude": (["y", "x"], data),
-            "longitude": (["y", "x"], data),
-            "orog": (["y", "x"], data),
-        }
-    )
     with patch.object(grids_and_meshes.sources, "AWSHRRRArchive") as AWSHRRRArchive:  # noqa: N806
-        AWSHRRRArchive().open_sample_dataset.return_value = ds
+        AWSHRRRArchive().open_sample_dataset.return_value = dataset
         args = {"rundir": tmp_path, "logfile": logfile}
         if resolution_km:
             args["resolution_km"] = resolution_km
