@@ -1,11 +1,12 @@
 from pathlib import Path
+from unittest.mock import patch
+
 import numpy as np
 import xarray as xr
 from pytest import fixture
-from unittest.mock import patch
 
-from .grids_and_meshes import GridsAndMeshes
 from . import grids_and_meshes
+from .grids_and_meshes import GridsAndMeshes
 
 
 @fixture
@@ -42,16 +43,20 @@ def test_conus_data_grid(driverobj):
 
 def test__conus_data_grid(tmp_path):
     logfile = tmp_path / "logfile"
+    data = np.arange(150000).reshape((300, 500))
     ds = xr.Dataset(
         data_vars={
-            "latitude": (["y", "x"], np.ones((3,3))),
-            "longitude": (["y", "x"], np.ones((3,3))),
-            "orog": (["y", "x"], np.ones((3,3))),
-        },
+            "latitude": (["y", "x"], data),
+            "longitude": (["y", "x"], data),
+            "orog": (["y", "x"], data),
+        }
     )
     with patch.object(grids_and_meshes.sources, "AWSHRRRArchive") as AWSHRRRArchive:
         AWSHRRRArchive().open_sample_dataset.return_value = ds
         cds = grids_and_meshes._conus_data_grid(rundir=tmp_path, logfile=logfile)
+        assert cds.lat.shape == cds.lon.shape == (59, 99)
+        AWSHRRRArchive.assert_called()
+        AWSHRRRArchive().open_sample_dataset.assert_called_once()
 
 
 # Schema tests.

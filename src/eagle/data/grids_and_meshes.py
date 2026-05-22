@@ -171,7 +171,6 @@ def _conus_data_grid(rundir: Path, logfile: Path, resolution_km: int = 15) -> Da
             hds = hds.assign_coords({f"{key}_b": corners})
             hds = hds.drop_vars(f"{key}_bounds")
         hds = hds.rename({"x_vertices": "x_b", "y_vertices": "y_b"})
-
         stride = resolution_km // 3
         # Get the nodes and bounds by subsampling.
         trim = stride - 1
