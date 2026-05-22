@@ -1,7 +1,60 @@
+# This is the base EAGLE config. It currently configures the Nested EAGLE case.
+
+# yamllint disable rule:anchors rule:line-length
+
 grids_and_meshes:
   filenames:
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
     latent_mesh: '{{ val.filenames.latent_mesh }}'
+inference:
+  anemoi:
+    input_dataset_kwargs: &dataset-kwargs
+      cutout:
+        - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
+          trim_edge: [10, 11, 10, 11]
+        - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
+      adjust: all
+      min_distance_km: 0
+prewxvx:
+  common:
+    prewxvx: &prewxvx-common
+      forecast_path: '{{ inference.anemoi.output_path }}'
+      freq: '{{ app.time.freq }}'
+      lead_time: !int '{{ app.time.leadtime }}'
+      lam_index: 64220
+      lcc_info:
+        n_x: 338
+        n_y: 190
+      levels:
+        - 250
+        - 500
+        - 850
+      start_date: !datetime '{{ app.time.inference_start }}'
+      end_date: !datetime '{{ app.time.inference_stop }}'
+      vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
+    rundir: '{{ val.vx.rundir }}'
+  global:
+    prewxvx: &prewxvx-global
+      name: global
+      eagle_tools:
+        <<: *prewxvx-common
+        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}'
+        model_type: nested-global
+        anemoi_reference_dataset_kwargs:
+          <<: *dataset-kwargs
+        forecast_regrid_kwargs:
+          regridder_kwargs:
+            method: 'conservative_normed'
+          target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}'
+      rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
+  lam:
+    prewxvx: &prewxvx-lam
+      name: lam
+      eagle_tools:
+        <<: *prewxvx-common
+        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
+        model_type: nested-lam
+      rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
 training:
   anemoi:
     # Blocks to customize default Anemoi training config.
@@ -338,6 +391,136 @@ val:
   filenames:
     hrrr_target_grid: hrrr_15km.nc
     latent_mesh: latentx2.spongex1.combined.sorted.npz
+visualization:
+  grid2grid:
+    global:
+      visualization:
+        eagle_tools:
+          stat_prefix: grid_stat_nested_global
+    lam:
+      visualization:
+        eagle_tools:
+          start_date: !datetime '{{ app.time.inference_start }}'
+          end_date: !datetime '{{ app.time.inference_stop }}'
+          freq: '{{ app.time.freq }}'
+          leadtimes: !dict '{{ visualization.common.leadtimes }}'
+          stat_prefix: grid_stat_nested_lam
+          work_path: '{{ val.vx.rundir }}/grid2grid/lam'
+          name: grid-lam
+          rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
+          spatial_stat_plots: !dict '{{ visualization.common.spatial_stat_plots }}'
+          stats: !list '{{ visualization.common.stats }}'
+          variable_prefixes: !list '{{ visualization.common.variable_prefixes }}'
+          variables: !list '{{ visualization.common.variables }}'
+  grid2obs:
+    global:
+      visualization:
+        eagle_tools:
+          stat_prefix: point_stat_nested_global
+    lam:
+      visualization:
+        eagle_tools:
+          start_date: !datetime '{{ app.time.inference_start }}'
+          end_date: !datetime '{{ app.time.inference_stop }}'
+          freq: '{{ app.time.freq }}'
+          leadtimes: !dict '{{ visualization.common.leadtimes }}'
+          stat_prefix: point_stat_nested_lam
+          work_path: '{{ val.vx.rundir }}/grid2obs/lam/'
+          name: obs-lam
+          rundir: '{{ val.visualization.rundir }}/grid2obs/lam'
+          stats: !list '{{ visualization.common.stats }}'
+          variable_prefixes: !list '{{ visualization.common.variable_prefixes }}'
+          variables: !list '{{ visualization.common.variables }}'
+vx:
+  grid2grid:
+    global:
+      wxvx:
+        wxvx:
+          forecast:
+            name: nested_global
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
+          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
+
+    lam:
+      platform: !dict '{{ app.platform }}'
+      wxvx: # config for the EAGLE driver
+        execution:
+          batchargs:
+            cores: 1
+            export: false
+            partition: '{{ app.partitions.netaccess }}'
+            walltime: '00:30:00'
+            rundir: '{{ vx.grid2grid.lam.wxvx.rundir }}'
+          envcmds: !list '{{ vx.common.execution.envcmds }}'
+          executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
+        name: grid2grid-lam
+        prewxvx:
+          <<: *prewxvx-lam
+        rundir: '{{ val.vx.rundir }}/grid2grid/lam'
+        wxvx: # config for the wxvx application
+          cycles: !dict '{{ vx.common.wxvx.cycles }}'
+          truth:
+            name: HRRR
+            type: grid
+            url: https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.{{ yyyymmdd }}/conus/hrrr.t{{ hh }}z.wrfprsf{{ "%02d" % fh }}.grib2
+          forecast:
+            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
+            name: nested_lam
+            # NB: Retain relative 'meta.post_files' reference in 'path' value!
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
+            projection:
+              a: 6371229
+              b: 6371229
+              lat_0: 38.5
+              lat_1: 38.5
+              lat_2: 38.5
+              lon_0: 262.5
+              proj: lcc
+          leadtimes: !dict '{{ vx.common.wxvx.leadtimes }}'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
+          ncdiffs: !bool '{{ vx.grid2grid.global.wxvx.wxvx.ncdiffs }}'
+          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
+          regrid: !dict '{{ vx.grid2grid.global.wxvx.wxvx.regrid }}'
+          variables: !dict '{{ vx.common.wxvx.variables }}'
+  grid2obs:
+    global:
+      wxvx:
+        wxvx:
+          forecast:
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
+          paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
+    lam:
+      platform: !dict '{{ app.platform }}'
+      wxvx: # config for the EAGLE driver
+        execution:
+          batchargs:
+            cores: 1
+            export: false
+            partition: '{{ app.partitions.netaccess }}'
+            rundir: '{{ vx.grid2obs.lam.wxvx.rundir }}'
+            walltime: '00:30:00'
+          envcmds: !list '{{ vx.common.execution.envcmds }}'
+          executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
+        name: grid2obs-lam
+        prewxvx:
+          <<: *prewxvx-lam
+        rundir: '{{ val.vx.rundir }}/grid2obs/lam'
+        wxvx: # config for the wxvx application
+          truth: !dict '{{ vx.grid2obs.global.wxvx.wxvx.truth }}'
+          cycles: !dict '{{ vx.common.wxvx.cycles }}'
+          forecast:
+            coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
+            name: '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.name }}'
+            # NB: Retain relative 'meta.post_files' reference in 'path' value!
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
+            projection: !dict '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.projection }}'
+          leadtimes: !dict '{{ vx.common.wxvx.leadtimes }}'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
+          paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
+          regrid: !dict '{{ vx.grid2obs.global.wxvx.wxvx.regrid }}'
+          variables: !dict '{{ vx.common.wxvx.variables }}'
 zarrs:
   hrrr:
     zarr:
