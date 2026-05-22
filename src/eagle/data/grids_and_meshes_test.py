@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import numpy as np
 import xarray as xr
-from pytest import fixture
+from pytest import fixture, mark
 
 from . import grids_and_meshes
 from .grids_and_meshes import GridsAndMeshes
@@ -41,7 +41,8 @@ def test_conus_data_grid(driverobj):
     pass
 
 
-def test__conus_data_grid(tmp_path):
+@mark.parametrize("resolution_km", [None, 3, 60])
+def test__conus_data_grid(resolution_km, tmp_path):
     logfile = tmp_path / "logfile"
     data = np.arange(150000).reshape((300, 500))
     ds = xr.Dataset(
@@ -51,12 +52,16 @@ def test__conus_data_grid(tmp_path):
             "orog": (["y", "x"], data),
         }
     )
-    with patch.object(grids_and_meshes.sources, "AWSHRRRArchive") as AWSHRRRArchive:
+    with patch.object(grids_and_meshes.sources, "AWSHRRRArchive") as AWSHRRRArchive:  # noqa: N806
         AWSHRRRArchive().open_sample_dataset.return_value = ds
-        cds = grids_and_meshes._conus_data_grid(rundir=tmp_path, logfile=logfile)
-        assert cds.lat.shape == cds.lon.shape == (59, 99)
+        args = {"rundir": tmp_path, "logfile": logfile}
+        if resolution_km:
+            args["resolution_km"] = resolution_km
+        cds = grids_and_meshes._conus_data_grid(**args)
         AWSHRRRArchive.assert_called()
         AWSHRRRArchive().open_sample_dataset.assert_called_once()
+        shape = {None: (59, 99), 3: (300, 500), 60: (14, 24)}[resolution_km]
+        assert cds.lat.shape == cds.lon.shape == shape
 
 
 # Schema tests.
