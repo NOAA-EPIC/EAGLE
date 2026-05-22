@@ -47,6 +47,11 @@ def driverobj(config):
 
 
 @fixture
+def gfs_target_grid(driverobj):
+    return driverobj.rundir / driverobj.config["filenames"]["gfs_target_grid"]
+
+
+@fixture
 def hrrr_target_grid(driverobj):
     return driverobj.rundir / driverobj.config["filenames"]["hrrr_target_grid"]
 
@@ -58,22 +63,37 @@ def test_conus_data_grid(dataset, driverobj, hrrr_target_grid):
     assert not hrrr_target_grid.exists()
     with patch.object(grids_and_meshes, "_conus_data_grid") as _conus_data_grid:
         _conus_data_grid.return_value = dataset
-        task = driverobj.conus_data_grid()
+        assert driverobj.conus_data_grid().ready
     assert hrrr_target_grid.is_file()
-    assert task.ready
 
 
 def test_conus_data_grid__bad_res(driverobj, hrrr_target_grid):
     driverobj._config["conus_grid_resolution_km"] = 3
-    task = driverobj.conus_data_grid()
-    assert task.ready
+    assert driverobj.conus_data_grid().ready
     assert not hrrr_target_grid.exists()
 
 
 def test_conus_data_grid__bad_filenames(driverobj, hrrr_target_grid):
     driverobj._config["filenames"] = {}
-    task = driverobj.conus_data_grid()
-    assert task.ready
+    assert driverobj.conus_data_grid().ready
+    assert not hrrr_target_grid.exists()
+
+
+def test_global_data_grid(driverobj, gfs_target_grid):
+    assert not gfs_target_grid.exists()
+    assert driverobj.global_data_grid().ready
+    assert gfs_target_grid.is_file()
+
+
+def test_global_data_grid__bad_res(driverobj, hrrr_target_grid):
+    driverobj._config["global_grid_resolution_km"] = 0.25
+    assert driverobj.global_data_grid().ready
+    assert not hrrr_target_grid.exists()
+
+
+def test_global_data_grid__bad_filenames(driverobj, hrrr_target_grid):
+    driverobj._config["filenames"] = {}
+    assert driverobj.global_data_grid().ready
     assert not hrrr_target_grid.exists()
 
 

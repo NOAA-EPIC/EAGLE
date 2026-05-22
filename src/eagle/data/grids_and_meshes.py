@@ -85,7 +85,9 @@ class GridsAndMeshes(AssetsTimeInvariant):
             yield None
             path.parent.mkdir(parents=True, exist_ok=True)
             res = self.config["conus_grid_resolution_km"]
-            gmesh = _global_latent_grid(self.config["latent_mesh_global_resolution_deg"])
+            gmesh = _global_latent_grid(
+                self.config["latent_mesh_global_resolution_deg"]
+            )
             cmesh = _conus_latent_grid(
                 _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res),
                 coarsen=self.config["latent_mesh_conus_coarsen_factor"],
