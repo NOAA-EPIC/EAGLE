@@ -67,14 +67,14 @@ def test_conus_data_grid(dataset, driverobj, hrrr_target_grid):
     assert hrrr_target_grid.is_file()
 
 
-def test_conus_data_grid__bad_res(driverobj, hrrr_target_grid):
-    driverobj._config["conus_grid_resolution_km"] = 3
+def test_conus_data_grid__bad_filenames(driverobj, hrrr_target_grid):
+    driverobj._config["filenames"] = {}
     assert driverobj.conus_data_grid().ready
     assert not hrrr_target_grid.exists()
 
 
-def test_conus_data_grid__bad_filenames(driverobj, hrrr_target_grid):
-    driverobj._config["filenames"] = {}
+def test_conus_data_grid__bad_res(driverobj, hrrr_target_grid):
+    driverobj._config["conus_grid_resolution_km"] = 3
     assert driverobj.conus_data_grid().ready
     assert not hrrr_target_grid.exists()
 
@@ -89,14 +89,14 @@ def test_global_data_grid(driverobj, gfs_target_grid):
     assert gfs_target_grid.is_file()
 
 
-def test_global_data_grid__bad_res(driverobj, gfs_target_grid):
-    driverobj._config["global_grid_resolution_deg"] = 0.25
+def test_global_data_grid__bad_filenames(driverobj, gfs_target_grid):
+    driverobj._config["filenames"] = {}
     assert driverobj.global_data_grid().ready
     assert not gfs_target_grid.exists()
 
 
-def test_global_data_grid__bad_filenames(driverobj, gfs_target_grid):
-    driverobj._config["filenames"] = {}
+def test_global_data_grid__bad_res(driverobj, gfs_target_grid):
+    driverobj._config["global_grid_resolution_deg"] = 0.25
     assert driverobj.global_data_grid().ready
     assert not gfs_target_grid.exists()
 
