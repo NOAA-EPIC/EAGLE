@@ -79,22 +79,85 @@ def test_conus_data_grid__bad_filenames(driverobj, hrrr_target_grid):
     assert not hrrr_target_grid.exists()
 
 
+def test_driver_name():
+    assert GridsAndMeshes.driver_name() == "grids_and_meshes"
+
+
 def test_global_data_grid(driverobj, gfs_target_grid):
     assert not gfs_target_grid.exists()
     assert driverobj.global_data_grid().ready
     assert gfs_target_grid.is_file()
 
 
-def test_global_data_grid__bad_res(driverobj, hrrr_target_grid):
-    driverobj._config["global_grid_resolution_km"] = 0.25
+def test_global_data_grid__bad_res(driverobj, gfs_target_grid):
+    driverobj._config["global_grid_resolution_deg"] = 0.25
     assert driverobj.global_data_grid().ready
-    assert not hrrr_target_grid.exists()
+    assert not gfs_target_grid.exists()
 
 
-def test_global_data_grid__bad_filenames(driverobj, hrrr_target_grid):
+def test_global_data_grid__bad_filenames(driverobj, gfs_target_grid):
     driverobj._config["filenames"] = {}
     assert driverobj.global_data_grid().ready
-    assert not hrrr_target_grid.exists()
+    assert not gfs_target_grid.exists()
+
+
+def test_latent_mesh(driverobj):
+    path = driverobj.rundir / driverobj.config["filenames"]["latent_mesh"]
+    assert not path.exists()
+    coords = {"lat": np.array([3.0, 4.0]), "lon": np.array([1.0, 2.0])}
+    with (
+        patch.object(grids_and_meshes, "_global_latent_grid"),
+        patch.object(grids_and_meshes, "_conus_data_grid"),
+        patch.object(grids_and_meshes, "_conus_latent_grid"),
+        patch.object(
+            grids_and_meshes, "_combine_global_and_conus_meshes", return_value=coords
+        ),
+    ):
+        assert driverobj.latent_mesh().ready
+    assert path.is_file()
+
+
+def test_latent_mesh__bad_filenames(driverobj):
+    path = driverobj.rundir / driverobj.config["filenames"]["latent_mesh"]
+    driverobj._config["filenames"] = {}
+    assert driverobj.latent_mesh().ready
+    assert not path.exists()
+
+
+@mark.parametrize(
+    "remove",
+    [
+        [],
+        ["hrrr_target_grid"],
+        ["gfs_target_grid"],
+        ["latent_mesh"],
+        ["hrrr_target_grid", "gfs_target_grid", "latent_mesh"],
+    ],
+)
+def test_provisioned_rundir(driverobj, readytask, remove):
+    for key in remove:
+        del driverobj._config["filenames"][key]
+    with patch.multiple(
+        driverobj,
+        conus_data_grid=readytask,
+        global_data_grid=readytask,
+        latent_mesh=readytask,
+    ):
+        assert driverobj.provisioned_rundir().ready
+
+
+def test__combine_global_and_conus_meshes():
+    gmesh = xr.Dataset({"lat": ("lat", [0.0, 1.0]), "lon": ("lon", [0.0, 1.0])})
+    cmesh = xr.Dataset({"lat": (["y", "x"], [[20.0]]), "lon": (["y", "x"], [[10.0]])})
+    mask = np.array([True, True, False, False])
+    order = np.array([2, 0, 1])
+    with (
+        patch.object(grids_and_meshes, "cutout_mask", return_value=mask),
+        patch.object(grids_and_meshes, "get_coordinates_ordering", return_value=order),
+    ):
+        result = grids_and_meshes._combine_global_and_conus_meshes(gmesh, cmesh)
+    np.testing.assert_array_equal(result["lat"], [20.0, 0.0, 0.0])
+    np.testing.assert_array_equal(result["lon"], [10.0, 0.0, 1.0])
 
 
 @mark.parametrize("resolution_km", [None, 3, 60])
@@ -110,6 +173,38 @@ def test__conus_data_grid(dataset, resolution_km, tmp_path):
         AWSHRRRArchive().open_sample_dataset.assert_called_once()
         shape = {None: (59, 99), 3: (300, 500), 60: (14, 24)}[resolution_km]
         assert cds.lat.shape == cds.lon.shape == shape
+
+
+def test__conus_data_grid_logfile(driverobj):
+    assert driverobj._conus_data_grid_logfile == (
+        driverobj.rundir / driverobj.config["filenames"]["hrrr_target_grid"]
+    ).with_suffix(".log")
+
+
+def test__conus_data_grid_logfile__no_hrrr(driverobj):
+    del driverobj._config["filenames"]["hrrr_target_grid"]
+    assert (
+        driverobj._conus_data_grid_logfile == driverobj.rundir / "hrrr_target_grid.log"
+    )
+
+
+def test__conus_latent_grid():
+    ny, nx = 100, 200
+    cds = xr.Dataset(
+        {
+            "lat_b": (["y_b", "x_b"], np.zeros((ny, nx))),
+            "lon_b": (["y_b", "x_b"], np.zeros((ny, nx))),
+        }
+    )
+    result = grids_and_meshes._conus_latent_grid(cds)
+    assert result.lat.shape == result.lon.shape == (40, 90)
+
+
+def test__global_latent_grid():
+    result = grids_and_meshes._global_latent_grid(2.0)
+    assert "latitude_longitude" not in result
+    assert result.lat.shape == (90,)
+    assert result.lon.shape == (180,)
 
 
 # Schema tests.
