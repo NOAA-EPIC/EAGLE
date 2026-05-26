@@ -1,4 +1,6 @@
+import logging
 from pathlib import Path
+from subprocess import run
 
 from iotaa import Asset, collection, external, task  # provided by uwtools
 from uwtools.api.config import get_yaml_config
@@ -31,6 +33,7 @@ class Inference(DriverTimeInvariant):
             else Path(config["checkpoint_path"])
         )
         yield self._checkpoint(ckpt_path)
+        self._validate_checkpoint(ckpt_path)
         if ckpt_dir:
             config["checkpoint_path"] = str(ckpt_path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -66,3 +69,20 @@ class Inference(DriverTimeInvariant):
         taskname = "Checkpoint exists %s" % path
         yield taskname
         yield Asset(path, path.exists)
+
+    def _validate_checkpoint(self, ckpt_path: Path):
+        """
+        Warn if checkpoint is incompatible with the current anemoi-inference version.
+        """
+        logfile = self.rundir / "validate.log"
+        result = run(
+            "anemoi-inference validate %s >%s 2>&1" % (ckpt_path, logfile),
+            check=False,
+            cwd=self.rundir,
+            shell=True,
+        )
+        if result.returncode:
+            logging.warning(
+                "Checkpoint %s may be incompatible with the current anemoi-inference version.",  # noqa: E501
+                ckpt_path,
+            )

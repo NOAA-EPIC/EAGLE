@@ -2,8 +2,9 @@ from os import utime
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture
+from pytest import fixture, mark
 
+from . import inference
 from .inference import Inference
 
 
@@ -78,6 +79,16 @@ def test_anemoi_config__explicit_checkpoint(driverobj, tmp_path):
 
 def test_driver_name():
     assert Inference.driver_name() == "inference"
+
+
+@mark.parametrize("returncode", [0, 1])
+def test_validate_checkpoint(driverobj, tmp_path, logged, returncode):
+    driverobj._config["rundir"] = tmp_path
+    ckpt_path = tmp_path / "inference-last.ckpt"
+    with patch.object(inference, "run") as mock_run:
+        mock_run.return_value.returncode = returncode
+        driverobj._validate_checkpoint(ckpt_path)
+    assert logged(f"Checkpoint {ckpt_path} may be incompatible") == returncode
 
 
 def test_provisioned_rundir(driverobj, readytask, tmp_path):
