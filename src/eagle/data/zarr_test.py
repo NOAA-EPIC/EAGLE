@@ -1,41 +1,89 @@
+from pathlib import Path
+from unittest.mock import patch
+
+from pytest import fixture
+
+from .zarr import Zarr
+
+
+@fixture
+def config():
+    return {
+        "platform": {
+            "account": "a",
+            "scheduler": "slurm",
+        },
+        "zarr": {
+            "execution": {
+                # uwtools validates this block.
+                "batchargs": {
+                    "walltime": "01:00:00",
+                },
+                "executable": "ufs2arco",
+            },
+            "name": "gfs",
+            "rundir": "/path/to/rundir",
+            "ufs2arco": {
+                "attrs": {},
+                "directories": {},
+                "mover": {
+                    "name": "mpidatamover",
+                },
+                "multisource": [
+                    {
+                        "source": {
+                            "name": "gfs_archive",
+                        },
+                    },
+                ],
+                "target": {
+                    "name": "anemoi",
+                },
+                "transforms": {},
+            },
+        },
+    }
+
+
+# Driver tests.
+
+
+@fixture
+def driverobj(config):
+    return Zarr(
+        config=config,
+        batch=True,
+        schema_file=Path(__file__).parent / "zarr.jsonschema",
+    )
+
+
+def test_driver_name():
+    assert Zarr.driver_name() == "zarr"
+
+
+def test_provisioned_rundir(driverobj, readytask, tmp_path):
+    driverobj._config["rundir"] = tmp_path
+    runscript = tmp_path / "runscript.zarr-gfs"
+    assert not runscript.is_file()
+    with patch.object(driverobj, "ufs2arco_config", wraps=readytask) as ufs2arco_config:
+        driverobj.provisioned_rundir()
+    ufs2arco_config.assert_called_once_with()
+    assert runscript.is_file()
+
+
+def test_ufs2arco_config(driverobj, tmp_path):
+    driverobj._config["rundir"] = tmp_path
+    cfgfile = tmp_path / "ufs2arco-gfs.yaml"
+    assert not cfgfile.is_file()
+    driverobj.ufs2arco_config()
+    assert cfgfile.is_file()
+
+
 # Schema tests.
 
-CONFIG: dict = {
-    "zarr": {
-        "execution": {
-            # uwtools validates this block.
-            "batchargs": {
-                "walltime": "01:00:00",
-            },
-            "executable": "ufs2arco",
-        },
-        "name": "gfs",
-        "rundir": "/path/to/rundir",
-        "ufs2arco": {
-            "attrs": {},
-            "directories": {},
-            "mover": {
-                "name": "mpidatamover",
-            },
-            "multisource": [
-                {
-                    "source": {
-                        "name": "gfs_archive",
-                    },
-                },
-            ],
-            "target": {
-                "name": "anemoi",
-            },
-            "transforms": {},
-        },
-    },
-}
 
-
-def test_top(logged, tmp_path, validator, with_del, with_set):
+def test_top(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "zarr", tmp_path)
-    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -50,9 +98,9 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'object'")
 
 
-def test_zarr(logged, tmp_path, validator, with_del, with_set):
+def test_zarr(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "zarr", tmp_path, "properties", "zarr")
-    config = CONFIG["zarr"]
+    config = config["zarr"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -71,11 +119,11 @@ def test_zarr(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'string'")
 
 
-def test_zarr__ufs2arco(logged, tmp_path, validator, with_del, with_set):
+def test_zarr__ufs2arco(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(
         __file__, "zarr", tmp_path, "properties", "zarr", "properties", "ufs2arco"
     )
-    config = CONFIG["zarr"]["ufs2arco"]
+    config = config["zarr"]["ufs2arco"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -94,7 +142,7 @@ def test_zarr__ufs2arco(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'object'")
 
 
-def test_zarr__ufs2arco__multisource(logged, tmp_path, validator):
+def test_zarr__ufs2arco__multisource(config, logged, tmp_path, validator):
     ok = validator(
         __file__,
         "zarr",
@@ -106,7 +154,7 @@ def test_zarr__ufs2arco__multisource(logged, tmp_path, validator):
         "properties",
         "multisource",
     )
-    config = CONFIG["zarr"]["ufs2arco"]["multisource"]
+    config = config["zarr"]["ufs2arco"]["multisource"]
     # Basic correctness:
     assert ok(config)
     # At least one element is required:
@@ -115,7 +163,7 @@ def test_zarr__ufs2arco__multisource(logged, tmp_path, validator):
 
 
 def test_zarr__ufs2arco__multisource__item(
-    logged, tmp_path, validator, with_del, with_set
+    config, logged, tmp_path, validator, with_del, with_set
 ):
     ok = validator(
         __file__,
@@ -129,7 +177,7 @@ def test_zarr__ufs2arco__multisource__item(
         "multisource",
         "items",
     )
-    config = CONFIG["zarr"]["ufs2arco"]["multisource"][0]
+    config = config["zarr"]["ufs2arco"]["multisource"][0]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -145,7 +193,7 @@ def test_zarr__ufs2arco__multisource__item(
 
 
 def test_zarr__ufs2arco__multisource__item__source(
-    logged, tmp_path, validator, with_del, with_set
+    config, logged, tmp_path, validator, with_del, with_set
 ):
     ok = validator(
         __file__,
@@ -161,7 +209,7 @@ def test_zarr__ufs2arco__multisource__item__source(
         "properties",
         "source",
     )
-    config = CONFIG["zarr"]["ufs2arco"]["multisource"][0]["source"]
+    config = config["zarr"]["ufs2arco"]["multisource"][0]["source"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
