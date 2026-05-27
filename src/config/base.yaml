@@ -55,7 +55,7 @@ inference:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
       - set -ex
-    executable: eagle-tools inference inference.yaml
+    executable: '{{ app.launcher | default("") }} eagle-tools inference inference.yaml'
   rundir: '{{ app.rundir }}/inference'
 platform: !dict '{{ app.platform }}'
 prewxvx:
@@ -444,7 +444,7 @@ training:
       - set -ex
       - export SLURM_GPUS_PER_NODE=1
       - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-    executable: anemoi-training train --config-name=training
+    executable: '{{ app.launcher | default("") }} anemoi-training train --config-name=training'
   remove:
     # Dot-separated config keys paths to delete from the composed runtime config.
     - graph.nodes.hidden.node_builder.grid
