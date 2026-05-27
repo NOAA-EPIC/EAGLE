@@ -19,7 +19,7 @@ app:
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
 grids_and_meshes:
   filenames:
-    gfs_target_grid: !remove
+    gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
     latent_mesh: !remove
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/data'
@@ -29,7 +29,7 @@ grids_and_meshes:
   latent_mesh_conus_coarsen_factor: !remove
 inference:
   anemoi:
-    input_dataset_kwargs:
+    input_dataset_kwargs: &nrt-dataset-kwargs
       cutout:
         - dataset: '{{ val.data.rundir }}/hrrr.zarr'
           trim_edge: [25, 24, 25, 26]
@@ -43,6 +43,20 @@ inference:
       - conda activate anemoi
       - set -ex
       - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+prewxvx:
+  common:
+    prewxvx:
+      lam_index: 407040
+      lcc_info:
+        n_x: 848
+        n_y: 480
+  global:
+    prewxvx:
+      eagle_tools:
+        anemoi_reference_dataset_kwargs:
+          <<: *nrt-dataset-kwargs
+        forecast_regrid_kwargs:
+          target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.gfs_target_grid }}'
 training: !remove
 ufs2arco:
   mover:
@@ -67,7 +81,7 @@ ufs2arco:
     statistics_period: !remove
 val:
   filenames:
-    gfs_target_grid: !remove
+    gfs_target_grid: global_quarter_degree.nc
     hrrr_target_grid: hrrr_6km.nc
     latent_mesh: !remove
     graph: !remove

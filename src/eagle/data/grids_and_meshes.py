@@ -51,7 +51,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
         The global grid, provisioned to the rundir.
         """
         res = self.config["global_grid_resolution_deg"]
-        if res == 0.25 or "gfs_target_grid" not in self.config["filenames"]:
+        if "gfs_target_grid" not in self.config["filenames"]:
             return
         path = self.rundir / self.config["filenames"]["gfs_target_grid"]
         yield self.taskname(f"global data grid {path}")
