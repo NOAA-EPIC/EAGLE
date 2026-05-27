@@ -60,7 +60,8 @@ def test_anemoi_config(driverobj, tmp_path):
     driverobj._config["rundir"] = tmp_path
     cfgfile = tmp_path / "inference.yaml"
     assert not cfgfile.is_file()
-    driverobj.anemoi_config()
+    with patch.object(driverobj, "_valid_checkpoint", return_value=None):
+        driverobj.anemoi_config()
     assert cfgfile.is_file()
     assert str(latest_ckptfile) in cfgfile.read_text()
 
@@ -73,22 +74,24 @@ def test_anemoi_config__explicit_checkpoint(driverobj, tmp_path):
     driverobj._config["anemoi"]["checkpoint_path"] = str(ckptfile)
     cfgfile = tmp_path / "inference.yaml"
     assert not cfgfile.is_file()
-    driverobj.anemoi_config()
+    with patch.object(driverobj, "_valid_checkpoint", return_value=None):
+        driverobj.anemoi_config()
     assert cfgfile.is_file()
+
+
+@mark.parametrize("valid", [True, False])
+def test__valid_checkpoint(driverobj, tmp_path, valid):
+    ckpt_path = tmp_path / "inference-last.ckpt"
+    ckpt_path.touch()
+    with patch.object(inference, "Checkpoint") as checkpoint:
+        checkpoint.return_value.validate_environment.return_value = valid
+        driverobj._valid_checkpoint(ckpt_path)
+    checkpoint.assert_called_once_with(ckpt_path)
+    checkpoint.return_value.validate_environment.assert_called_once_with()
 
 
 def test_driver_name():
     assert Inference.driver_name() == "inference"
-
-
-@mark.parametrize("returncode", [0, 1])
-def test_validate_checkpoint(driverobj, tmp_path, logged, returncode):
-    driverobj._config["rundir"] = tmp_path
-    ckpt_path = tmp_path / "inference-last.ckpt"
-    with patch.object(inference, "run") as mock_run:
-        mock_run.return_value.returncode = returncode
-        driverobj._validate_checkpoint(ckpt_path)
-    assert logged(f"Checkpoint {ckpt_path} may be incompatible") == returncode
 
 
 def test_provisioned_rundir(driverobj, readytask, tmp_path):
