@@ -85,9 +85,9 @@ def test__valid_checkpoint(driverobj, tmp_path, valid):
     ckpt_path.touch()
     with patch.object(inference, "Checkpoint") as checkpoint:
         checkpoint.return_value.validate_environment.return_value = valid
-        driverobj._valid_checkpoint(ckpt_path)
-    checkpoint.assert_called_once_with(ckpt_path)
-    checkpoint.return_value.validate_environment.assert_called_once_with()
+        result = driverobj._valid_checkpoint(ckpt_path)
+    assert result.ref == ckpt_path
+    assert result.ready is valid
 
 
 def test_driver_name():
