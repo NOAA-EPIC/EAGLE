@@ -6,7 +6,7 @@ app:
     now: !datetime '{{ "NOW" | env }}'
     ic_start: !datetime '{{ app.nrt.inference_start - app.nrt.multistep_input_offset }}'
     inference_start: !datetime '{{ app.nrt.now - app.nrt.offset - app.nrt.latency }}'
-    latency: !timedelta 6
+    latency: !timedelta 96
     leadtime: !timedelta 48
     offset: !timedelta '0:0:{{ (app.nrt.now.timestamp() % 21600) | int }}'
     stop: !datetime '{{ app.nrt.inference_start + app.nrt.leadtime }}'
@@ -57,6 +57,10 @@ prewxvx:
           <<: *nrt-dataset-kwargs
         forecast_regrid_kwargs:
           target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.gfs_target_grid }}'
+  lam:
+    prewxvx:
+      eagle_tools:
+        rename_curvilinear_coords_to_latlon: true
 training: !remove
 ufs2arco:
   mover:

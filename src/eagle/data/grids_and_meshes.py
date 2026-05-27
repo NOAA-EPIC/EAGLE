@@ -58,9 +58,15 @@ class GridsAndMeshes(AssetsTimeInvariant):
         yield Asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        ds = xesmf.util.grid_global(res, res, cf=True, lon1=360)
-        ds = ds.drop_vars("latitude_longitude")
-        ds = ds.sortby("lat", ascending=False)  # GFS goes north -> south
+        lon = np.arange(0, 360, res)
+        lat = np.arange(-90, 90, res)
+        ds = xr.Dataset(
+            coords={
+                "lon": ("lon", lon),
+                "lat": ("lat", lat),
+            }
+        )
+        ds = ds.sel(lat=slice(-89.9, 89.9))
         ds.to_netcdf(path)
 
     @task
