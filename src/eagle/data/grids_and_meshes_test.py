@@ -1,24 +1,217 @@
+from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
+import xarray as xr
+from pytest import fixture, mark
+
+from . import grids_and_meshes
+from .grids_and_meshes import GridsAndMeshes
+
+
+@fixture
+def config(tmp_path):
+    return {
+        "grids_and_meshes": {
+            "filenames": {
+                "gfs_target_grid": "%s/global_one_degree.nc" % tmp_path,
+                "hrrr_target_grid": "%s/hrrr_15km.nc" % tmp_path,
+                "latent_mesh": "%s/latentx2.spongex1.combined.sorted.npz" % tmp_path,
+            },
+            "conus_grid_resolution_km": 15,
+            "global_grid_resolution_deg": 1.0,
+            "latent_mesh_global_resolution_deg": 2.0,
+            "latent_mesh_conus_coarsen_factor": 2,
+            "rundir": "%s/rundir" % tmp_path,
+        }
+    }
+
+
+@fixture
+def dataset():
+    data = np.arange(150000).reshape((300, 500))
+    return xr.Dataset(
+        data_vars={
+            "latitude": (["y", "x"], data),
+            "longitude": (["y", "x"], data),
+            "orog": (["y", "x"], data),
+        }
+    )
+
+
+@fixture
+def driverobj(config):
+    return GridsAndMeshes(
+        config=config, schema_file=Path(__file__).parent / "grids_and_meshes.jsonschema"
+    )
+
+
+@fixture
+def gfs_target_grid(driverobj):
+    return driverobj.rundir / driverobj.config["filenames"]["gfs_target_grid"]
+
+
+@fixture
+def hrrr_target_grid(driverobj):
+    return driverobj.rundir / driverobj.config["filenames"]["hrrr_target_grid"]
+
+
+# Driver tests.
+
+
+def test_conus_data_grid(dataset, driverobj, hrrr_target_grid):
+    assert not hrrr_target_grid.exists()
+    with patch.object(grids_and_meshes, "_conus_data_grid") as _conus_data_grid:
+        _conus_data_grid.return_value = dataset
+        assert driverobj.conus_data_grid().ready
+    assert hrrr_target_grid.is_file()
+
+
+def test_conus_data_grid__bad_filenames(driverobj, hrrr_target_grid):
+    driverobj._config["filenames"] = {}
+    assert driverobj.conus_data_grid().ready
+    assert not hrrr_target_grid.exists()
+
+
+def test_conus_data_grid__bad_res(driverobj, hrrr_target_grid):
+    driverobj._config["conus_grid_resolution_km"] = 3
+    assert driverobj.conus_data_grid().ready
+    assert not hrrr_target_grid.exists()
+
+
+def test_driver_name():
+    assert GridsAndMeshes.driver_name() == "grids_and_meshes"
+
+
+def test_global_data_grid(driverobj, gfs_target_grid):
+    assert not gfs_target_grid.exists()
+    assert driverobj.global_data_grid().ready
+    assert gfs_target_grid.is_file()
+
+
+def test_global_data_grid__bad_filenames(driverobj, gfs_target_grid):
+    driverobj._config["filenames"] = {}
+    assert driverobj.global_data_grid().ready
+    assert not gfs_target_grid.exists()
+
+
+def test_global_data_grid__bad_res(driverobj, gfs_target_grid):
+    driverobj._config["global_grid_resolution_deg"] = 0.25
+    assert driverobj.global_data_grid().ready
+    assert not gfs_target_grid.exists()
+
+
+def test_latent_mesh(driverobj):
+    path = driverobj.rundir / driverobj.config["filenames"]["latent_mesh"]
+    assert not path.exists()
+    coords = {"lat": np.array([3.0, 4.0]), "lon": np.array([1.0, 2.0])}
+    with (
+        patch.object(grids_and_meshes, "_global_latent_grid"),
+        patch.object(grids_and_meshes, "_conus_data_grid"),
+        patch.object(grids_and_meshes, "_conus_latent_grid"),
+        patch.object(
+            grids_and_meshes, "_combine_global_and_conus_meshes", return_value=coords
+        ),
+    ):
+        assert driverobj.latent_mesh().ready
+    assert path.is_file()
+
+
+def test_latent_mesh__bad_filenames(driverobj):
+    path = driverobj.rundir / driverobj.config["filenames"]["latent_mesh"]
+    driverobj._config["filenames"] = {}
+    assert driverobj.latent_mesh().ready
+    assert not path.exists()
+
+
+@mark.parametrize(
+    "remove",
+    [
+        [],
+        ["hrrr_target_grid"],
+        ["gfs_target_grid"],
+        ["latent_mesh"],
+        ["hrrr_target_grid", "gfs_target_grid", "latent_mesh"],
+    ],
+)
+def test_provisioned_rundir(driverobj, readytask, remove):
+    for key in remove:
+        del driverobj._config["filenames"][key]
+    with patch.multiple(
+        driverobj,
+        conus_data_grid=readytask,
+        global_data_grid=readytask,
+        latent_mesh=readytask,
+    ):
+        assert driverobj.provisioned_rundir().ready
+
+
+def test__combine_global_and_conus_meshes():
+    gmesh = xr.Dataset({"lat": ("lat", [0.0, 1.0]), "lon": ("lon", [0.0, 1.0])})
+    cmesh = xr.Dataset({"lat": (["y", "x"], [[20.0]]), "lon": (["y", "x"], [[10.0]])})
+    mask = np.array([True, True, False, False])
+    order = np.array([2, 0, 1])
+    with (
+        patch.object(grids_and_meshes, "cutout_mask", return_value=mask),
+        patch.object(grids_and_meshes, "get_coordinates_ordering", return_value=order),
+    ):
+        result = grids_and_meshes._combine_global_and_conus_meshes(gmesh, cmesh)
+    np.testing.assert_array_equal(result["lat"], [20.0, 0.0, 0.0])
+    np.testing.assert_array_equal(result["lon"], [10.0, 0.0, 1.0])
+
+
+@mark.parametrize("resolution_km", [None, 3, 60])
+def test__conus_data_grid(dataset, resolution_km, tmp_path):
+    logfile = tmp_path / "logfile"
+    with patch.object(grids_and_meshes.sources, "AWSHRRRArchive") as AWSHRRRArchive:  # noqa: N806
+        AWSHRRRArchive().open_sample_dataset.return_value = dataset
+        args = {"rundir": tmp_path, "logfile": logfile}
+        if resolution_km:
+            args["resolution_km"] = resolution_km
+        cds = grids_and_meshes._conus_data_grid(**args)
+        AWSHRRRArchive.assert_called()
+        AWSHRRRArchive().open_sample_dataset.assert_called_once()
+        shape = {None: (59, 99), 3: (300, 500), 60: (14, 24)}[resolution_km]
+        assert cds.lat.shape == cds.lon.shape == shape
+
+
+def test__conus_data_grid_logfile(driverobj):
+    assert driverobj._conus_data_grid_logfile == (
+        driverobj.rundir / driverobj.config["filenames"]["hrrr_target_grid"]
+    ).with_suffix(".log")
+
+
+def test__conus_data_grid_logfile__no_hrrr(driverobj):
+    del driverobj._config["filenames"]["hrrr_target_grid"]
+    assert (
+        driverobj._conus_data_grid_logfile == driverobj.rundir / "hrrr_target_grid.log"
+    )
+
+
+def test__conus_latent_grid():
+    ny, nx = 100, 200
+    cds = xr.Dataset(
+        {
+            "lat_b": (["y_b", "x_b"], np.zeros((ny, nx))),
+            "lon_b": (["y_b", "x_b"], np.zeros((ny, nx))),
+        }
+    )
+    result = grids_and_meshes._conus_latent_grid(cds)
+    assert result.lat.shape == result.lon.shape == (40, 90)
+
+
+def test__global_latent_grid():
+    result = grids_and_meshes._global_latent_grid(2.0)
+    assert "latitude_longitude" not in result
+    assert result.lat.shape == (90,)
+    assert result.lon.shape == (180,)
+
+
 # Schema tests.
 
-CONFIG = {
-    "grids_and_meshes": {
-        "filenames": {
-            "gfs_target_grid": "/path/to/global_one_degree.nc",
-            "hrrr_target_grid": "/path/to/hrrr_15km.nc",
-            "latent_mesh": "/path/to/latentx2.spongex1.combined.sorted.npz",
-        },
-        "conus_grid_resolution_km": 15,
-        "global_grid_resolution_deg": 1.0,
-        "latent_mesh_global_resolution_deg": 2.0,
-        "latent_mesh_conus_coarsen_factor": 2,
-        "rundir": "/path/to/rundir",
-    },
-}
 
-
-def test_top(logged, tmp_path, validator, with_del, with_set):
+def test_top(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(__file__, "grids_and_meshes", tmp_path)
-    config = CONFIG
     # Basic correctness:
     assert ok(config)
     # Additional keys are allowed:
@@ -33,11 +226,11 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
         assert logged("is not of type 'object'")
 
 
-def test_grids_and_meshes(logged, tmp_path, validator, with_del, with_set):
+def test_grids_and_meshes(config, logged, tmp_path, validator, with_del, with_set):
     ok = validator(
         __file__, "grids_and_meshes", tmp_path, "properties", "grids_and_meshes"
     )
-    config = CONFIG["grids_and_meshes"]
+    config = config["grids_and_meshes"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -148,7 +341,9 @@ def test_grids_and_meshes__latent_mesh_conus_coarsen_factor(
     assert logged("is not of type 'integer'")
 
 
-def test_grids_and_meshes__filenames(logged, tmp_path, validator, with_del, with_set):
+def test_grids_and_meshes__filenames(
+    config, logged, tmp_path, validator, with_del, with_set
+):
     ok = validator(
         __file__,
         "grids_and_meshes",
@@ -158,7 +353,7 @@ def test_grids_and_meshes__filenames(logged, tmp_path, validator, with_del, with
         "properties",
         "filenames",
     )
-    config = CONFIG["grids_and_meshes"]["filenames"]
+    config = config["grids_and_meshes"]["filenames"]
     # Basic correctness:
     assert ok(config)
     # Additional keys are not allowed:
@@ -173,12 +368,12 @@ def test_grids_and_meshes__filenames(logged, tmp_path, validator, with_del, with
 
 
 def test_grids_and_meshes__latent_mesh_settings_conditional_required(
-    logged, tmp_path, validator, with_del, with_set
+    config, logged, tmp_path, validator, with_del, with_set
 ):
     ok = validator(
         __file__, "grids_and_meshes", tmp_path, "properties", "grids_and_meshes"
     )
-    config = CONFIG["grids_and_meshes"]
+    config = config["grids_and_meshes"]
     # If latent mesh is requested, latent mesh settings are required.
     assert not ok(with_del(config, "latent_mesh_global_resolution_deg"))
     assert logged("'latent_mesh_global_resolution_deg' is a required property")
