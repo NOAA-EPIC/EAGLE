@@ -1,0 +1,85 @@
+submit_common: &submit_common
+  attrs:
+    maxtries: 3
+  nodes: '{{ app.quickstart.nodes }}'
+  walltime: '{{ app.quickstart.walltime }}'
+  account: '{{ app.platform.account }}'
+  partition: '{{ app.partitions.cpu }}'
+  queue: '{{ app.queues.cpu }}'
+  command: 'make {{ jobname }} config=eagle.yaml batch=false'
+  join: '{{ app.base }}/{{ app.platform.scheduler }}/{{ jobname }}.{{ app.platform.scheduler }}'
+submit_netaccess: &submit_netaccess
+  <<: *submit_common
+  partition: '{{ app.partitions.netaccess }}'
+submit_gpu: &submit_gpu
+  <<: *submit_common
+  partition: '{{ app.gpu.batchargs.partition }}'
+  queue: '{{ app.gpu.batchargs.queue }}'
+  native: '{{ app.quickstart.gpu.native }}'
+workflow:
+  attrs:
+    realtime: false
+    scheduler: '{{ app.platform.scheduler }}'
+  cycledef: 
+    - attrs: 
+        group: cyc
+      spec: '{{ app.time.inference_start.strftime("%Y%m%d%H%M") }} {{ app.time.inference_start.strftime("%Y%m%d%H%M") }} 06:00:00'
+  log:
+    value:
+      cyclestr:
+        value: '{{ app.base }}/{{ app.platform.scheduler }}/rocoto.@Y@m@d@H.{{ app.platform.scheduler }}'
+  tasks:
+    task_grids_and_meshes:
+      <<: *submit_netaccess
+      jobname: grids-and-meshes
+    task_zarr_gfs:
+      <<: *submit_netaccess
+      jobname: zarr-gfs
+      native: '{{ app.quickstart.zarr.native }}'
+      dependency:
+        taskdep_grids_and_meshes:
+          attrs:
+            task: grids_and_meshes
+    task_zarr_hrrr:
+      <<: *submit_netaccess
+      jobname: zarr-hrrr
+      native: '{{ app.quickstart.zarr.native }}'
+      dependency:
+        taskdep_grids_and_meshes:
+          attrs: 
+            task: grids_and_meshes
+    task_training:
+      <<: *submit_gpu
+      jobname: training
+      dependency:
+        and:
+          datadep_zarr_gfs:
+            value: 'run/{{ app.experiment_name }}/data/runscript.zarr-gfs.done'
+          datadep_zarr_hrrr:
+            value: 'run/{{ app.experiment_name }}/data/runscript.zarr-hrrr.done'
+    task_inference:
+      <<: *submit_gpu
+      jobname: inference
+      dependency:
+          datadep_training:
+            value: 'run/{{ app.experiment_name }}/training/runscript.training.done'
+    metatask_vx:
+      var:
+        extent: global global lam lam
+        metric: grid obs grid obs
+      task_vx_#metric#_#extent#:
+        <<: *submit_netaccess
+        jobname: vx-#metric#-#extent#
+        dependency:
+          datadep_inference:
+            value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'
+    metatask_vis:
+      var:
+        extent: global global lam lam
+        metric: grid obs grid obs 
+      task_vis_#metric#_#extent#:
+        <<: *submit_common
+        jobname: vis-#metric#-#extent#
+        dependency:
+          datadep_inference:
+            value: 'run/{{ app.experiment_name }}/inference/runscript.inference.done'

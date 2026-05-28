@@ -77,3 +77,27 @@ Since ``uwtools`` driver tasks are idempotent, now that ``runscript.inference`` 
 by subsequent driver invocations. It could now be manually edited, for example to add debugging statements, and 
 the ``run`` task then invoked to execute inference with the debugging statements in place. If ``runscript.inference`` 
 were manually deleted and the driver invoked again, the runscript would be recreated with its default contents.
+
+.. _ExecutingWithoutBatchSubmission:
+
+Executing Without Batch Submission
+------------------------------------------------------------------------------
+
+Some targets defined in ``src/Makefile`` invoke their drivers by default with the ``--batch`` flag set, which directs ``uwtools`` to provision a runscript that includes batch-system directives (e.g. ``#SBATCH`` directives for Slurm) and to submit that script to the batch system for execution. Alternatively, the optional ``batch=`` clause may be used to disable (or to explicitly enable) batch submission. YAML true and false `boolean values <https://yaml.org/type/bool.html>`_ are supported; true values enable batch submission and false values disable it.
+
+For example, the following ``make`` invocations would all execute inference with batch submission enabled:
+
+.. code-block:: text
+
+    $ make inference config=eagle.yaml
+    $ make inference config=eagle.yaml batch=true
+    $ make inference config=eagle.yaml batch=yes
+
+These invocations would execute inference without batch submission, i.e. on the current local machine:
+
+.. code-block:: text
+
+    $ make inference config=eagle.yaml batch=false
+    $ make inference config=eagle.yaml batch=no
+
+Invocation without batch submission can be useful when running on a system with hardware appropriate to the driver given its configuration, for example in a batch job created by a Rocoto workflow where it would be unnecessary for EAGLE to submit a new batch job from within an existing one.

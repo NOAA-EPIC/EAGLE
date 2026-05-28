@@ -1,24 +1,24 @@
-BASHSRCS = $(wildcard ../.github/scripts/*) format setup
-HELPERS  = vx zarr
-MODULES  = data inference training visualization wxvx
-PACKAGE  = eagle
-STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
-TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
-VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
-
 INSTALLDIR ?= conda
+
+ACTIVATE    = source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate
+BASHSRCS    = $(wildcard ../.github/scripts/*) format setup
+ENVS        = data inference training visualization wxvx
+HELPERS     = vx zarr
+PACKAGE     = eagle
+STEPS       = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+TOOLING     = config devenv env format lint realize shellcheck test typecheck unittest validate workflow yamllint
+VERBOSE     = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
+
+BATCH      := $(if $(filter True,$(shell $(ACTIVATE) base; python -c "import yaml; print(yaml.safe_load('$(batch)' or 'yes'))")), --batch)
 SHELL      := $(shell which bash)
 NOW        := $(shell date -uIseconds)
 
-export NOW
-
-activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
-check    = @$(if $(1),,$(error $(2)= argument required))
-exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
-make     = $(MAKE) --no-print-directory
-modenv   = $(env4mod_$(1))
-modloop  = @set -e && for mod in $(PACKAGE) $(MODULES); do $(make) mod=$$mod $(1); done
-tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
+activate    = @$(ACTIVATE) $(1)
+check       = @$(if $(1),,$(error $(2)= argument required))
+envloop     = @set -e && for env in $(PACKAGE) $(ENVS); do $(make) env=$$env $(1); done
+exec        = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
+make        = $(MAKE) --no-print-directory
+tasklist    = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
 
 env4mod_$(PACKAGE)    = base
 env4mod_data          = data
@@ -29,6 +29,8 @@ env4mod_wxvx          = wxvx
 
 .ONESHELL:
 .PHONY: $(HELPERS) $(STEPS) $(TOOLING)
+
+export NOW
 
 all:
 	@echo Available targets:
@@ -74,7 +76,7 @@ ifeq ($(task),?)
 	$(call tasklist,inference,inference,Inference)
 else
 	$(call check,$(config),config)
-	$(call exec,inference,inference,Inference,$(or $(task),run) --batch)
+	$(call exec,inference,inference,Inference,$(or $(task),run)$(BATCH))
 endif
 
 lint:
@@ -104,7 +106,7 @@ ifeq ($(task),?)
 	$(call tasklist,training,training,Training)
 else
 	$(call check,$(config),config)
-	$(call exec,training,training,Training,$(or $(task),run) --batch)
+	$(call exec,training,training,Training,$(or $(task),run)$(BATCH))
 endif
 
 typecheck:
@@ -161,7 +163,7 @@ else
 	$(call check,$(config),config)
 	$(call check,$(extent),extent)
 	$(call check,$(truth),truth)
-	$(call exec,wxvx,wxvx,WXVX,$(or $(task),run) --key-path vx.grid2$(truth).$(extent) --batch)
+	$(call exec,wxvx,wxvx,WXVX,$(or $(task),run) --key-path vx.grid2$(truth).$(extent)$(BATCH))
 endif
 
 vx-grid-global:
@@ -176,6 +178,12 @@ vx-obs-global:
 vx-obs-lam:
 	@$(make) vx truth=obs extent=lam
 
+workflow:
+	$(call check,$(config),config)
+	$(call activate,base)
+	@(set -x && uw rocoto realize -c $(config) -o eagle.xml)
+	@(set -x && uw rocoto iterate -w eagle.xml -d eagle.db --cycle 2022-02-03T12 --task vis_obs_lam)
+
 yamllint:
 	$(call activate,base)
 	@echo "=> Linting YAML configs"
@@ -188,7 +196,7 @@ ifeq ($(task),?)
 else
 	$(call check,$(config),config)
 	$(call check,$(source),source)
-	$(call exec,data,zarr,Zarr,$(or $(task),run) --key-path zarrs.$(source) --batch)
+	$(call exec,data,zarr,Zarr,$(or $(task),run) --key-path zarrs.$(source)$(BATCH))
 endif
 
 zarr-gfs:
