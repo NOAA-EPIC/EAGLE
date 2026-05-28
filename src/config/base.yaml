@@ -4,7 +4,7 @@
 
 app:
   base: /path/to/eagle/src
-  experiment_name: nested-yaml
+  experiment_name: default
   gpu: # set by platform config
   partitions: # set by platform config
   platform: # set by platform config
@@ -256,9 +256,9 @@ vx:
       run: '{{ val.vx.rundir }}/TRUTH/EXTENT/run'
     wxvx: &wxvx-common
       cycles:
-        start: '{{ app.time.inference_start }}'
+        start: !datetime '{{ app.time.inference_start }}'
         step: 0
-        stop: '{{ app.time.inference_stop }}'
+        stop: !datetime '{{ app.time.inference_stop }}'
       forecast:
         coords:
           latitude: latitude
