@@ -31,7 +31,10 @@ class Inference(DriverTimeInvariant):
             if ckpt_dir
             else Path(config["checkpoint_path"])
         )
-        yield self._valid_checkpoint(ckpt_path)
+        if self.config.get("validate", True):
+            yield self.valid_checkpoint(ckpt_path)
+        else:
+            yield self._checkpoint(ckpt_path)
         if ckpt_dir:
             config["checkpoint_path"] = str(ckpt_path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -48,6 +51,18 @@ class Inference(DriverTimeInvariant):
             self.runscript(),
         ]
 
+    @task
+    def valid_checkpoint(self, ckpt_path: Path):
+        """
+        Checkpoint is compatible with the current anemoi-inference environment.
+        """
+        taskname = "Validating checkpoint compatibility %s" % ckpt_path
+        yield taskname
+        valid: list[bool] = []
+        yield Asset(None, lambda: valid == [True])
+        yield self._checkpoint(ckpt_path)
+        valid.append(Checkpoint(ckpt_path).validate_environment())
+
     # Public methods
 
     @classmethod
@@ -60,13 +75,10 @@ class Inference(DriverTimeInvariant):
     # Private methods
 
     @external
-    def _valid_checkpoint(self, ckpt_path: Path):
+    def _checkpoint(self, path: Path):
         """
-        Checkpoint is compatible with the current anemoi-inference environment.
+        Checkpoint exists at the given path.
         """
-        taskname = "Validating checkpoint compatibility %s" % ckpt_path
+        taskname = "Checkpoint exists %s" % path
         yield taskname
-        yield Asset(
-            ckpt_path,
-            lambda: Checkpoint(ckpt_path).validate_environment(),
-        )
+        yield Asset(path, path.exists)

@@ -60,7 +60,7 @@ def test_anemoi_config(driverobj, tmp_path):
     driverobj._config["rundir"] = tmp_path
     cfgfile = tmp_path / "inference.yaml"
     assert not cfgfile.is_file()
-    with patch.object(driverobj, "_valid_checkpoint", return_value=None):
+    with patch.object(driverobj, "valid_checkpoint", return_value=None):
         driverobj.anemoi_config()
     assert cfgfile.is_file()
     assert str(latest_ckptfile) in cfgfile.read_text()
@@ -74,19 +74,43 @@ def test_anemoi_config__explicit_checkpoint(driverobj, tmp_path):
     driverobj._config["anemoi"]["checkpoint_path"] = str(ckptfile)
     cfgfile = tmp_path / "inference.yaml"
     assert not cfgfile.is_file()
-    with patch.object(driverobj, "_valid_checkpoint", return_value=None):
+    with patch.object(driverobj, "valid_checkpoint", return_value=None):
         driverobj.anemoi_config()
     assert cfgfile.is_file()
 
 
+def test_anemoi_config__no_validation(driverobj, tmp_path):
+    del driverobj._config["checkpoint_dir"]
+    ckptfile = tmp_path / "inference-last.ckpt"
+    ckptfile.touch()
+    driverobj._config["anemoi"]["checkpoint_path"] = ckptfile
+    driverobj._config["rundir"] = tmp_path
+    driverobj._config["validate"] = False
+    cfgfile = tmp_path / "inference.yaml"
+    assert not cfgfile.is_file()
+    with patch.object(driverobj, "_checkpoint", return_value=None):
+        driverobj.anemoi_config()
+    assert cfgfile.is_file()
+
+
+@mark.parametrize("exists", [True, False])
+def test__checkpoint(driverobj, tmp_path, exists):
+    ckpt_path = tmp_path / "inference-last.ckpt"
+    if exists:
+        ckpt_path.touch()
+    result = driverobj._checkpoint(ckpt_path)
+    assert result.ref == ckpt_path
+    assert result.ready is exists
+
+
 @mark.parametrize("valid", [True, False])
-def test__valid_checkpoint(driverobj, tmp_path, valid):
+def test_valid_checkpoint(driverobj, tmp_path, valid):
     ckpt_path = tmp_path / "inference-last.ckpt"
     ckpt_path.touch()
     with patch.object(inference, "Checkpoint") as checkpoint:
         checkpoint.return_value.validate_environment.return_value = valid
-        result = driverobj._valid_checkpoint(ckpt_path)
-    assert result.ref == ckpt_path
+        result = driverobj.valid_checkpoint(ckpt_path)
+    assert result.ref is None
     assert result.ready is valid
 
 
@@ -140,6 +164,9 @@ def test_inference(config, logged, tmp_path, validator, with_del, with_set):
     for key in ["anemoi", "execution", "rundir"]:
         assert not ok(with_del(config, key))
         assert logged(f"'{key}' is a required property")
+    for key in ["validate"]:
+        assert not ok(with_set(config, None, key))
+        assert logged("is not of type 'boolean'")
     # Some keys have object values:
     for key in ["anemoi", "execution"]:
         assert not ok(with_set(config, None, key))
