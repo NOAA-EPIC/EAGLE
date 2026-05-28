@@ -31,10 +31,10 @@ class Inference(DriverTimeInvariant):
             if ckpt_dir
             else Path(config["checkpoint_path"])
         )
-        if self.config.get("validate", True):
-            yield self.valid_checkpoint(ckpt_path)
-        else:
+        if self.config.get("validate", False):
             yield self._checkpoint(ckpt_path)
+        else:
+            yield self.valid_checkpoint(ckpt_path)
         if ckpt_dir:
             config["checkpoint_path"] = str(ckpt_path)
         path.parent.mkdir(parents=True, exist_ok=True)
