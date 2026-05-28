@@ -6,7 +6,7 @@ channels:
 dependencies:
   - pip
   - python 3.13
-  - uwtools 2.14.*
+  - uwtools 2.16.*
   - wxvx >=0.7.2
   - xesmf 0.8.*
   - zarr 2.18.*
