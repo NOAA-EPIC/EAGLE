@@ -9,8 +9,8 @@ Contributing
 Development
 ------------------------------------------------------------------------------
 
-First, clone the main :term:`EAGLE` repository and create a branch on the machine where you will 
-do the development work. Contributions should be submitted as pull requests from a 
+First, clone the main :term:`EAGLE` repository and create a branch on the machine where you will
+do the development work. Contributions should be submitted as pull requests from a
 branch separate from the main branch.
 
 .. code-block:: text
@@ -29,7 +29,13 @@ development packages in each environment:
 
     make devenv cudascript=<name-or-path> # alternatively: EAGLEDEV=1 ./setup cudascript=<name-or-path>
 
-See :ref:`Runtime Environment <RuntimeEnvironment>` for a description of the ``cudascript=`` argument.
+The ``cudascript=`` argument is described :ref:`here <RuntimeEnvironment>`.
+
+.. hint::
+
+    If an existing, non-development :ref:`runtime environment <RuntimeEnvironment>` has already been built, the ``make devenv`` command can be used to quickly upgrade it to a development environment. There is no need to remove existing conda environments or the underlying conda installation: The development packages will be installed into the existing environments.
+
+    Likewise, if local changes are made to package versions defined in the ``src/envs/*.yaml`` files, re-running the ``make devenv`` or ``make env`` commands will quickly bring the existing conda environments up-to-date with those newly specified versions: There is no need to remove existing environments or the underlying conda installation.
 
 After successful completion, the following ``make`` targets will be available:
 
@@ -53,9 +59,9 @@ files will be created in the appropriate run directory:
 - ``runscript.<target>.submit``: A file containing the job ID of the submitted batch job, if applicable.
 - ``runscript.<target>.done``: Created if the core component completes successfully (i.e. exits with status code 0).
 
-EAGLE drivers are idempotent and, as such, will not take further action if run again unless the output they previously 
-created is removed. In general, removing ``.done`` (and, when present, ``.submit``) files in the appropriate run directory 
-should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or 
+EAGLE drivers are idempotent and, as such, will not take further action if run again unless the output they previously
+created is removed. In general, removing ``.done`` (and, when present, ``.submit``) files in the appropriate run directory
+should suffice to reset a driver to allow it to run again, potentially overwriting its previous output. Removing or
 renaming the entire run directory also works.
 
 Debugging Execution
