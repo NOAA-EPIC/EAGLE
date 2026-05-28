@@ -17,25 +17,18 @@ app:
     scheduler: slurm
 inference:
   execution:
-    envcmds: # PM DRY THIS OUT
+    envcmds: !extend
       - source /etc/profile.d/profile-slurm.sh
-      - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate anemoi
-      - set -ex
 training:
   execution:
-    envcmds: # PM DRY THIS OUT
+    envcmds: !extend
       - source /etc/profile.d/profile-slurm.sh
-      - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate anemoi
-      - set -ex
-      - export SLURM_GPUS_PER_NODE=1
-      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 zarrs:
   common:
     execution:
       batchargs:
         --mem-per-cpu: 3G
-      envcmds: !list '{{ ["source /etc/profile.d/profile-slurm.sh"] + zarrs.common.envcmds }}'
+      envcmds: !extend
+        - source /etc/profile.d/profile-slurm.sh
       mpiargs:
         - "--export=ALL"
