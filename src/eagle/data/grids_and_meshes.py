@@ -67,6 +67,7 @@ class GridsAndMeshes(AssetsTimeInvariant):
             }
         )
         ds = ds.sel(lat=slice(-89.9, 89.9))
+        ds = ds.sortby("lat", ascending=False)
         ds.to_netcdf(path)
 
     @task

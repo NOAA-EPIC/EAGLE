@@ -16,6 +16,7 @@ app:
     start: !datetime '{{ app.nrt.ic_start }}'
     stop: !datetime '{{ app.nrt.stop }}'
     leadtime: !int '{{ (app.nrt.leadtime.total_seconds() / 3600) | int }}'
+    multistep_input: 2
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
 grids_and_meshes:
   filenames:
