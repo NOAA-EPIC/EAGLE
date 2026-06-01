@@ -8,7 +8,7 @@ VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
 INSTALLDIR ?= conda
 SHELL      := $(shell which bash)
-NOW        := $(shell date -uIseconds)
+NOW        := $(shell date -u +"%Y-%m-%dT%H:%M:%S")
 
 export NOW
 

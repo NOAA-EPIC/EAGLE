@@ -9,11 +9,11 @@ grids_and_meshes:
 inference:
   anemoi:
     input_dataset_kwargs: &dataset-kwargs
+      adjust: all
       cutout:
         - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
           trim_edge: [10, 11, 10, 11]
         - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
-      adjust: all
       min_distance_km: 0
 prewxvx:
   common:
