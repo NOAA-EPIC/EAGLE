@@ -31,18 +31,19 @@ grids_and_meshes:
 inference:
   anemoi:
     checkpoint_path: /path/to/checkpoint # NB: If a value for inference.checkpoint_dir is provided, it will override this value with the latest checkpoint in that directory.
+    end_date: !datetime '{{ app.time.inference_stop }}'
+    freq: '{{ app.time.freq }}'
     input_dataset_kwargs: &dataset-kwargs
+      adjust: all
       cutout:
         - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
           trim_edge: [10, 11, 10, 11]
         - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
-      adjust: all
       min_distance_km: 0
-    end_date: !datetime '{{ app.time.inference_stop }}'
-    freq: '{{ app.time.freq }}'
     lead_time: !int '{{ app.time.leadtime }}'
     output_path: '{{ inference.rundir }}/output'
     start_date: !datetime '{{ app.time.inference_start }}'
+    use_mpi: true
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
     batchargs:
@@ -54,8 +55,8 @@ inference:
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
-      - set -ex
-    executable: eagle-tools inference inference.yaml
+      - set -e
+    executable: '{{ app.launcher | default("") }} eagle-tools inference inference.yaml'
   rundir: '{{ app.rundir }}/inference'
 platform: !dict '{{ app.platform }}'
 prewxvx:
@@ -441,10 +442,10 @@ training:
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
-      - set -ex
       - export SLURM_GPUS_PER_NODE=1
       - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-    executable: anemoi-training train --config-name=training
+      - set -e
+    executable: '{{ app.launcher | default("") }} anemoi-training train --config-name=training'
   remove:
     # Dot-separated config keys paths to delete from the composed runtime config.
     - graph.nodes.hidden.node_builder.grid
@@ -834,10 +835,6 @@ vx:
           regrid: !dict '{{ vx.grid2obs.global.wxvx.wxvx.regrid }}'
 zarrs:
   common:
-    envcmds:
-      - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate data
-      - set -ex
     execution:
       batchargs:
         cores: 4
@@ -845,7 +842,10 @@ zarrs:
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:10:00'
-      envcmds: !list '{{ zarrs.common.envcmds }}'
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate data
+        - set -e
       mpiargs: []
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
   gfs:

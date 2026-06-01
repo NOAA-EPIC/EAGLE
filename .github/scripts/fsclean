@@ -60,6 +60,7 @@ else
   echo RECLAIMED $reclaimed GB
   if [[ $final -lt $GIGSREQD ]]; then
     msg $final STOPPING
+    echo "A manual re-run of this CI job may succeed if the next runner has more free space."
     exit 1
   fi
   msg $final OK
