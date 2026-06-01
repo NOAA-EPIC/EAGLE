@@ -34,6 +34,7 @@ inference:
     lead_time: !int '{{ app.time.leadtime }}'
     output_path: '{{ inference.rundir }}/output'
     start_date: !datetime '{{ app.time.inference_start }}'
+    use_mpi: true
   checkpoint_dir: '{{ training.rundir }}/outputs/checkpoint'
   execution:
     batchargs:
@@ -45,8 +46,8 @@ inference:
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
-      - set -ex
-    executable: eagle-tools inference inference.yaml
+      - set -e
+    executable: '{{ app.launcher | default("") }} eagle-tools inference inference.yaml'
   rundir: '{{ app.rundir }}/inference'
 platform: !dict '{{ app.platform }}'
 training:
@@ -70,10 +71,13 @@ training:
     envcmds:
       - source {{ val.conda }}/etc/profile.d/conda.sh
       - conda activate anemoi
-      - set -ex
       - export SLURM_GPUS_PER_NODE=1
       - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-    executable: anemoi-training train --config-name=training
+      - set -e
+    executable: '{{ app.launcher | default("") }} anemoi-training train --config-name=training'
+  remove:
+    # Dot-separated config keys paths to delete from the composed runtime config.
+    - graph.nodes.hidden.node_builder.grid
   rundir: '{{ app.rundir }}/training'
 ufs2arco:
   dirs:
@@ -364,10 +368,6 @@ vx:
             to: G104
 zarrs:
   common:
-    envcmds:
-      - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate data
-      - set -ex
     execution:
       batchargs:
         cores: 4
@@ -375,7 +375,10 @@ zarrs:
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:10:00'
-      envcmds: !list '{{ zarrs.common.envcmds }}'
+      envcmds:
+        - source {{ val.conda }}/etc/profile.d/conda.sh
+        - conda activate data
+        - set -e
       mpiargs: []
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
   gfs:

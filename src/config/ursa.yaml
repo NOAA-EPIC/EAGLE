@@ -9,16 +9,26 @@ app:
       nodes: 1
       partition: u1-h100
       queue: gpuwf
+  launcher: srun --export=ALL
   partitions:
     netaccess: u1-service
   platform: &platform
     account: epic
     scheduler: slurm
+inference:
+  execution:
+    envcmds: !extend
+      - source /etc/profile.d/profile-slurm.sh
+training:
+  execution:
+    envcmds: !extend
+      - source /etc/profile.d/profile-slurm.sh
 zarrs:
   common:
     execution:
       batchargs:
         --mem-per-cpu: 3G
-      envcmds: !list '{{ ["source /etc/profile.d/profile-slurm.sh"] + zarrs.common.envcmds }}'
+      envcmds: !extend
+        - source /etc/profile.d/profile-slurm.sh
       mpiargs:
         - "--export=ALL"
