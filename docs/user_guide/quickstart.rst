@@ -115,7 +115,7 @@ Building and Running :term:`EAGLE`
    
    .. code-block:: bash
 
-      make config compose=base:ursa:nrt > nrt-composed.yaml
+      make config compose=base:nested:ursa:nrt > nrt-composed.yaml
 
    b. Set the ``app.base`` value in ``nrt-composed.yaml`` to the absolute path to the current ``src/`` directory.
 
