@@ -38,9 +38,9 @@ Building and Running :term:`EAGLE`
 
    .. code-block:: bash
 
-      make config compose=base:ursa >eagle.yaml
+      make config compose=base:nested:ursa >eagle.yaml
 
-   The ``config`` target operates on ``.yaml`` files in the ``config/`` directory, so this command composes ``config/base.yaml`` 
+   The ``config`` target operates on ``.yaml`` files in the ``config/`` directory, so this command composes ``config/base.yaml``, ``config/nested.yaml``, 
    and ``config/ursa.yaml`` and redirects the composed config into ``eagle.yaml``.
 
 #. Set the ``app.base`` value in ``eagle.yaml`` to the absolute path to the current ``src/`` directory.

@@ -403,15 +403,15 @@ visualization:
           start_date: !datetime '{{ app.time.inference_start }}'
           end_date: !datetime '{{ app.time.inference_stop }}'
           freq: '{{ app.time.freq }}'
-          leadtimes: !dict '{{ visualization.common.leadtimes }}'
+          leadtimes: !dict '{{ visualization.common.postwxvx.leadtimes }}'
           stat_prefix: grid_stat_nested_lam
+          variable_prefixes: !list '{{ visualization.common.postwxvx.variable_prefixes }}'
           work_path: '{{ val.vx.rundir }}/grid2grid/lam'
-          name: grid-lam
-          rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
-          spatial_stat_plots: !dict '{{ visualization.common.spatial_stat_plots }}'
-          stats: !list '{{ visualization.common.stats }}'
-          variable_prefixes: !list '{{ visualization.common.variable_prefixes }}'
-          variables: !list '{{ visualization.common.variables }}'
+        name: grid-lam
+        rundir: '{{ val.visualization.rundir }}/grid2grid/lam'
+        spatial_stat_plots: !dict '{{ visualization.common.spatial_stat_plots }}'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
   grid2obs:
     global:
       visualization:
@@ -423,14 +423,14 @@ visualization:
           start_date: !datetime '{{ app.time.inference_start }}'
           end_date: !datetime '{{ app.time.inference_stop }}'
           freq: '{{ app.time.freq }}'
-          leadtimes: !dict '{{ visualization.common.leadtimes }}'
+          leadtimes: !dict '{{ visualization.common.postwxvx.leadtimes }}'
           stat_prefix: point_stat_nested_lam
+          variable_prefixes: !list '{{ visualization.common.postwxvx.variable_prefixes }}'
           work_path: '{{ val.vx.rundir }}/grid2obs/lam/'
-          name: obs-lam
-          rundir: '{{ val.visualization.rundir }}/grid2obs/lam'
-          stats: !list '{{ visualization.common.stats }}'
-          variable_prefixes: !list '{{ visualization.common.variable_prefixes }}'
-          variables: !list '{{ visualization.common.variables }}'
+        name: obs-lam
+        rundir: '{{ val.visualization.rundir }}/grid2obs/lam'
+        stats: !list '{{ visualization.common.stats }}'
+        variables: !list '{{ visualization.common.variables }}'
 vx:
   grid2grid:
     global:
