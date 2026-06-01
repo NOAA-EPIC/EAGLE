@@ -68,8 +68,13 @@ prewxvx:
       lcc_info:
         n_x: 848
         n_y: 480
+      levels:
+        - 250
+        - 500
+        - 850
       start_date: !datetime '{{ app.time.inference_start }}'
       end_date: !datetime '{{ app.time.inference_stop }}'
+      vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
     rundir: '{{ val.vx.rundir }}'
   global:
     prewxvx: &prewxvx-global
