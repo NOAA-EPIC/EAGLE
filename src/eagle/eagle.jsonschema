@@ -177,6 +177,7 @@
     "grids_and_meshes",
     "inference",
     "platform",
+    "prewxvx",
     "training",
     "ufs2arco",
     "val",

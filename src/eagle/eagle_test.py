@@ -55,6 +55,7 @@ def test_top(logged, tmp_path, validator, with_del, with_set):
         "grids_and_meshes",
         "inference",
         "platform",
+        "prewxvx",
         "training",
         "ufs2arco",
         "val",
