@@ -150,9 +150,6 @@
     "platform": {
       "type": "object"
     },
-    "prewxvx": {
-      "type": "object"
-    },
     "training": {
       "type": "object"
     },
