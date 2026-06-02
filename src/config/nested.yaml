@@ -3,9 +3,11 @@
 # yamllint disable rule:anchors rule:line-length
 
 grids_and_meshes:
+  conus_grid_resolution_km: 15
   filenames:
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
     latent_mesh: '{{ val.filenames.latent_mesh }}'
+  latent_mesh_conus_coarsen_factor: 2
 inference:
   anemoi:
     input_dataset_kwargs: &dataset-kwargs
@@ -57,6 +59,15 @@ prewxvx:
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
 training:
   anemoi:
+    defaults:
+      - data: zarr
+      - dataloader: native_grid
+      - diagnostics: evaluation
+      - graph: encoder_decoder_only
+      - model: transformer
+      - system: slurm
+      - training: stretched
+      - _self_
     # Blocks to customize default Anemoi training config.
     data:
       datasets:
@@ -438,7 +449,7 @@ vx:
         wxvx:
           forecast:
             name: nested_global
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
 
@@ -468,7 +479,7 @@ vx:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_lam
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
             projection:
               a: 6371229
               b: 6371229
@@ -488,7 +499,7 @@ vx:
       wxvx:
         wxvx:
           forecast:
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
     lam:
@@ -514,7 +525,7 @@ vx:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.name }}'
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.24h.nc'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
             projection: !dict '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.projection }}'
           leadtimes: !dict '{{ vx.common.wxvx.leadtimes }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
