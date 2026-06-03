@@ -94,7 +94,7 @@ wait_runscript_batch() {
 EXP="ci-pr$PR_NUM-$(echo $SHA | cut -c1-7)"
 echo Experiment name: $EXP
 
-make config compose=base:ursa INSTALLDIR="$INSTALLDIR" >eagle.yaml
+make config compose=base:nested:ursa INSTALLDIR="$INSTALLDIR" >eagle.yaml
 
 SRC_ABS="$GITHUB_WORKSPACE/src"
 
@@ -193,7 +193,7 @@ done
 for extent in global lam; do
   dir=$RUNROOT/visualization/grid2grid/$extent/plots-spatial-stats
   count=$(find $dir -type f -name "*.png" | wc -l)
-  expected=40
+  expected=8
   test $count -eq $expected || {
     echo ERROR: Found $count PNG files in $dir, expected $expected
     exit 1
@@ -210,7 +210,7 @@ inference:
   anemoi:
     checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
 EOF
-make config compose=base:ursa:nrt >nrt-composed.yaml
+make config compose=base:nested:ursa:nrt >nrt-composed.yaml
 make realize config=nrt-composed.yaml update=update.yaml >nrt.yaml
 
 # Define NRTDIR in terms of NOW variable (changes every run).
