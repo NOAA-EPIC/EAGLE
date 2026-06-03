@@ -79,18 +79,15 @@ def test_anemoi_config__explicit_checkpoint(driverobj, tmp_path):
     assert cfgfile.is_file()
 
 
-def test_anemoi_config__no_validation(driverobj, tmp_path):
+def test_anemoi_config__validate_checkpoint_exists(driverobj, tmp_path):
     del driverobj._config["checkpoint_dir"]
     ckptfile = tmp_path / "inference-last.ckpt"
     ckptfile.touch()
     driverobj._config["anemoi"]["checkpoint_path"] = ckptfile
     driverobj._config["rundir"] = tmp_path
-    driverobj._config["validate"] = False
-    cfgfile = tmp_path / "inference.yaml"
-    assert not cfgfile.is_file()
-    with patch.object(driverobj, "_checkpoint", return_value=None):
-        driverobj.anemoi_config()
-    assert cfgfile.is_file()
+    driverobj._config["validate"] = True
+    task = driverobj.anemoi_config()
+    assert task.ready
 
 
 @mark.parametrize("exists", [True, False])
