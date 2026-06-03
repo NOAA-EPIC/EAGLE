@@ -15,8 +15,7 @@
           },
           "then": {
             "required": [
-              "latent_mesh_global_resolution_deg",
-              "latent_mesh_conus_coarsen_factor"
+              "latent_mesh_global_resolution_deg"
             ]
           }
         }
@@ -66,7 +65,6 @@
         }
       },
       "required": [
-        "conus_grid_resolution_km",
         "filenames",
         "global_grid_resolution_deg",
         "rundir"

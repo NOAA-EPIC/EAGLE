@@ -23,16 +23,23 @@ class WXVX(DriverTimeInvariant):
         nc_dir = Path(self.config["prewxvx"]["eagle_tools"]["output_path"])
         pre_dir = Path(self.config["prewxvx"]["rundir"])
         pre_path = pre_dir / f"prewxvx-{extent}.yaml"
-        nc = f"nested-{extent}.*.nc"
+        print("nc_dir:",nc_dir)
+        print("pre_dir:",pre_dir)
+        print("pre_path:",pre_path)
+        #nc = f"nested-{extent}.*.nc"
+        nc = f"{extent}.*.nc" if "global" in self._name else "fnested-{extent}.*.nc"
         yield {
             "config": Asset(pre_path, pre_path.is_file),
             "ncfiles": Asset(nc_dir, lambda: any(nc_dir.glob(nc))),
         }
         yield None
         pre_path.parent.mkdir(parents=True, exist_ok=True)
+        print("made it here")
         nc_dir.mkdir(parents=True, exist_ok=True)
         get_yaml_config(self.config["prewxvx"]["eagle_tools"]).dump(pre_path)
         logfile = pre_dir / "prewxvx.log"
+        print("logfile:",logfile)
+        print("about to run: eagle-tools prewxvx ",pre_path,">",logfile)
         run(
             "eagle-tools prewxvx %s >%s 2>&1" % (pre_path, logfile),
             check=False,

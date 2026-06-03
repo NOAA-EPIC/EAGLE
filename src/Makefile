@@ -45,8 +45,13 @@ config:
 
 data:
 	@$(make) grids-and-meshes
+	$(call check,$(mode),mode)
+ifeq ($(mode),global)
 	@$(make) zarr-gfs
-	@$(make) zarr-hrrr
+else
+	@$(make) zarr-gfs
+	@$(make) zarr-hrrr                                                                               
+endif
 
 devenv:
 	$(call check,$(cudascript),cudascript)
