@@ -193,7 +193,7 @@ done
 for extent in global lam; do
   dir=$RUNROOT/visualization/grid2grid/$extent/plots-spatial-stats
   count=$(find $dir -type f -name "*.png" | wc -l)
-  expected=40
+  expected=8
   test $count -eq $expected || {
     echo ERROR: Found $count PNG files in $dir, expected $expected
     exit 1

@@ -57,7 +57,7 @@ training:
       - graph: encoder_decoder_only
       - model: transformer
       - system: slurm
-      - training: single
+      - training: stretched
       - _self_
   execution:
     batchargs:
