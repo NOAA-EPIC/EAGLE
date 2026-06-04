@@ -164,5 +164,4 @@ Building and Running :term:`EAGLE`
 
    Verification requires completed forecast output, so wait until the inference window has completed before running these commands. 
    For example, if you created a 48 hour forecast, you will need to wait 48 hours to verify it. Once the output is available, run 
-   the same ``vx`` targets shown above to verify against gridded analyses or observations. For additional details on products, 
-   logs, and output locations, see :ref:`QuickstartVerification`.
+   the same ``vx`` targets shown above to verify against gridded analyses or observations.
