@@ -1,17 +1,49 @@
-# This is the global EAGLE config.
+# This is the Global EAGLE case.
 
 # yamllint disable rule:anchors rule:line-length
 
 grids_and_meshes:
-  filenames:
-    latent_mesh: '{{ val.filenames.latent_mesh }}'                                                                                    
-  latent_mesh_global_resolution_deg: 2.0
   conus_grid_resolution_km: 15
+  filenames:
+    latent_mesh: '{{ val.filenames.latent_mesh }}'
+  latent_mesh_global_resolution_deg: 2.0
   latent_mesh_conus_coarsen_factor: 2
 inference:
   anemoi:
     input_dataset_kwargs: &dataset-kwargs
       dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
+prewxvx:
+  common:
+    prewxvx: &prewxvx-common
+      forecast_path: '{{ inference.anemoi.output_path }}'
+      freq: '{{ app.time.freq }}'
+      lead_time: !int '{{ app.time.leadtime }}'
+      lam_index: 64220
+      lcc_info:
+        n_x: 338
+        n_y: 190
+      levels:
+        - 250
+        - 500
+        - 850
+      start_date: '{{ app.time.inference_start }}'
+      end_date: '{{ app.time.inference_stop }}'
+      vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
+    rundir: '{{ val.vx.rundir }}'
+  global:
+    prewxvx: &prewxvx-global
+      name: global
+      eagle_tools:
+        <<: *prewxvx-common
+        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}'
+        model_type: global
+        anemoi_reference_dataset_kwargs:
+          <<: *dataset-kwargs
+        forecast_regrid_kwargs:
+          regridder_kwargs:
+            method: 'conservative_normed'
+          target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}'
+      rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
 training:
   anemoi:
     defaults:
@@ -344,38 +376,6 @@ training:
                 - u
                 - v
                 - w
-prewxvx:
-  common:
-    prewxvx: &prewxvx-common
-      forecast_path: '{{ inference.anemoi.output_path }}'
-      freq: '{{ app.time.freq }}'
-      lead_time: !int '{{ app.time.leadtime }}'
-      lam_index: 64220
-      lcc_info:
-        n_x: 338
-        n_y: 190
-      levels:
-        - 250
-        - 500
-        - 850
-      start_date: '{{ app.time.inference_start }}'
-      end_date: '{{ app.time.inference_stop }}'
-      vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
-    rundir: '{{ val.vx.rundir }}'
-  global:
-    prewxvx: &prewxvx-global
-      name: global
-      eagle_tools:
-        <<: *prewxvx-common
-        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}'
-        model_type: global
-        anemoi_reference_dataset_kwargs:
-          <<: *dataset-kwargs
-        forecast_regrid_kwargs:
-          regridder_kwargs:
-            method: 'conservative_normed'
-          target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.gfs_target_grid }}'
-      rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.global.prewxvx.name }}'
 val:                                                                                                                 
   filenames:
     latent_mesh: latentx2.spongex1.combined.sorted.npz
