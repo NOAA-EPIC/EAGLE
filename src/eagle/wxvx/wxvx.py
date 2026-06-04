@@ -26,7 +26,6 @@ class WXVX(DriverTimeInvariant):
         print("nc_dir:",nc_dir)
         print("pre_dir:",pre_dir)
         print("pre_path:",pre_path)
-        #nc = f"nested-{extent}.*.nc"
         nc = f"{extent}.*.nc" if "global" in self._name else "fnested-{extent}.*.nc"
         yield {
             "config": Asset(pre_path, pre_path.is_file),
