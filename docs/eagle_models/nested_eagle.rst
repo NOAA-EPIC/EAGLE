@@ -64,9 +64,28 @@ The nested-EAGLE model uses the following architecture:
 
 * Encoder and Decoder: Graph Transformer
 * Processor: Sliding Window Transformer
-* Latent space is a 4x coarsened data space
+* Latent mesh: four times coarser than the native data resolution
 
-The graph configuration connects targets to nodes through nearest neighbors in
-the encoder and decoder, with ``encoder_knn=12`` and ``decoder_knn=3``.
+Near-Real-Time Forecasting
+--------------------------
 
-The latent mesh is four times coarser than the native data resolution.
+The nested-EAGLE model can be run in near real time (NRT) using the
+``nested-eagle-v1`` branch in this repository. That branch includes the required 
+dependencies (including compatible ``anemoi`` versions) and is the recommended
+starting point for NRT runs of nested-EAGLE.
+
+To run NRT:
+
+#. Check out the ``nested-eagle-v1`` branch.
+#. Follow the NRT workflow in :ref:`Quickstart` (see "Run inference in near-real-time (NRT)").
+#. EPIC hosts the checkpoint (placeholder: need to decide on this)
+#. Before running ``make realize``, update:
+
+   * ``app.base`` to the absolute path of your local ``src/`` directory
+   * ``inference.anemoi.checkpoint_dir`` to the provided checkpoint (inference-last.ckpt)
+
+After those updates, realize the config and continue with the remaining quickstart
+NRT steps.
+
+EPIC runs this nested-EAGLE workflow in near-real-time every 6 hours. You can
+view project information and current forecast results on the `NOAA EPIC website <https://www.epic.noaa.gov/ai/eagle-overview/>`_.

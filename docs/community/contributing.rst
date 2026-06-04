@@ -90,23 +90,22 @@ The resulting verbose logging, which will include stacktraces from any unhandled
 Pull Requests
 ------------------------------------------------------------------------------
 
-.. _ForkPR:
+.. _BranchPR:
 
-Fork and PR Overview
+Branch and PR Overview
 ==============================================================================
 
-Contributions to the ``EAGLE`` project are made through a fork and pull request model. GitHub provides a thorough overview in their `Contributing to a project quickstart <https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project>`_, but the process for EAGLE can be summarized as:
+Contributions to the ``EAGLE`` project are made through a branch and pull request model. GitHub provides a thorough overview in their `Contributing to a project quickstart <https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project>`_, but the process for EAGLE can be summarized as:
 
 #. Create or identify a GitHub issue to document the proposed change.
-#. Fork the `EAGLE repository <https://github.com/NOAA-EPIC/EAGLE>`_ into your personal GitHub account.
-#. Clone your fork onto your development system.
-#. Create a branch in your clone for the change. All development should take place on a branch, not on ``main``.
-#. Make, commit, and push your changes to that branch in your fork.
+#. Clone the `EAGLE repository <https://github.com/NOAA-EPIC/EAGLE>`_ onto your development system.
+#. Create a branch in your local clone for the change. All development should take place on a branch, not on ``main``.
+#. Make, commit, and push your changes to that branch.
 #. Open a pull request to merge your changes into the upstream repository.
 
 Open or review issues on the `EAGLE issues page <https://github.com/NOAA-EPIC/EAGLE/issues>`_.
 
-For future contributions, keep your fork current by syncing it with the upstream ``NOAA-EPIC/EAGLE`` repository.
+For future contributions, keep your local ``main`` branch current by pulling updates from ``NOAA-EPIC/EAGLE``.
 
 .. _DevTest:
 
