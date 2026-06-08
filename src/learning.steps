@@ -1,0 +1,158 @@
+6/8/2026
+start from: https://github.com/NOAA-EPIC/EAGLE/blob/main/docs/user_guide/quickstart.rst
+
+1. Create all environments
+   make env cudascript=ursa
+
+   To activate this environment, use:
+
+   	mamba activate anemoi
+	mamba activate data
+	mamba activate visualization
+	mamba activate wxvx
+
+   Or to execute a single command in this environment, use:
+
+	mamba run -n anemoi mycommand
+
+   Installing pip packages:
+	anemoi-inference==0.10.*,
+	anemoi-models==0.13.*,
+	anemoi-training==0.10.*,
+	eagle-tools==0.8.1
+
+To activate this environment, use:
+
+    mamba activate wxvx
+
+Or to execute a single command in this environment, use:
+
+    mamba run -n wxvx mycommand
+
+
+Installing pip packages: eagle-tools==0.8.1
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+wxvx 0.7.2 requires met2go===11.0.3.*, which is not installed.
+wxvx 0.7.2 requires python-eccodes===2.42.*, which is not installed.
+wxvx 0.7.2 requires iotaa===1.6.*, but you have iotaa 1.6.0 which is incompatible.
+wxvx 0.7.2 requires netcdf4===1.7.*, but you have netcdf4 1.7.2 which is incompatible.
+wxvx 0.7.2 requires pandas===2.2.*, but you have pandas 2.2.3 which is incompatible.
+wxvx 0.7.2 requires pyproj===3.7.*, but you have pyproj 3.7.2 which is incompatible.
+wxvx 0.7.2 requires pyyaml===6.0.*, but you have pyyaml 6.0.3 which is incompatible.
+wxvx 0.7.2 requires requests===2.32.*, but you have requests 2.34.2 which is incompatible.
+wxvx 0.7.2 requires seaborn===0.13.*, but you have seaborn 0.13.2 which is incompatible.
+wxvx 0.7.2 requires xarray===2025.12.*, but you have xarray 2025.12.0 which is incompatible.
+
+real    4m41.320s
+user    2m4.028s
+sys     2m0.759s
+=> Done
+
+
+repeat:
+
+
+  941  git clone --recursive ssh://git@github.com/NOAA-EPIC/EAGLE.git
+  942  cd EAGLE/src
+  943  h
+  944  make devenv cudascript=ursa | tee log.make
+  945  h
+(base) [Wei.Huang@ufe02 src]$ pwd
+/scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src
+
+	
+b. make devenv cudascript=ursa | tee log.make
+
+
+........
+Linking wxvx-0.7.2-py_1
+
+Transaction finished
+
+
+To activate this environment, use:
+
+    mamba activate wxvx
+
+Or to execute a single command in this environment, use:
+
+    mamba run -n wxvx mycommand
+
+
+Installing pip packages: eagle-tools==0.8.1
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+wxvx 0.7.2 requires met2go===11.0.3.*, which is not installed.
+wxvx 0.7.2 requires python-eccodes===2.42.*, which is not installed.
+wxvx 0.7.2 requires iotaa===1.6.*, but you have iotaa 1.6.0 which is incompatible.
+wxvx 0.7.2 requires netcdf4===1.7.*, but you have netcdf4 1.7.2 which is incompatible.
+wxvx 0.7.2 requires pandas===2.2.*, but you have pandas 2.2.3 which is incompatible.
+wxvx 0.7.2 requires pyproj===3.7.*, but you have pyproj 3.7.2 which is incompatible.
+wxvx 0.7.2 requires pyyaml===6.0.*, but you have pyyaml 6.0.3 which is incompatible.
+wxvx 0.7.2 requires requests===2.32.*, but you have requests 2.34.2 which is incompatible.
+wxvx 0.7.2 requires seaborn===0.13.*, but you have seaborn 0.13.2 which is incompatible.
+wxvx 0.7.2 requires xarray===2025.12.*, but you have xarray 2025.12.0 which is incompatible.
+=> Installing dev packages into environment: wxvx
+
+
+2. Create the EAGLE YAML config
+
+	make config compose=base:nested:ursa >eagle.yaml
+
+		produces: + uw config compose config/base.yaml config/nested.yaml config/ursa.yaml
+
+
+3. Set the app.base value in eagle.yaml to the absolute path to the current src/ directory.
+	my app.base: /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src
+
+4. Create training data
+
+	make data config=eagle.yaml | tee log.data
+
+(base) [Wei.Huang@ufe02 src]$ make data config=eagle.yaml | tee log.data
++ uw execute --config-file eagle.yaml --module eagle/data/grids_and_meshes.py --classname GridsAndMeshes --task provisioned_rundir
+[2026-06-08T16:57:17]     INFO Schema validation succeeded for grids_and_meshes config
+[2026-06-08T16:57:17]     INFO grids_and_meshes CONUS data grid /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src/run/wei_learning/data/hrrr_15km.nc: Executing
+[2026-06-08T16:57:25]     INFO grids_and_meshes CONUS data grid /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src/run/wei_learning/data/hrrr_15km.nc: Ready
+[2026-06-08T16:57:25]     INFO grids_and_meshes global data grid /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src/run/wei_learning/data/global_one_degree.nc: Executing
+[2026-06-08T16:57:25]     INFO grids_and_meshes global data grid /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src/run/wei_learning/data/global_one_degree.nc: Ready
+[2026-06-08T16:57:25]     INFO grids_and_meshes latent mesh /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src/run/wei_learning/data/latentx2.spongex1.combined.sorted.npz: Executing
+[2026-06-08T16:57:25]     INFO grids_and_meshes latent mesh /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src/run/wei_learning/data/latentx2.spongex1.combined.sorted.npz: Ready
+[2026-06-08T16:57:25]     INFO grids_and_meshes provisioned run directory: Ready
++ uw execute --config-file eagle.yaml --module eagle/data/zarr.py --classname Zarr --task run --key-path zarrs.gfs --batch
+[2026-06-08T16:57:45]     INFO Schema validation succeeded for zarr config
+[2026-06-08T16:57:45]     INFO Validating config against internal schema: platform
+[2026-06-08T16:57:45]     INFO Schema validation succeeded for platform config
+[2026-06-08T16:57:45]     INFO zarr runscript.zarr-gfs: Executing
+[2026-06-08T16:57:45]     INFO zarr runscript.zarr-gfs: Ready
+[2026-06-08T16:57:45]     INFO zarr ufs2arco gfs config: Executing
+[2026-06-08T16:57:45]     INFO zarr ufs2arco gfs config: Ready
+[2026-06-08T16:57:45]     INFO zarr gfs provisioned run directory: Ready
+[2026-06-08T16:57:45]     INFO zarr run via batch submission: Executing
+[2026-06-08T16:57:45]     INFO Running in /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src/run/wei_learning/data:
+[2026-06-08T16:57:45]     INFO   set -o pipefail && sbatch runscript.zarr-gfs 2>&1 | tee runscript.zarr-gfs.submit
+[2026-06-08T16:57:46]     INFO zarr run via batch submission: Ready
+[2026-06-08T16:57:46]     INFO zarr run: Ready
++ uw execute --config-file eagle.yaml --module eagle/data/zarr.py --classname Zarr --task run --key-path zarrs.hrrr --batch
+[2026-06-08T16:58:05]     INFO Schema validation succeeded for zarr config
+[2026-06-08T16:58:05]     INFO Validating config against internal schema: platform
+[2026-06-08T16:58:05]     INFO Schema validation succeeded for platform config
+[2026-06-08T16:58:05]     INFO zarr runscript.zarr-hrrr: Executing
+[2026-06-08T16:58:05]     INFO zarr runscript.zarr-hrrr: Ready
+[2026-06-08T16:58:05]     INFO zarr ufs2arco hrrr config: Executing
+[2026-06-08T16:58:05]     INFO zarr ufs2arco hrrr config: Ready
+[2026-06-08T16:58:05]     INFO zarr hrrr provisioned run directory: Ready
+[2026-06-08T16:58:05]     INFO zarr run via batch submission: Executing
+[2026-06-08T16:58:05]     INFO Running in /scratch3/NAGAPE/epic/Wei.Huang/src/nv/EAGLE/src/run/wei_learning/data:
+[2026-06-08T16:58:05]     INFO   set -o pipefail && sbatch runscript.zarr-hrrr 2>&1 | tee runscript.zarr-hrrr.submit
+[2026-06-08T16:58:05]     INFO zarr run via batch submission: Ready
+[2026-06-08T16:58:05]     INFO zarr run: Ready
+
+
+there are warning msg in:
+	run/wei_learning/data/runscript.zarr-gfs.out
+	run/wei_learning/data/runscript.zarr-hrrr.out
+
+5. Train the ML model
+
+	make training config=eagle.yaml | tee log.training
+
