@@ -17,18 +17,18 @@ app:
     scheduler: slurm
 inference:
   execution:
-    envcmds: !extend
-      - source /etc/profile.d/profile-slurm.sh
+    envcmds: !list '{{ val.slurm_script + val.inference.envcmds  }}'
 training:
   execution:
-    envcmds: !extend
-      - source /etc/profile.d/profile-slurm.sh
+    envcmds: !list '{{ val.slurm_script + val.training.envcmds }}'
+val:
+  slurm_script:
+    - source /etc/profile.d/profile-slurm.sh
 zarrs:
   common:
     execution:
       batchargs:
         --mem-per-cpu: 3G
-      envcmds: !extend
-        - source /etc/profile.d/profile-slurm.sh
+      envcmds: !list '{{ val.slurm_script + val.zarrs.envcmds }}'
       mpiargs:
         - "--export=ALL"
