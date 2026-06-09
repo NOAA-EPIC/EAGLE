@@ -44,7 +44,7 @@ inference:
     use_mpi: true
     input_dataset_kwargs:
       adjust: all
-      cutout:
+      cutout: &id013
       - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
         trim_edge:
         - 10
@@ -558,14 +558,14 @@ val:
 visualization:
   common:
     postwxvx:
-      start_date: !datetime '{{ app.time.inference_start }}'
-      end_date: !datetime '{{ app.time.inference_stop }}'
+      start_date: &id001 !datetime '{{ app.time.inference_start }}'
+      end_date: &id002 !datetime '{{ app.time.inference_stop }}'
       freq: '{{ app.time.freq }}'
-      leadtimes:
+      leadtimes: &id003
         start: 0
         end: 24
         step: !int '{{ val.step }}'
-      variable_prefixes:
+      variable_prefixes: &id004
       - 2t_heightAboveGround_0002
       - 10u_heightAboveGround_0010
       - 10v_heightAboveGround_0010
@@ -600,22 +600,11 @@ visualization:
     global:
       visualization:
         eagle_tools:
-          start_date: !datetime '{{ app.time.inference_start }}'
-          end_date: !datetime '{{ app.time.inference_stop }}'
+          start_date: *id001
+          end_date: *id002
           freq: '{{ app.time.freq }}'
-          leadtimes:
-            start: 0
-            end: 24
-            step: !int '{{ val.step }}'
-          variable_prefixes:
-          - 2t_heightAboveGround_0002
-          - 10u_heightAboveGround_0010
-          - 10v_heightAboveGround_0010
-          - gh_isobaricInhPa_0500
-          - t_isobaricInhPa_0850
-          - u_isobaricInhPa_0250
-          - v_isobaricInhPa_0250
-          - sp_surface
+          leadtimes: *id003
+          variable_prefixes: *id004
           work_path: '{{ val.vx.rundir }}/grid2grid/global'
           stat_prefix: grid_stat_nested_global
         name: grid-global
@@ -642,22 +631,11 @@ visualization:
     global:
       visualization:
         eagle_tools:
-          start_date: !datetime '{{ app.time.inference_start }}'
-          end_date: !datetime '{{ app.time.inference_stop }}'
+          start_date: *id001
+          end_date: *id002
           freq: '{{ app.time.freq }}'
-          leadtimes:
-            start: 0
-            end: 24
-            step: !int '{{ val.step }}'
-          variable_prefixes:
-          - 2t_heightAboveGround_0002
-          - 10u_heightAboveGround_0010
-          - 10v_heightAboveGround_0010
-          - gh_isobaricInhPa_0500
-          - t_isobaricInhPa_0850
-          - u_isobaricInhPa_0250
-          - v_isobaricInhPa_0250
-          - sp_surface
+          leadtimes: *id003
+          variable_prefixes: *id004
           work_path: '{{ val.vx.rundir }}/grid2obs/global/'
           stat_prefix: point_stat_nested_global
         name: obs-global
@@ -701,7 +679,7 @@ vx:
       obs: '{{ val.vx.rundir }}/TRUTH/EXTENT/obs'
       run: '{{ val.vx.rundir }}/TRUTH/EXTENT/run'
     wxvx:
-      cycles:
+      cycles: &id005
         start: !datetime '{{ app.time.inference_start }}'
         step: 0
         stop: !datetime '{{ app.time.inference_stop }}'
@@ -713,7 +691,7 @@ vx:
           time:
             inittime: forecast_reference_time
             validtime: time
-      leadtimes:
+      leadtimes: &id006
         start: '{{ app.time.leadtime }}'
         step: '{{ app.time.step }}'
         stop: '{{ app.time.leadtime }}'
@@ -721,7 +699,7 @@ vx:
         workdir: '{{ val.vx.rundir }}/TRUTH/EXTENT'
         grids: '{{ val.vx.rundir }}/TRUTH/EXTENT/grids'
         post_files: '{{ val.vx.rundir }}/postprocessed_files/EXTENT'
-      variables:
+      variables: &id007
         t2m:
           level_type: heightAboveGround
           levels:
@@ -777,60 +755,16 @@ vx:
         prewxvx: !dict '{{ prewxvx.global.prewxvx }}'
         rundir: '{{ val.vx.rundir }}/grid2grid/global'
         wxvx:
-          cycles:
-            start: !datetime '{{ app.time.inference_start }}'
-            step: 0
-            stop: !datetime '{{ app.time.inference_stop }}'
+          cycles: *id005
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             projection:
               proj: latlon
             name: nested_global
             path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
-          leadtimes:
-            start: '{{ app.time.leadtime }}'
-            step: '{{ app.time.step }}'
-            stop: '{{ app.time.leadtime }}'
+          leadtimes: *id006
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
-          variables:
-            t2m:
-              level_type: heightAboveGround
-              levels:
-              - 2
-              name: 2t
-            gh:
-              level_type: isobaricInhPa
-              levels:
-              - 500
-              name: gh
-            sp:
-              level_type: surface
-              name: sp
-            t:
-              level_type: isobaricInhPa
-              levels:
-              - 850
-              name: t
-            u:
-              level_type: isobaricInhPa
-              levels:
-              - 250
-              name: u
-            u10:
-              level_type: heightAboveGround
-              levels:
-              - 10
-              name: 10u
-            v:
-              level_type: isobaricInhPa
-              levels:
-              - 250
-              name: v
-            v10:
-              level_type: heightAboveGround
-              levels:
-              - 10
-              name: 10v
+          variables: *id007
           truth:
             name: GFS
             type: grid
@@ -855,21 +789,21 @@ vx:
         name: grid2grid-lam
         prewxvx:
           name: lam
-          eagle_tools:
+          eagle_tools: &id008
             forecast_path: '{{ inference.anemoi.output_path }}'
             freq: '{{ app.time.freq }}'
-            lead_time: !int '{{ app.time.leadtime }}'
+            lead_time: &id009 !int '{{ app.time.leadtime }}'
             lam_index: 64220
-            lcc_info:
+            lcc_info: &id010
               n_x: 338
               n_y: 190
-            levels:
+            levels: &id011
             - 250
             - 500
             - 850
             start_date: '{{ app.time.inference_start }}'
             end_date: '{{ app.time.inference_stop }}'
-            vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
+            vars_of_interest: &id012 !list '{{ vx.common.wxvx.variables.keys() | list }}'
             output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
             model_type: nested-lam
           rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
@@ -915,59 +849,15 @@ vx:
         prewxvx: !dict '{{ prewxvx.global.prewxvx }}'
         rundir: '{{ val.vx.rundir }}/grid2obs/global'
         wxvx:
-          cycles:
-            start: !datetime '{{ app.time.inference_start }}'
-            step: 0
-            stop: !datetime '{{ app.time.inference_stop }}'
+          cycles: *id005
           forecast:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.global.wxvx.wxvx.forecast.name }}'
             projection: !dict '{{ vx.grid2grid.global.wxvx.wxvx.forecast.projection }}'
             path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
-          leadtimes:
-            start: '{{ app.time.leadtime }}'
-            step: '{{ app.time.step }}'
-            stop: '{{ app.time.leadtime }}'
+          leadtimes: *id006
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
-          variables:
-            t2m:
-              level_type: heightAboveGround
-              levels:
-              - 2
-              name: 2t
-            gh:
-              level_type: isobaricInhPa
-              levels:
-              - 500
-              name: gh
-            sp:
-              level_type: surface
-              name: sp
-            t:
-              level_type: isobaricInhPa
-              levels:
-              - 850
-              name: t
-            u:
-              level_type: isobaricInhPa
-              levels:
-              - 250
-              name: u
-            u10:
-              level_type: heightAboveGround
-              levels:
-              - 10
-              name: 10u
-            v:
-              level_type: isobaricInhPa
-              levels:
-              - 250
-              name: v
-            v10:
-              level_type: heightAboveGround
-              levels:
-              - 10
-              name: 10v
+          variables: *id007
           truth:
             name: PREPBUFR
             type: point
@@ -991,23 +881,7 @@ vx:
         name: grid2obs-lam
         prewxvx:
           name: lam
-          eagle_tools:
-            forecast_path: '{{ inference.anemoi.output_path }}'
-            freq: '{{ app.time.freq }}'
-            lead_time: !int '{{ app.time.leadtime }}'
-            lam_index: 64220
-            lcc_info:
-              n_x: 338
-              n_y: 190
-            levels:
-            - 250
-            - 500
-            - 850
-            start_date: '{{ app.time.inference_start }}'
-            end_date: '{{ app.time.inference_stop }}'
-            vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
-            output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
-            model_type: nested-lam
+          eagle_tools: *id008
           rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
         rundir: '{{ val.vx.rundir }}/grid2obs/lam'
         wxvx:
@@ -1095,18 +969,13 @@ prewxvx:
     prewxvx:
       forecast_path: '{{ inference.anemoi.output_path }}'
       freq: '{{ app.time.freq }}'
-      lead_time: !int '{{ app.time.leadtime }}'
+      lead_time: *id009
       lam_index: 64220
-      lcc_info:
-        n_x: 338
-        n_y: 190
-      levels:
-      - 250
-      - 500
-      - 850
+      lcc_info: *id010
+      levels: *id011
       start_date: '{{ app.time.inference_start }}'
       end_date: '{{ app.time.inference_stop }}'
-      vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
+      vars_of_interest: *id012
     rundir: '{{ val.vx.rundir }}'
   global:
     prewxvx:
@@ -1114,30 +983,18 @@ prewxvx:
       eagle_tools:
         forecast_path: '{{ inference.anemoi.output_path }}'
         freq: '{{ app.time.freq }}'
-        lead_time: !int '{{ app.time.leadtime }}'
+        lead_time: *id009
         lam_index: 64220
-        lcc_info:
-          n_x: 338
-          n_y: 190
-        levels:
-        - 250
-        - 500
-        - 850
+        lcc_info: *id010
+        levels: *id011
         start_date: '{{ app.time.inference_start }}'
         end_date: '{{ app.time.inference_stop }}'
-        vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
+        vars_of_interest: *id012
         output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.global.prewxvx.name }}'
         model_type: nested-global
         anemoi_reference_dataset_kwargs:
           adjust: all
-          cutout:
-          - dataset: '{{ grids_and_meshes.rundir }}/hrrr.zarr'
-            trim_edge:
-            - 10
-            - 11
-            - 10
-            - 11
-          - dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
+          cutout: *id013
           min_distance_km: 0
         forecast_regrid_kwargs:
           regridder_kwargs:
@@ -1147,21 +1004,5 @@ prewxvx:
   lam:
     prewxvx:
       name: lam
-      eagle_tools:
-        forecast_path: '{{ inference.anemoi.output_path }}'
-        freq: '{{ app.time.freq }}'
-        lead_time: !int '{{ app.time.leadtime }}'
-        lam_index: 64220
-        lcc_info:
-          n_x: 338
-          n_y: 190
-        levels:
-        - 250
-        - 500
-        - 850
-        start_date: '{{ app.time.inference_start }}'
-        end_date: '{{ app.time.inference_stop }}'
-        vars_of_interest: !list '{{ vx.common.wxvx.variables.keys() | list }}'
-        output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
-        model_type: nested-lam
+      eagle_tools: *id008
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
