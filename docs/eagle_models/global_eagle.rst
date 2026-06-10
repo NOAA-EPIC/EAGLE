@@ -5,10 +5,6 @@ global-EAGLE
 :term:`EAGLE` currently includes a prototype EAGLE model trained with
 global :term:`GFS` data.
 
-This model builds on previous work from Met Norway (Nipen et al., 2024,
-arXiv:2409.02891) by combining lower-resolution global data with
-higher-resolution data over an area of interest.
-
 EAGLE configurations were provided by Tim Smith at NOAA Physical
 Sciences Laboratory.
 
