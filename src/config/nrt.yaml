@@ -30,6 +30,7 @@ grids_and_meshes:
   latent_mesh_conus_coarsen_factor: !remove
 inference:
   anemoi:
+    checkpoint_path: '{{ app.base }}/inference-last.ckpt'
     input_dataset_kwargs: &nrt-dataset-kwargs
       cutout:
         - dataset: '{{ val.data.rundir }}/hrrr.zarr'
