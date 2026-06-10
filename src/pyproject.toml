@@ -5,10 +5,6 @@ skip_covered = true
 
 [tool.coverage.run]
 branch = true
-omit = [ # TODO REMOVE ALL THESE
-  "eagle/data/grids_and_meshes.py",
-  "eagle/data/zarr.py",
-]
 
 [tool.mypy]
 check_untyped_defs = true

@@ -35,15 +35,18 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         res = self.config["conus_grid_resolution_km"]
         if res == 3 or "hrrr_target_grid" not in self.config["filenames"]:
-            return
-        path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
-        yield self.taskname(f"conus data grid {path}")
-        yield Asset(path, path.is_file)
-        yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res).to_netcdf(
-            path
-        )
+            yield self.taskname("CONUS data grid (skipping)")
+            yield Asset(None, lambda: True)
+            yield None
+        else:
+            path = self.rundir / self.config["filenames"]["hrrr_target_grid"]
+            yield self.taskname(f"CONUS data grid {path}")
+            yield Asset(path, path.is_file)
+            yield None
+            path.parent.mkdir(parents=True, exist_ok=True)
+            _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res).to_netcdf(
+                path
+            )
 
     @task
     def global_data_grid(self):
@@ -76,20 +79,25 @@ class GridsAndMeshes(AssetsTimeInvariant):
         The latent mesh, provisioned to the rundir.
         """
         if "latent_mesh" not in self.config["filenames"]:
-            return
-        path = self.rundir / self.config["filenames"]["latent_mesh"]
-        yield self.taskname(f"latent mesh {path}")
-        yield Asset(path, path.is_file)
-        yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        res = self.config["conus_grid_resolution_km"]
-        gmesh = _global_latent_grid(self.config["latent_mesh_global_resolution_deg"])
-        cmesh = _conus_latent_grid(
-            _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res),
-            coarsen=self.config["latent_mesh_conus_coarsen_factor"],
-        )
-        coords = _combine_global_and_conus_meshes(gmesh, cmesh)
-        np.savez(path, lon=coords["lon"], lat=coords["lat"])
+            yield self.taskname("latent mesh (skipping)")
+            yield Asset(None, lambda: True)
+            yield None
+        else:
+            path = self.rundir / self.config["filenames"]["latent_mesh"]
+            yield self.taskname(f"latent mesh {path}")
+            yield Asset(path, path.is_file)
+            yield None
+            path.parent.mkdir(parents=True, exist_ok=True)
+            res = self.config["conus_grid_resolution_km"]
+            gmesh = _global_latent_grid(
+                self.config["latent_mesh_global_resolution_deg"]
+            )
+            cmesh = _conus_latent_grid(
+                _conus_data_grid(self.rundir, self._conus_data_grid_logfile, res),
+                coarsen=self.config["latent_mesh_conus_coarsen_factor"],
+            )
+            coords = _combine_global_and_conus_meshes(gmesh, cmesh)
+            np.savez(path, lon=coords["lon"], lat=coords["lat"])
 
     @collection
     def provisioned_rundir(self):
@@ -98,16 +106,12 @@ class GridsAndMeshes(AssetsTimeInvariant):
         """
         yield self.taskname("provisioned run directory")
         tasks = []
-
         if "hrrr_target_grid" in self.config["filenames"]:
             tasks.append(self.conus_data_grid())
-
         if "gfs_target_grid" in self.config["filenames"]:
             tasks.append(self.global_data_grid())
-
         if "latent_mesh" in self.config["filenames"]:
             tasks.append(self.latent_mesh())
-
         yield tasks
 
     # Public methods
@@ -178,7 +182,6 @@ def _conus_data_grid(rundir: Path, logfile: Path, resolution_km: int = 15) -> Da
             hds = hds.assign_coords({f"{key}_b": corners})
             hds = hds.drop_vars(f"{key}_bounds")
         hds = hds.rename({"x_vertices": "x_b", "y_vertices": "y_b"})
-
         stride = resolution_km // 3
         # Get the nodes and bounds by subsampling.
         trim = stride - 1
