@@ -3,15 +3,21 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
-  - flash-attn 2.8.*
+  - flash-attn 2.7.*
   - mpi4py 4.1.*
-  - numpy 2.2.6.*
+  - numpy 1.26.4*
   - pip
   - python 3.12
+  - pytorch 2.6.*
+  - torch-geometric 2.6.*
+  - torchvision 0.21.*
   - setuptools 81.0.*
   - uwtools 2.16.*
   - pip:
-      - anemoi-inference==0.10.*
-      - anemoi-models==0.13.*
-      - anemoi-training==0.10.*
-      - eagle-tools==0.8.1
+    - anemoi-inference==0.9.1
+    - anemoi-models==0.12.0
+    - anemoi-datasets==0.5.30
+    - anemoi-graphs==0.8.2
+    - anemoi-transform==0.1.21
+    - anemoi-utils==0.4.42
+    - eagle-tools==0.8.1

@@ -23,10 +23,10 @@ prewxvx:
       forecast_path: '{{ inference.anemoi.output_path }}'
       freq: '{{ app.time.freq }}'
       lead_time: !int '{{ app.time.leadtime }}'
-      lam_index: 64220
+      lam_index: 407040
       lcc_info:
-        n_x: 338
-        n_y: 190
+        n_x: 848
+        n_y: 480
       levels:
         - 250
         - 500

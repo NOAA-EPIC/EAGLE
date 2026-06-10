@@ -2,12 +2,12 @@
 
 app:
   nrt:
-    multistep_input_offset: !timedelta 0
+    multistep_input_offset: !timedelta 6
     now: !datetime '{{ "NOW" | env }}'
     ic_start: !datetime '{{ app.nrt.inference_start - app.nrt.multistep_input_offset }}'
     inference_start: !datetime '{{ app.nrt.now - app.nrt.offset - app.nrt.latency }}'
     latency: !timedelta 6
-    leadtime: !timedelta 48
+    leadtime: !timedelta 240
     offset: !timedelta '0:0:{{ (app.nrt.now.timestamp() % 21600) | int }}'
     stop: !datetime '{{ app.nrt.inference_start + app.nrt.leadtime }}'
   time:
@@ -16,17 +16,53 @@ app:
     start: !datetime '{{ app.nrt.ic_start }}'
     stop: !datetime '{{ app.nrt.stop }}'
     leadtime: !int '{{ (app.nrt.leadtime.total_seconds() / 3600) | int }}'
+    multistep_input: 2
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
 grids_and_meshes:
+  filenames:
+    gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
+    hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
+    latent_mesh: !remove
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/data'
+  conus_grid_resolution_km: 6
+  global_grid_resolution_deg: 0.25
+  latent_mesh_global_resolution_deg: !remove
+  latent_mesh_conus_coarsen_factor: !remove
 inference:
   anemoi:
-    input_dataset_kwargs:
+    checkpoint_path: '{{ app.base }}/inference-last.ckpt'
+    input_dataset_kwargs: &nrt-dataset-kwargs
       cutout:
         - dataset: '{{ val.data.rundir }}/hrrr.zarr'
-          trim_edge: [10, 11, 10, 11]
+          trim_edge: [25, 24, 25, 26]
         - dataset: '{{ val.data.rundir }}/gfs.zarr'
-  checkpoint_dir: '{{ app.base }}/run/{{ app.experiment_name }}/training/outputs/checkpoint'
+      adjust: all
+      min_distance_km: 6
+  checkpoint_dir: !remove
+  execution:
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate anemoi
+      - set -ex
+      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+prewxvx:
+  common:
+    prewxvx:
+      lam_index: 407040
+      lcc_info:
+        n_x: 848
+        n_y: 480
+  global:
+    prewxvx:
+      eagle_tools:
+        anemoi_reference_dataset_kwargs:
+          <<: *nrt-dataset-kwargs
+        forecast_regrid_kwargs:
+          target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.gfs_target_grid }}'
+  lam:
+    prewxvx:
+      eagle_tools:
+        rename_curvilinear_coords_to_latlon: true
 training: !remove
 ufs2arco:
   mover:
@@ -50,6 +86,11 @@ ufs2arco:
     multistep_input: !int '{{ app.time.multistep_input }}'
     statistics_period: !remove
 val:
+  filenames:
+    gfs_target_grid: global_quarter_degree.nc
+    hrrr_target_grid: hrrr_6km.nc
+    latent_mesh: !remove
+    graph: !remove
   statsdelta: !remove
   variables:
     - gh
@@ -76,9 +117,7 @@ zarrs:
       ufs2arco:
         multisource: !remove
         source: !dict '{{ dict(ufs2arco.source, name="gfs_archive", slices=ufs2arco.slices) }}'
-        transforms:
-          horizontal_regrid:
-            target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'
+        transforms: !remove
   hrrr:
     zarr:
       ufs2arco:
