@@ -6,8 +6,8 @@ app:
     now: !datetime '{{ "NOW" | env }}'
     ic_start: !datetime '{{ app.nrt.inference_start - app.nrt.multistep_input_offset }}'
     inference_start: !datetime '{{ app.nrt.now - app.nrt.offset - app.nrt.latency }}'
-    latency: !timedelta 96
-    leadtime: !timedelta 48
+    latency: !timedelta 6
+    leadtime: !timedelta 240
     offset: !timedelta '0:0:{{ (app.nrt.now.timestamp() % 21600) | int }}'
     stop: !datetime '{{ app.nrt.inference_start + app.nrt.leadtime }}'
   time:
