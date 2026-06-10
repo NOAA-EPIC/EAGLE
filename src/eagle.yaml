@@ -1,6 +1,6 @@
 app:
   base: /scratch3/NAGAPE/epic/Wei.Huang/src/EAGLE/src
-  experiment_name: wei_learning
+  experiment_name: 'wei_learning_all'
   gpu:
     batchargs:
       --gres: gpu:h100:1

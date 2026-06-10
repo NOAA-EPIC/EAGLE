@@ -32,7 +32,7 @@ EOF
     exit 0
 }
 
-set -eu
+#set +u
 
 # FIXED: Added colons after n, s, and m so they handle trailing arguments properly!
 while getopts ":hn:s:m:v" option; do
@@ -67,6 +67,40 @@ fi
 
 eval "$(mamba shell hook --shell bash)"
 
+wait_for_file() {
+    local file_path="$1"
+    local timeout=1800 # 30 minutes in seconds (30 * 60)
+    local interval=10  # Check every 10 seconds
+
+    # Initail check to see if the file exists
+    if [ -f "$file_path" ]; then
+        return 0
+    fi
+
+    echo "Checking for file: $file_path..."
+
+    # Initialize Bash's builtin SECONDS counter
+    SECONDS=0
+
+    # Loop until the file exists or the 30-minute timeout is reached
+    until [ -f "$file_path" ] || (( SECONDS >= timeout )); do
+        sleep "$interval"
+        echo "Still waiting... ($((SECONDS))s elapsed)"
+    done
+
+    # Final check to see if the file exists or if we timed out
+    if [ -f "$file_path" ]; then
+        echo "Success! File '$file_path' is ready."
+        return 0
+    else
+        echo "Error: File '$file_path' was not produced within 30 minutes."
+        return 1
+    fi
+}
+
+# Example of how to use it:
+# wait_for_file "/path/to/your/file.txt"
+
 case "${step}" in
     env|devenv)
         if [[ -f "${EAGLEhome}/conda/bin/mamba" ]]; then
@@ -86,19 +120,11 @@ case "${step}" in
             esac
         fi
 
-        set +u
-        echo "Activating anemoi environment..."
         mamba activate /scratch5/purged/Wei.Huang/src/EAGLE/src/conda/envs/anemoi
-        # Re-enable strict checking for the rest of your EAGLE script steps
-        set -u
         make env cudascript=${MACHINE_ID}
         ;;
     config)
-        set +u
-        echo "Activating anemoi environment..."
         mamba activate /scratch5/purged/Wei.Huang/src/EAGLE/src/conda/envs/anemoi
-        # Re-enable strict checking for the rest of your EAGLE script steps
-        set -u
         make config compose=base:nested:${MACHINE_ID} > eagle.yaml
         sed -i "s?/path/to/eagle/src?${EAGLEhome}?g" eagle.yaml
         sed -i "s|experiment_name: default|experiment_name: \'${expname}\'|g" eagle.yaml
@@ -124,16 +150,18 @@ case "${step}" in
 	if [[ ! -f "${EAGLEhome}/run/${expname}/training/runscript.training.done" ]]; then
             echo "Training is not done, need to run ${BASH_SOURCE[0]} -n ${expname} -s training"
             echo "Then wait and re-run when training is done."
+	    squeue -u $USER
             exit 15
         fi
 	mamba activate ${EAGLEhome}/conda/envs/inference
         make inference config=eagle.yaml
         ;;
     veri*)
-	# Check if training is done:
+	# Check if inference is done:
 	if [[ ! -f "${EAGLEhome}/run/${expname}/inference/runscript.inference.done" ]]; then
             echo "Inference is not done, need to run ${BASH_SOURCE[0]} -n ${expname} -s inference"
             echo "Then wait and re-run when inference is done."
+	    squeue -u $USER
             exit 16
         fi
 	mamba activate ${EAGLEhome}/conda/envs/wxvx
@@ -142,8 +170,43 @@ case "${step}" in
         make vx-obs-global config=eagle.yaml &
         make vx-obs-lam config=eagle.yaml &
 	wait
-        ;;
+	;;
     visu*)
+	# if any verification failed, re-run it.
+	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done" ]]; then
+	    mamba activate ${EAGLEhome}/conda/envs/wxvx
+	    make vx-grid-global config=eagle.yaml
+	    wait_for_file "${EAGLEhome}/run/${expname}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done"
+	    mamba deactivate
+	fi
+	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done" ]]; then
+	    mamba activate ${EAGLEhome}/conda/envs/wxvx
+	    make vx-grid-lam config=eagle.yaml 
+	    wait_for_file "${EAGLEhome}/run/${expname}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done"
+	    mamba deactivate
+	fi
+	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done" ]]; then
+	    mamba activate ${EAGLEhome}/conda/envs/wxvx
+	    make vx-obs-global config=eagle.yaml
+	    wait_for_file "${EAGLEhome}/run/${expname}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done"
+	    mamba deactivate
+	fi
+	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done" ]]; then
+	    mamba activate ${EAGLEhome}/conda/envs/wxvx
+	    make vx-obs-lam config=eagle.yaml
+	    wait_for_file "${EAGLEhome}/run/${expname}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done"
+	    mamba deactivate
+	fi
+	# re-check if verifications are done:
+	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done" ]] || \
+           [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done" ]] || \
+           [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done" ]] || \
+           [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done" ]]; then
+            echo "Verifications are not ready, need to run ${BASH_SOURCE[0]} -n ${expname} -s verification"
+            echo "Then wait and re-run when verifications are finished."
+	    squeue -u $USER
+            exit 16
+	fi
 	mamba activate ${EAGLEhome}/conda/envs/visualization
         make vis-grid-global config=eagle.yaml &
         make vis-grid-lam config=eagle.yaml &
@@ -162,10 +225,7 @@ case "${step}" in
 	    case "${response}" in
     	        [Yy])
         	    echo "Proceeding to overwrite..."
-                    set +u
-                    echo "Activating anemoi environment..."
                     mamba activate /scratch5/purged/Wei.Huang/src/EAGLE/src/conda/envs/anemoi
-                    set -u
                     make env cudascript=${MACHINE_ID}
 	            mamba deactivate
         	    ;;
@@ -174,21 +234,13 @@ case "${step}" in
         	    ;;
 	    esac
         else
-            set +u
-            echo "Activating anemoi environment..."
             mamba activate /scratch5/purged/Wei.Huang/src/EAGLE/src/conda/envs/anemoi
-            set -u
             make env cudascript=${MACHINE_ID}
 	    mamba deactivate
         fi
 
         # 2. config
-        # Save state or turn off strict unbound variable checking
-        set +u
-        echo "Activating anemoi environment..."
         mamba activate /scratch5/purged/Wei.Huang/src/EAGLE/src/conda/envs/anemoi
-        # Re-enable strict checking for the rest of your EAGLE script steps
-        set -u
         make config compose=base:nested:${MACHINE_ID} > eagle.yaml
         sed -i "s?/path/to/eagle/src?${EAGLEhome}?g" eagle.yaml
         sed -i "s|experiment_name: default|experiment_name: \'${expname}\'|g" eagle.yaml
