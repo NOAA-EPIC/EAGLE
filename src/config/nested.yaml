@@ -1,6 +1,7 @@
 # This is the Nested EAGLE case.
 
 # yamllint disable rule:anchors rule:line-length
+
 grids_and_meshes:
   conus_grid_resolution_km: 15
   filenames:
