@@ -18,14 +18,8 @@ app:
     leadtime: !int '{{ (app.nrt.leadtime.total_seconds() / 3600) | int }}'
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
 grids_and_meshes:
-  rundir: '{{ app.base }}/run/{{ app.experiment_name }}/data'
+  rundir: '{{ app.rundir }}/data'
 inference:
-  anemoi:
-    input_dataset_kwargs:
-      cutout:
-        - dataset: '{{ val.data.rundir }}/hrrr.zarr'
-          trim_edge: [10, 11, 10, 11]
-        - dataset: '{{ val.data.rundir }}/gfs.zarr'
   checkpoint_dir: '{{ app.base }}/run/{{ app.experiment_name }}/training/outputs/checkpoint'
 training: !remove
 ufs2arco:
