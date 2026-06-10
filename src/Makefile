@@ -44,12 +44,9 @@ config:
 	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
-	@$(make) grids-and-meshes
 	$(call check,$(mode),mode)
-ifeq ($(mode),global)
 	@$(make) zarr-gfs
-else
-	@$(make) zarr-gfs
+ifeq ($(mode),nested)
 	@$(make) zarr-hrrr                                                                               
 endif
 
