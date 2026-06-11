@@ -193,9 +193,3 @@ else
 	$(call check,$(source),source)
 	$(call exec,data,zarr,Zarr,$(or $(task),run) --key-path zarrs.$(source) --batch)
 endif
-
-#zarr-gfs:
-#	@$(make) zarr source=gfs
-#
-#zarr-hrrr:
-#	@$(make) zarr source=hrrr
