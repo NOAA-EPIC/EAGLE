@@ -46,11 +46,7 @@ config:
 data:
 	$(call activate,data)
 	@$(make) grids-and-meshes
-	@for x in gfs hrrr; do \
-		if test -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)"; then \
-			 $(make) zarr source=$$x; \
-		fi \
-	done
+	@for x in gfs hrrr; do test -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)" && $(make) zarr source=$$x || true; done
 
 devenv:
 	$(call check,$(cudascript),cudascript)
