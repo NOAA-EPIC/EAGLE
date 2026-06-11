@@ -217,7 +217,7 @@ make realize config=nrt-composed.yaml update=update.yaml >nrt.yaml
 
 NRTDIR="$(uw config realize -i nrt.yaml --key-path app.rundir)"
 
-make data config=nrt.yaml mode=nested
+make data config=nrt.yaml
 for datasource in gfs hrrr; do
   wait_runscript_batch "$NRTDIR/data" "zarr-$datasource" "Zarr $datasource"
 done

@@ -44,11 +44,8 @@ config:
 	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
-	$(call check,$(mode),mode)
-	@$(make) zarr-gfs
-ifeq ($(mode),nested)
-	@$(make) zarr-hrrr                                                                               
-endif
+	@$(make) grids-and-meshes
+	@for x in gfs hrrr; do test -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)" && $(make) zarr source=$$x; done
 
 devenv:
 	$(call check,$(cudascript),cudascript)
