@@ -49,6 +49,8 @@ if [[ "${verbose}" == "YES" ]]; then
     set -x
 fi
 
+source ${EAGLEhome}/conda/etc/profile.d/conda.sh
+
 # Ensure EAGLEhome is expanded cleanly
 conda_bin_path="${EAGLEhome}/conda/bin"
 
