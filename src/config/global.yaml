@@ -113,7 +113,7 @@ training:
         test: 1
         training: 1
         validation: 1
-      dataset: 
+      dataset:
         dataset: '{{ val.data.rundir }}/gfs.zarr'
       limit_batches:
         training: null
@@ -375,7 +375,7 @@ training:
                 - u
                 - v
                 - w
-val:                                                                                                                 
+val:
   filenames:
     latent_mesh: latentx2.spongex1.combined.sorted.npz
 vx:
@@ -387,7 +387,7 @@ vx:
             name: global
             path: '{{ meta.post_files }}/global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
-          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'         
+          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
   grid2obs:
     global:
       wxvx:
