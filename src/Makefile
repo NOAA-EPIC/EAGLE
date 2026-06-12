@@ -60,6 +60,7 @@ format:
 	./format $(PACKAGE)
 
 grids-and-meshes:
+	$(call activate,data)
 ifeq ($(task),?)
 	$(call tasklist,data,grids_and_meshes,GridsAndMeshes)
 else
