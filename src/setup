@@ -118,7 +118,7 @@ prep_env() {
   )
   cat <<EOF
 
-Note: Apparent pip errors about not installed or incompatible packages are generally safe to ignore.
+Note: Apparent pip errors, if any, about not installed or incompatible packages are generally safe to ignore.
 
 EOF
   install_devpkgs_maybe $name
