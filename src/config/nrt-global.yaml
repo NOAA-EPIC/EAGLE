@@ -73,15 +73,3 @@ zarrs:
         transforms:
           horizontal_regrid:
             target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'
-  hrrr:
-    zarr:
-      ufs2arco:
-        multisource: !remove
-        source: !dict '{{ dict(ufs2arco.source, name="aws_hrrr_archive") }}'
-        transforms:
-          horizontal_regrid:
-            target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.hrrr_target_grid }}'
-          rotate_vectors:
-            vector_pairs:
-              - ['u', 'v']
-              - ['u10', 'v10']
