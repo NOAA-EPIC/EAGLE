@@ -1,3 +1,5 @@
+# yamllint disable rule:anchors rule:line-length
+
 channels:
   - nodefaults
   - conda-forge
