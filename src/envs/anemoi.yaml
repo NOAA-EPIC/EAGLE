@@ -4,6 +4,7 @@ channels:
   - ufs-community
 dependencies:
   - flash-attn 2.8.*
+  - matplotlib <3.9
   - mpi4py 4.1.*
   - numpy 2.2.6.*
   - pip
