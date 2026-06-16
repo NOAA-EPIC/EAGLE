@@ -79,7 +79,12 @@ jobs:
               page += 1;
             }
 
-            const relevant = files.some(f => f.startsWith("config/") || f.startsWith("eagle/") || f.startsWith("envs/") || ["Makefile", "pyproject.toml", "setup"].includes(f));
+            const relevant = files.some(
+              f => f.startsWith("config/")
+                || f.startsWith("eagle/")
+                || f.startsWith("envs/")
+                || ["Makefile", "pyproject.toml", "setup"].includes(f)
+            );
             core.info(`Changed files: ${files.length}`);
             core.info(`Relevant changes: ${relevant}`);
             core.setOutput("relevant", relevant ? "true" : "false");
