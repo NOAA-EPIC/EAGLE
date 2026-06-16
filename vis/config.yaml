@@ -1,0 +1,8 @@
+default_paths:
+  temperature_nc: "/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/2t-heightAboveGround-0002.nc"
+  u_wind_nc: "/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/10u-heightAboveGround-0010.nc"
+  v_wind_nc: "/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/10v-heightAboveGround-0010.nc"
+  output_temperature_image: "eagle_2m_temperature.png"
+  output_windbarb_image: "eagle_10m_windbarb.png"
+  output_overlay_image: "eagle_2m_temperature_10m_windbarb_overlay.png"
+

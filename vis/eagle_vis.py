@@ -11,11 +11,12 @@ import cartopy.feature as cfeature
 from cartopy.mpl.gridliner import LATITUDE_FORMATTER, LONGITUDE_FORMATTER
 
 class WindFieldVisualizer:
-    def __init__(self, nc_t, nc_u, nc_v):
+    def __init__(self, nc_t, nc_u, nc_v, show_on_screen=False):
         """Initializes the visualizer and verifies file integrity."""
         self.nc_t_path = nc_t
         self.nc_u_path = nc_u
         self.nc_v_path = nc_v
+        self.show_on_screen = show_on_screen
         
         # Automatically run file integrity checks upon initialization
         self._validate_input_files()
@@ -129,7 +130,7 @@ class WindFieldVisualizer:
         cbar = fig.colorbar(mesh, ax=ax, orientation="horizontal", pad=0.12, shrink=0.7, aspect=30)
         cbar.set_label(f"Temperature ({self.temp_units})", fontsize=11)
 
-    def plot_contour_only(self, output_filename):
+    def plot_contour_only(self, output_filename, title="Temperatre"):
         """Plot Type 1: Renders Temperature fields and Wind Speed contour layout maps."""
         fig, ax = self._create_base_map()
         
@@ -137,16 +138,16 @@ class WindFieldVisualizer:
         mesh = ax.pcolormesh(self.longitude, self.latitude, self.temp, transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
         
         # 2. Wind Speed lines overlay
-        contour_levels = np.arange(5, self.wind_speed.max(), 5)
-        contours = ax.contour(self.longitude, self.latitude, self.wind_speed, levels=contour_levels, colors="white", linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
+        # contour_levels = np.arange(5, self.wind_speed.max(), 5)
+        # contours = ax.contour(self.longitude, self.latitude, self.wind_speed, levels=contour_levels, colors="white", linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
         ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="white")
         
         self._add_color_bar(fig, ax, mesh)
-        plt.title("Wind Speed Contour Field", fontsize=14, pad=20)
+        plt.title(title, fontsize=14, pad=20)
         self._finalize_and_save(fig, output_filename)
 
     def plot_windbarb_only(self, output_filename):
-        """Plot Type 2: Renders Background Temperature maps alongside isolated text barbs."""
+        """Plot Type 2: Renders barbs."""
         fig, ax = self._create_base_map()
         
         # 1. Background Temperature color raster
@@ -177,11 +178,14 @@ class WindFieldVisualizer:
         fig, ax = self._create_base_map()
         
         # 1. Background raster
-        mesh = ax.pcolormesh(self.longitude, self.latitude, self.temp, transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
+        mesh = ax.pcolormesh(self.longitude, self.latitude, self.temp,
+                             transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
         
         # 2. Add Contour lines
         contour_levels = np.arange(5, self.wind_speed.max(), 5)
-        contours = ax.contour(self.longitude, self.latitude, self.wind_speed, levels=contour_levels, colors="white", linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
+        contours = ax.contour(self.longitude, self.latitude, self.wind_speed,
+                              levels=contour_levels, colors="white",
+                              linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
         ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="white")
         
         # 3. Add Wind Barbs
@@ -211,7 +215,13 @@ class WindFieldVisualizer:
         
         plt.savefig(output_filename, bbox_inches="tight", dpi=300)
         print(f"Successfully generated plot artifact: {output_filename}")
-        plt.close(fig)
+
+        # Show on desktop monitor if user requested it
+        if self.show_on_screen:
+            print(f"Displaying window overlay for tracking: '{output_filename}' (Close window to proceed)...")
+            plt.show()
+        else:
+            plt.close(fig)
 
 def main():
     parser = argparse.ArgumentParser(description="Object-Oriented Meteorological Wind & Temperature Visualization Pipeline Engine")
@@ -230,41 +240,49 @@ def main():
 
     # OUTPUT FILES ARGUMENTS
     output_group = parser.add_argument_group("Output Image Name Options")
-    output_group.add_argument("--out_contour", type=str, default="1_contour_only.png",
+    output_group.add_argument("-c", "--contour_output", type=str, default="1_contour_only.png",
                               help="Filename for the contour-only plot layer output.")
-    output_group.add_argument("--out_windbarb", type=str, default="2_windbarb_only.png",
+    output_group.add_argument("-w", "--windbarb_output", type=str, default="2_windbarb_only.png",
                               help="Filename for the windbarb-only plot layer output.")
-    output_group.add_argument("--out_overlay", type=str, default="3_windbarb_overlay_contour.png",
+    output_group.add_argument("-o", "--overlay_output", type=str, default="3_windbarb_overlay_contour.png",
                               help="Filename for the combined overlay plot layer output.")
+
+    # INTERACTIVE VIEW MODE ARGUMENT
+    display_group = parser.add_argument_group("Display Settings")
+    display_group.add_argument("-s", "--show", action="store_true", default=False,
+                               help="Open interactive plot windows on the local desktop interface screen sequentially.")
 
     args = parser.parse_args()
 
     # Initialization automatically checks file paths; will exit early if an path doesn't exist
 
-    visualizer = WindFieldVisualizer(nc_t=args.temperature_nc,nc_u=args.u_wind_nc,nc_v=args.v_wind_nc)
+    visualizer = WindFieldVisualizer(nc_t=args.temperature_nc,
+                                     nc_u=args.u_wind_nc,
+                                     nc_v=args.v_wind_nc,
+                                     show_on_screen=args.show)
 
     # Process pipeline calculations
     visualizer.load_and_process_data()
 
     # Generate the requested plot images using customized filenames
 
-    visualizer.plot_contour_only(args.out_contour)
-    visualizer.plot_windbarb_only(args.out_windbarb)
-    visualizer.plot_windbarb_overlay_contour(args.out_overlay)
+    visualizer.plot_contour_only(args.contour_output)
+    visualizer.plot_windbarb_only(args.windbarb_output)
+    visualizer.plot_windbarb_overlay_contour(args.overlay_output)
 
 ########################################################################################################################################################
-if name == "main":
+if __name__ == "__main__":
     main()
-### New Execution Syntax Examples
 
+### New Execution Syntax Examples
 # You can run the script with its defaults, or modify any inputs/outputs cleanly:
 
 # Changing an input and its corresponding output name**:
 #  ```bash
 #  ./plotwindbarb.py -t alternative_temp.nc
-#                    --out_contour custom_contour_view.png
+#                    --contour_output custom_contour_view.png
 
 #Assigning completely clean unique tracks:
 #bash
-#  ./plotwindbarb.py --out_contour c1.png --out_windbarb b2.png --out_overlay composite3.png
+#  ./plotwindbarb.py --contour_output c1.png --windbarb_output b2.png --overlay_output composite3.png
 
