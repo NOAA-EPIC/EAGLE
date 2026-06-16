@@ -10,74 +10,70 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.mpl.gridliner import LATITUDE_FORMATTER, LONGITUDE_FORMATTER
 
-class WindFieldVisualizer:
-    def __init__(self, nc_t, nc_u, nc_v, show_on_screen=False):
+#---------------------------------------------------------------------------------------------------
+# Safe import validation for the YAML parsing module
+try:
+    import yaml
+except ImportError:
+    print("[ERROR] The 'pyyaml' package is required. Run: pip install pyyaml", file=sys.stderr)
+    sys.exit(1)
+
+#---------------------------------------------------------------------------------------------------
+class EAGLEVisualizer:
+    def __init__(self, config):
         """Initializes the visualizer and verifies file integrity."""
-        self.nc_t_path = nc_t
-        self.nc_u_path = nc_u
-        self.nc_v_path = nc_v
-        self.show_on_screen = show_on_screen
-        
+        self.config = config
+
         # Automatically run file integrity checks upon initialization
         self._validate_input_files()
-        
-        self.dt = None
-        self.du = None
-        self.dv = None
-        
+
         self.longitude = None
         self.latitude = None
         self.x_coords = None
         self.y_coords = None
-        
-        self.temp = None
-        self.u = None
-        self.v = None
-        self.wind_speed = None
-        self.temp_units = "unknown"
+
+        self.t2m = None
+        self.t2m_units = "unknown"
         self.lcc_proj = None
 
     def _validate_input_files(self):
         """Checks if all required input NetCDF paths exist before allocating system memory."""
+        print(f"Check input data files:")
         missing_files = []
-        for file_label, file_path in [("Temperature (-t)", self.nc_t_path), 
-                                      ("U-Wind (-u)", self.nc_u_path), 
-                                      ("V-Wind (-v)", self.nc_v_path)]:
-            if not os.path.exists(file_path):
-                missing_files.append(f"  - {file_label}: Path not found -> '{file_path}'")
-        
-        if missing_files:
-            print("\n[ERROR] Missing input datasets. Execution halted:", file=sys.stderr)
-            for error in missing_files:
-                print(error, file=sys.stderr)
-            sys.exit(1)
+        ncfilelist = ["nc_2m_t", "nc_10m_u", "nc_10m_v", "nc_500hPa_gh", "nc_sfp",
+                      "nc_850hPa_t", "nc_250hPa_u", "nc_250hPa_v"]
+        n = 0
+        for item in ncfilelist:
+            n += 1
+            if item in self.config:
+                ncflnm = self.config[item]
+                print(f"Item No. {n}: {item} -> {ncflnm}")
+                if not os.path.exists(ncflnm):
+                    print(f"  - {item}: Path not found -> '{nclnm}'")
+                    sys.exit(1)
+
+        self.show_on_screen = self.config["show_on_screen"]
+        print(f"self.show_on_screen = {self.show_on_screen}")
 
     def load_and_process_data(self):
         """Opens datasets, extracts coordinate arrays, and calculates wind metrics."""
         try:
-            self.dt = xr.open_dataset(self.nc_t_path)
-            self.du = xr.open_dataset(self.nc_u_path)
-            self.dv = xr.open_dataset(self.nc_v_path)
+            self.nc_2m_t_path = self.config["nc_2m_t"]
+            self.dt = xr.open_dataset(self.nc_2m_t_path)
         except Exception as e:
             print(f"\n[ERROR] Failed to open NetCDF files. File structure might be corrupt.\nDetails: {e}", file=sys.stderr)
             sys.exit(1)
-        
+
         # Extract variables and drop single-value dimensions
-        self.temp = self.dt["t2m"].squeeze().values
+        self.t2m = self.dt["t2m"].squeeze().values
         self.longitude = self.dt["longitude"].values
         self.latitude = self.dt["latitude"].values
         self.x_coords = self.dt["x"].values
         self.y_coords = self.dt["y"].values
-        
-        self.u = self.du["u10"].squeeze().values
-        self.v = self.dv["v10"].squeeze().values
-        
-        # Calculate wind speed magnitude (m/s) before knot conversion
-        self.wind_speed = np.sqrt(self.u**2 + self.v**2)
-        
+
         # Extract Temperature metadata units
-        self.temp_units = self.dt["t2m"].attrs.get("units", "unknown")
-        
+        self.t2m_units = self.dt["t2m"].attrs.get("units", "unknown")
+
         # Build Map Projections
         self._setup_projection()
 
@@ -87,7 +83,7 @@ class WindFieldVisualizer:
         lat_origin = crs_attrs["latitude_of_projection_origin"]
         lon_central = crs_attrs["longitude_of_central_meridian"]
         std_parallels = crs_attrs["standard_parallel"]
-        
+
         self.lcc_proj = ccrs.LambertConformal(
             central_longitude=lon_central,
             central_latitude=lat_origin,
@@ -97,17 +93,17 @@ class WindFieldVisualizer:
     def _create_base_map(self):
         """Initializes figure canvas, map frame layers, and standard grid lines."""
         fig, ax = plt.subplots(figsize=(12, 9), subplot_kw={"projection": self.lcc_proj})
-        
+
         # Clip tightly using native coordinate ranges
         ax.set_extent(
             [self.x_coords.min(), self.x_coords.max(), self.y_coords.min(), self.y_coords.max()],
             crs=self.lcc_proj,
         )
-        
+
         # Add basic geography boundaries
         ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1.2)
         ax.add_feature(cfeature.BORDERS, edgecolor="black", linestyle=":")
-        
+
         # Grid line properties configuration
         gl = ax.gridlines(draw_labels=True, linewidth=1, color="dimgray", alpha=0.4, linestyle="--")
         gl.top_labels = False
@@ -122,41 +118,70 @@ class WindFieldVisualizer:
         gl.edge_labels = False
         gl.x_inline = False
         gl.y_inline = False
-        
+
         return fig, ax
 
-    def _add_color_bar(self, fig, ax, mesh):
+    def _add_color_bar(self, fig, ax, mesh, cb_label):
         """Appends color bar metadata underneath frame display box."""
         cbar = fig.colorbar(mesh, ax=ax, orientation="horizontal", pad=0.12, shrink=0.7, aspect=30)
-        cbar.set_label(f"Temperature ({self.temp_units})", fontsize=11)
+        cbar.set_label(cb_label, fontsize=11)
 
-    def plot_contour_only(self, output_filename, title="Temperatre"):
-        """Plot Type 1: Renders Temperature fields and Wind Speed contour layout maps."""
+    def _finalize_and_save(self, fig, output_filename):
+        """Handles screen display rendering or exports map file to disk."""
+        plt.tight_layout()
+        if self.show_on_screen:
+            plt.show()
+        else:
+            fig.savefig(output_filename, dpi=150, bbox_inches='tight')
+            print(f"[INFO] Successfully exported plot frame: '{output_filename}'")
+            plt.close(fig)
+
+    def plot_t2m_only(self, image_name):
+        """Plot 2m Temperature field"""
         fig, ax = self._create_base_map()
-        
-        # 1. Background Temperature color raster
-        mesh = ax.pcolormesh(self.longitude, self.latitude, self.temp, transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
-        
-        # 2. Wind Speed lines overlay
-        # contour_levels = np.arange(5, self.wind_speed.max(), 5)
-        # contours = ax.contour(self.longitude, self.latitude, self.wind_speed, levels=contour_levels, colors="white", linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
-        ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="white")
-        
-        self._add_color_bar(fig, ax, mesh)
+
+        # color raster
+        mesh = ax.pcolormesh(self.longitude, self.latitude, self.t2m,
+                             transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
+
+        title="Temperature at 2 meter height"
+        cb_label = "Temperature ({self.t2m_units})"
+        self._add_color_bar(fig, ax, mesh, cb_label)
         plt.title(title, fontsize=14, pad=20)
-        self._finalize_and_save(fig, output_filename)
+        self._finalize_and_save(fig, image_name)
 
-    def plot_windbarb_only(self, output_filename):
-        """Plot Type 2: Renders barbs."""
+    def plot_10m_windbarb_only(self, image_name):
+        """Plot 20 meter barbs."""
+
+        try:
+            self.nc_10m_u_path = self.config["nc_10m_u"]
+            self.nc_10m_v_path = self.config["nc_10m_v"]
+            self.nc_10m_u = xr.open_dataset(self.nc_10m_u_path)
+            self.nc_10m_v = xr.open_dataset(self.nc_10m_v_path)
+        except Exception as e:
+            print(f"\n[ERROR] Failed to open NetCDF files. File structure might be corrupt.\nDetails: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Extract variables and drop single-value dimensions
+        self.u = self.nc_10m_u["u10"].squeeze().values
+        self.v = self.nc_10m_v["v10"].squeeze().values
+
+        # Calculate wind speed magnitude (m/s) before knot conversion
+        self.wind_speed = np.sqrt(self.u**2 + self.v**2)
+
         fig, ax = self._create_base_map()
-        
-        # 1. Background Temperature color raster
-        mesh = ax.pcolormesh(self.longitude, self.latitude, self.temp, transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
-        
+
+        # Wind Speed lines
+        contour_levels = np.arange(5, self.wind_speed.max(), 5)
+        if len(contour_levels) > 0:
+            contours = ax.contour(self.longitude, self.latitude, self.wind_speed, levels=contour_levels,
+                                  colors="white", linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
+            ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="blue")
+
         # 2. Convert raw m/s vector arrays dynamically to Knots for windbarb specifications
         u_knots = self.u * 1.94384
         v_knots = self.v * 1.94384
-        
+
         skip_barbs = 12
         ax.barbs(
             self.longitude[::skip_barbs, ::skip_barbs],
@@ -168,26 +193,26 @@ class WindFieldVisualizer:
             length=5.5,
             linewidth=0.8
         )
-        
-        self._add_color_bar(fig, ax, mesh)
-        plt.title("Wind Barb Field (Velocity Vectors in Knots)", fontsize=14, pad=20)
-        self._finalize_and_save(fig, output_filename)
 
-    def plot_windbarb_overlay_contour(self, output_filename):
+        plt.title("Wind Barb at 10 meter (Velocity Vectors in Knots)", fontsize=14, pad=20)
+        self._finalize_and_save(fig, image_name)
+
+    def plot_10m_windbarb_overlay_2m_t(self, image_name):
         """Plot Type 3: Full composition with background heat mapping, contour lines, and barbs."""
         fig, ax = self._create_base_map()
-        
+
         # 1. Background raster
-        mesh = ax.pcolormesh(self.longitude, self.latitude, self.temp,
+        mesh = ax.pcolormesh(self.longitude, self.latitude, self.t2m,
                              transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
-        
+
         # 2. Add Contour lines
         contour_levels = np.arange(5, self.wind_speed.max(), 5)
-        contours = ax.contour(self.longitude, self.latitude, self.wind_speed,
-                              levels=contour_levels, colors="white",
-                              linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
-        ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="white")
-        
+        if len(contour_levels) > 0:
+            contours = ax.contour(self.longitude, self.latitude, self.wind_speed,
+                                  levels=contour_levels, colors="white",
+                                  linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
+            ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="white")
+
         # 3. Add Wind Barbs
         u_knots = self.u * 1.94384
         v_knots = self.v * 1.94384
@@ -202,87 +227,41 @@ class WindFieldVisualizer:
             length=5.5,
             linewidth=0.8
         )
-        
-        self._add_color_bar(fig, ax, mesh)
-        plt.title("Temperature & Wind Velocity Vector Composite Field", fontsize=14, pad=20)
-        self._finalize_and_save(fig, output_filename)
 
-    def _finalize_and_save(self, fig, output_filename):
-        """Handles final positioning transforms, saves image assets, and safely closes window context."""
-        fig.subplots_adjust(bottom=0.15)
-        plt.tight_layout()
-        fig.subplots_adjust(left=0.02, right=0.98, top=0.95, bottom=0.05)
-        
-        plt.savefig(output_filename, bbox_inches="tight", dpi=300)
-        print(f"Successfully generated plot artifact: {output_filename}")
+        cb_label = "Temperature ({self.t2m_units})"
+        self._add_color_bar(fig, ax, mesh, cb_label)
+        plt.title("Wind Field Composition (Temperature, Contours & Barbs)", fontsize=14, pad=20)
+        self._finalize_and_save(fig, image_name)
 
-        # Show on desktop monitor if user requested it
-        if self.show_on_screen:
-            print(f"Displaying window overlay for tracking: '{output_filename}' (Close window to proceed)...")
-            plt.show()
-        else:
-            plt.close(fig)
+#---------------------------------------------------------------------------------------------------
+def load_yaml_config(filepath="config.yaml"):
+    """Reads configuration values or falls back to an error message if missing."""
+    if not os.path.exists(filepath):
+        print(f"[ERROR] Required configuration layout file '{filepath}' missing.", file=sys.stderr)
+        sys.exit(1)
+    try:
+        with open(filepath, 'r') as f:
+            config = yaml.safe_load(f)
+            return config.get("default_paths", {})
+    except Exception as e:
+        print(f"[ERROR] Critical formatting error within '{filepath}': {e}", file=sys.stderr)
+        sys.exit(1)
 
-def main():
-    parser = argparse.ArgumentParser(description="Object-Oriented Meteorological Wind & Temperature Visualization Pipeline Engine")
-    
-    # INPUT FILES ARGUMENTS
-    input_group = parser.add_argument_group("Input Data File Options")
-    input_group.add_argument("-t", "--temperature_nc", type=str, 
-                             default="/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/2t-heightAboveGround-0002.nc",
-                             help="File path to target Temperature NetCDF file profile.")
-    input_group.add_argument("-u", "--u_wind_nc", type=str, 
-                             default="/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/10u-heightAboveGround-0010.nc",
-                             help="File path to target U-component Wind NetCDF file profile.")
-    input_group.add_argument("-v", "--v_wind_nc", type=str,
-                             default="/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/10v-heightAboveGround-0010.nc",
-                             help="File path to target V-component Wind NetCDF file profile.")
+#---------------------------------------------------------------------------------------------------
+if __name__ == "__main__":
+    # Load configuration attributes directly from the YAML file layout
+    config = load_yaml_config("config.yaml")
+    print(f"config: {config}")
 
-    # OUTPUT FILES ARGUMENTS
-    output_group = parser.add_argument_group("Output Image Name Options")
-    output_group.add_argument("-c", "--contour_output", type=str, default="1_contour_only.png",
-                              help="Filename for the contour-only plot layer output.")
-    output_group.add_argument("-w", "--windbarb_output", type=str, default="2_windbarb_only.png",
-                              help="Filename for the windbarb-only plot layer output.")
-    output_group.add_argument("-o", "--overlay_output", type=str, default="3_windbarb_overlay_contour.png",
-                              help="Filename for the combined overlay plot layer output.")
-
-    # INTERACTIVE VIEW MODE ARGUMENT
-    display_group = parser.add_argument_group("Display Settings")
-    display_group.add_argument("-s", "--show", action="store_true", default=False,
-                               help="Open interactive plot windows on the local desktop interface screen sequentially.")
-
-    args = parser.parse_args()
-
-    # Initialization automatically checks file paths; will exit early if an path doesn't exist
-
-    visualizer = WindFieldVisualizer(nc_t=args.temperature_nc,
-                                     nc_u=args.u_wind_nc,
-                                     nc_v=args.v_wind_nc,
-                                     show_on_screen=args.show)
-
-    # Process pipeline calculations
+    # Initialize the class and run the rendering composition
+    visualizer = EAGLEVisualizer(config)
     visualizer.load_and_process_data()
 
-    # Generate the requested plot images using customized filenames
+    t2m_img = config.get("eagle_2m_t_image", "eagle_2m_t.png")
+    visualizer.plot_t2m_only(t2m_img)
 
-    visualizer.plot_contour_only(args.contour_output)
-    visualizer.plot_windbarb_only(args.windbarb_output)
-    visualizer.plot_windbarb_overlay_contour(args.overlay_output)
+    barb_10m_img = config.get("eagle_10m_barb_image", "eagle_10m_barb.png")
+    visualizer.plot_10m_windbarb_only(barb_10m_img)
 
-########################################################################################################################################################
-if __name__ == "__main__":
-    main()
-
-### New Execution Syntax Examples
-# You can run the script with its defaults, or modify any inputs/outputs cleanly:
-
-# Changing an input and its corresponding output name**:
-#  ```bash
-#  ./plotwindbarb.py -t alternative_temp.nc
-#                    --contour_output custom_contour_view.png
-
-#Assigning completely clean unique tracks:
-#bash
-#  ./plotwindbarb.py --contour_output c1.png --windbarb_output b2.png --overlay_output composite3.png
-
+    t2m_10m_wind_overlay_img = config.get("eagle_2m_t_10m_wind_image", "eagle_2m_t_10m_wind.png")
+    visualizer.plot_10m_windbarb_overlay_2m_t(t2m_10m_wind_overlay_img)
