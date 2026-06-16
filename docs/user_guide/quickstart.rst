@@ -11,7 +11,7 @@ platform. Future development will include additional platforms.
 
    GNU ``make`` version 3.82 or higher is required.
 
-**Complete the following steps from the** ``src/`` **directory.**
+**Complete the following steps from the repository root.**
 
 .. note:: The EAGLE runtime software environment currently requires over 50 GB of disk space. Consider available space, quota, etc. when choosing where to clone the EAGLE repository and run the following steps.
 
@@ -53,7 +53,7 @@ Building and Running :term:`EAGLE`
    The ``config`` target operates on ``.yaml`` files in the ``config/`` directory, so this command composes ``config/base.yaml``, ``config/nested.yaml``, 
    and ``config/ursa.yaml`` and redirects the composed config into ``eagle.yaml``.
 
-#. Set the ``app.base`` value in ``eagle.yaml`` to the absolute path to the current ``src/`` directory.
+#. Set the ``app.base`` value in ``eagle.yaml`` to the absolute path to the current (repository root) directory.
 
    The run directories from subsequent steps, along with the output of those steps, will be created in the ``run/<expname>`` 
    subdirectory of ``app.base``, where ``<expname>`` is the value of ``app.experiment_name``.
@@ -127,7 +127,7 @@ Building and Running :term:`EAGLE`
 
       make config compose=base:nested:ursa:nrt > nrt-composed.yaml
 
-   b. Set the ``app.base`` value in ``nrt-composed.yaml`` to the absolute path to the current ``src/`` directory.
+   b. Set the ``app.base`` value in ``nrt-composed.yaml`` to the absolute path to the current (repository root) directory.
 
    This should match the path used when generating the main EAGLE config above.
    
@@ -161,4 +161,4 @@ Building and Running :term:`EAGLE`
       
       make inference config=nrt.yaml
 
-   Your forecast will save to ``path/to/eagle/src/run/default/nrt_inference/YYYY/MM/DD/HH/inference``.
+   Your forecast will save to ``path/to/eagle/run/default/nrt_inference/YYYY/MM/DD/HH/inference``.

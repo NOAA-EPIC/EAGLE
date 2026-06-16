@@ -3,7 +3,7 @@
 # yamllint disable rule:anchors rule:line-length
 
 app:
-  base: /path/to/eagle/src
+  base: /path/to/eagle
   experiment_name: default
   gpu: # set by platform config
   partitions: # set by platform config

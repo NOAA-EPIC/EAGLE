@@ -4,7 +4,7 @@
 
 set -euo pipefail
 export SETVARS_CALL=${SETVARS_CALL:-0}
-cd "$GITHUB_WORKSPACE/src"
+cd "$GITHUB_WORKSPACE"
 
 time make env cudascript=ursa INSTALLDIR="$INSTALLDIR"
 
@@ -96,21 +96,21 @@ echo Experiment name: $EXP
 
 make config compose=base:nested:ursa INSTALLDIR="$INSTALLDIR" >eagle.yaml
 
-SRC_ABS="$GITHUB_WORKSPACE/src"
+BASEDIR="$GITHUB_WORKSPACE"
 
 cat <<EOF >update.yaml
 app:
-  base: $SRC_ABS
+  base: $BASEDIR
   experiment_name: $EXP
 inference:
   anemoi:
-    checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
+    checkpoint_path: $BASEDIR/run/$EXP/training/outputs/checkpoint
 EOF
 uw config realize -i eagle.yaml -o eagle.yaml -u update.yaml
 
 make validate config=eagle.yaml INSTALLDIR="$INSTALLDIR"
 
-RUNROOT="$SRC_ABS/run/$EXP"
+RUNROOT="$BASEDIR/run/$EXP"
 
 # Run data-prep and check artifacts.
 
@@ -204,11 +204,11 @@ done
 
 cat <<EOF >update.yaml
 app:
-  base: $SRC_ABS
+  base: $BASEDIR
   experiment_name: $EXP
 inference:
   anemoi:
-    checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
+    checkpoint_path: $BASEDIR/run/$EXP/training/outputs/checkpoint
 EOF
 make config compose=base:nested:ursa:nrt >nrt-composed.yaml
 make realize config=nrt-composed.yaml update=update.yaml >nrt.yaml

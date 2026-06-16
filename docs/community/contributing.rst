@@ -35,7 +35,7 @@ The ``cudascript=`` argument is described :ref:`here <RuntimeEnvironment>`.
 
     If an existing, non-development :ref:`runtime environment <RuntimeEnvironment>` has already been built, the ``make devenv`` command can be used to quickly upgrade it to a development environment. There is no need to remove existing conda environments or the underlying conda installation: The development packages will be installed into the existing environments.
 
-    Likewise, if local changes are made to package versions defined in the ``src/envs/*.yaml`` files, re-running the ``make devenv`` or ``make env`` commands will quickly bring the existing conda environments up-to-date with those newly specified versions: There is no need to remove existing environments or the underlying conda installation.
+    Likewise, if local changes are made to package versions defined in the ``envs/*.yaml`` files, re-running the ``make devenv`` or ``make env`` commands will quickly bring the existing conda environments up-to-date with those newly specified versions: There is no need to remove existing environments or the underlying conda installation.
 
 After successful completion, the following ``make`` targets will be available:
 
@@ -242,7 +242,7 @@ Use the following pull request template when opening a PR:
 Documentation
 ------------------------------------------------------------------------------
 
-If you are adding to or updating the documentation, wish to build and review changes locally, and have already built the EAGLE runtime software environment environment under ``src/`` (i.e., ``src/conda`` exists), then from the root directory of a clone of this repository:
+If you are adding to or updating the documentation, wish to build and review changes locally, and have already built the EAGLE runtime software environment environment (i.e., ``conda/`` exists), then from the root directory of a clone of this repository:
 
 .. code-block:: bash
 
