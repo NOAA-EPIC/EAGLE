@@ -76,10 +76,12 @@ jobs:
             }
 
             const relevant = files.some(
-              f => f.startsWith("config/")
+              f => ["Makefile", "pyproject.toml", "setup"].includes(f)
+                || f.startsWith(".github/scripts/")
+                || f.startsWith(".github/workflows/")
+                || f.startsWith("config/")
                 || f.startsWith("eagle/")
                 || f.startsWith("envs/")
-                || ["Makefile", "pyproject.toml", "setup"].includes(f)
             );
             core.info(`Changed files: ${files.length}`);
             core.info(`Relevant changes: ${relevant}`);
