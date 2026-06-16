@@ -10,6 +10,7 @@ permissions:
   issues: write
 
 jobs:
+
   cleanup:
     name: Clean old conda installs
     if: >-
@@ -23,6 +24,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Clean old conda installs
         run: .github/scripts/clean-old-conda-installs
+
   run_pipeline:
     name: Run Nested EAGLE end-to-end on Ursa
     if: >-
