@@ -167,61 +167,51 @@ case "${step}" in
             exit 16
         fi
 	mamba activate ${EAGLEhome}/conda/envs/wxvx
-        make vx-grid-global config=eagle.yaml &
-        make vx-grid-lam config=eagle.yaml &
-        make vx-obs-global config=eagle.yaml &
-        make vx-obs-lam config=eagle.yaml &
+	for kind in grid obs
+	do
+	    for region in global lam
+	    do
+                make vx-${kind}-${region} config=eagle.yaml &
+            done
+        done
 	wait
+        mamba deactivate
 	;;
     visu*)
-	# if any verification failed, re-run it.
-	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done" ]]; then
-	    mamba activate ${EAGLEhome}/conda/envs/wxvx
-	    make vx-grid-global config=eagle.yaml
-	    wait_for_file "${EAGLEhome}/run/${expname}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done"
-	    mamba deactivate
-	fi
-	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done" ]]; then
-	    mamba activate ${EAGLEhome}/conda/envs/wxvx
-	    make vx-grid-lam config=eagle.yaml 
-	    wait_for_file "${EAGLEhome}/run/${expname}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done"
-	    mamba deactivate
-	fi
-	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done" ]]; then
-	    mamba activate ${EAGLEhome}/conda/envs/wxvx
-	    make vx-obs-global config=eagle.yaml
-	    wait_for_file "${EAGLEhome}/run/${expname}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done"
-	    mamba deactivate
-	fi
-	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done" ]]; then
-	    mamba activate ${EAGLEhome}/conda/envs/wxvx
-	    make vx-obs-lam config=eagle.yaml
-	    wait_for_file "${EAGLEhome}/run/${expname}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done"
-	    mamba deactivate
-	fi
 	# re-check if verifications are done:
-	if [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done" ]] || \
-           [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done" ]] || \
-           [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done" ]] || \
-           [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done" ]]; then
-            echo "Verifications are not ready, need to run ${BASH_SOURCE[0]} -n ${expname} -s verification"
-            echo "Then wait and re-run when verifications are finished."
-	    squeue -u $USER
-            exit 16
-	fi
-	mamba activate ${EAGLEhome}/conda/envs/visualization
-        make vis-grid-global config=eagle.yaml &
-        make vis-grid-lam config=eagle.yaml &
-        make vis-obs-global config=eagle.yaml &
-        make vis-obs-lam config=eagle.yaml &
+        mamba activate ${EAGLEhome}/conda/envs/wxvx
+	for kind in grid obs
+	do
+	    for region in global lam
+	    do
+	        script="${EAGLEhome}/run/${expname}/vx/grid2${kind}/${region}/runscript.wxvx-grid2${kind}-${region}"
+                done_file="${script}.done"
+	        if [[ -f "${script}" ]] && [[ ! -f "${done_file}" ]]; then
+                    sbatch ${script}
+		    wait_for_file "${done_file}" &
+                fi
+            done
+        done
 	wait
+        mamba deactivate
+
+	mamba activate ${EAGLEhome}/conda/envs/visualization
+	for kind in grid obs
+	do
+	    for region in global lam
+	    do
+                make vis-${kind}-${region} config=eagle.yaml &
+            done
+        done
+	wait
+        mamba deactivate
         ;;
     all)
 	# 1. setup env
 	if [[ -f "${EAGLEhome}/conda/bin/mamba" ]]; then
 	    echo "Conda env already install....."
 	    # Prompt the user (-n 1 limits input to exactly 1 character, -r prevents backslash escapes)
-	    read -n 1 -r "Do you want to overwrite? (y/n): " response
+            read -n 1 -r -p "Do you want to overwrite? (y/n): " response
 	    echo "" # Prints a clean newline after the user keypress
 
 	    case "${response}" in
@@ -297,33 +287,41 @@ case "${step}" in
             fi
         done
 	mamba activate ${EAGLEhome}/conda/envs/wxvx
-        make vx-grid-global config=eagle.yaml &
-        make vx-grid-lam config=eagle.yaml &
-        make vx-obs-global config=eagle.yaml &
-        make vx-obs-lam config=eagle.yaml &
+	for kind in grid obs
+	do
+	    for region in global lam
+	    do
+                make vx-${kind}-${region} config=eagle.yaml &
+            done
+        done
+	wait
+	# re-check verification
+	for kind in grid obs
+	do
+	    for region in global lam
+	    do
+	        script="${EAGLEhome}/run/${expname}/vx/grid2${kind}/${region}/runscript.wxvx-grid2${kind}-${region}"
+                done_file="${script}.done"
+	        if [[ -f "${script}" ]] && [[ ! -f "${done_file}" ]]; then
+                    sbatch ${script}
+		    wait_for_file "${done_file}" &
+                fi
+            done
+        done
 	wait
 	mamba deactivate
        
         # 7. visualization
-	nwait=0
-	while [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/global/runscript.wxvx-grid2grid-global.done" ]] || \
-              [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2grid/lam/runscript.wxvx-grid2grid-lam.done" ]] || \
-              [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/global/runscript.wxvx-grid2obs-global.done" ]] || \
-              [[ ! -f "${EAGLEhome}/run/${expname}/vx/grid2obs/lam/runscript.wxvx-grid2obs-lam.done" ]]; do
-            echo "Waiting for verification..."
-            sleep 30
-            nwait=$(( nwait+1 ))
-	    if [[ "${nwait}" -ge 60 ]]; then
-                 echo "Waited to long for verification. quit..."
-		 exit 25
-            fi
-        done
 	mamba activate ${EAGLEhome}/conda/envs/visualization
-        make vis-grid-global config=eagle.yaml &
-        make vis-grid-lam config=eagle.yaml &
-        make vis-obs-global config=eagle.yaml &
-        make vis-obs-lam config=eagle.yaml &
+	for kind in grid obs
+	do
+	    for region in global lam
+	    do
+                make vis-${kind}-${region} config=eagle.yaml &
+            done
+        done
 	wait
+	mamba deactivate
         ;;
     *)
         echo "Unrecognized step: ${step}"
