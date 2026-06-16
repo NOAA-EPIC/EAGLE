@@ -5,7 +5,5 @@
 set -euo pipefail
 cd $GITHUB_WORKSPACE
 echo Running in $PWD
-if [[ -d conda ]]; then
-  mv -v conda conda.$(date +%s)
-fi
+test -d conda && mv -v conda conda.$(date +%s) || true
 git clean -ffdx -e "conda.*"
