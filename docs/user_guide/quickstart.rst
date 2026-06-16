@@ -34,6 +34,16 @@ Building and Running :term:`EAGLE`
    create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, 
    typechecking, unit testing, and :term:`YAML` linting.
 
+.. note::
+
+   EAGLE virtual environments are built using both conda and pip packages. If you examine the output from the ``make env`` command above, you may see messages like the following, from pip:
+
+   .. code-block:: text
+
+      ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+
+   This will be followed by a report of packages pip believes are not installed or are installed with incompatible versions. These messages are due to fundamental differences in how conda and pip operate, and are generally safe to ignore. But please open an :ref:`Issue <Issues>` if you later encounter problems you believe are related to package versions.
+
 #. Create the EAGLE YAML config
 
    .. code-block:: bash
