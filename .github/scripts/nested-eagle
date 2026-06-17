@@ -114,11 +114,7 @@ RUNROOT="$SRC_ABS/run/$EXP"
 
 # Run data-prep and check artifacts.
 
-make grids-and-meshes config=eagle.yaml INSTALLDIR="$INSTALLDIR"
-
-for datasource in gfs hrrr; do
-  make zarr-$datasource config=eagle.yaml INSTALLDIR="$INSTALLDIR"
-done
+make data config=eagle.yaml INSTALLDIR="$INSTALLDIR"
 
 for datasource in gfs hrrr; do
   wait_runscript_batch "$RUNROOT/data" "zarr-$datasource" "Zarr $datasource"
