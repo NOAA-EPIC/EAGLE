@@ -206,7 +206,7 @@ inference:
   anemoi:
     checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
 EOF
-make config compose=base:nested:ursa:nrt >nrt-composed.yaml
+make config compose=base:nested:ursa:nrt-nested >nrt-composed.yaml
 make realize config=nrt-composed.yaml update=update.yaml >nrt.yaml
 
 # Define NRTDIR in terms of NOW variable (changes every run).
