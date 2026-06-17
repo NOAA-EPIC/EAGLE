@@ -114,11 +114,7 @@ RUNROOT="$SRC_ABS/run/$EXP"
 
 # Run data-prep and check artifacts.
 
-make grids-and-meshes config=eagle.yaml INSTALLDIR="$INSTALLDIR"
-
-for datasource in gfs hrrr; do
-  make zarr-$datasource config=eagle.yaml INSTALLDIR="$INSTALLDIR"
-done
+make data config=eagle.yaml INSTALLDIR="$INSTALLDIR"
 
 for datasource in gfs hrrr; do
   wait_runscript_batch "$RUNROOT/data" "zarr-$datasource" "Zarr $datasource"
@@ -210,7 +206,7 @@ inference:
   anemoi:
     checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
 EOF
-make config compose=base:nested:ursa:nrt >nrt-composed.yaml
+make config compose=base:nested:ursa:nrt-nested >nrt-composed.yaml
 make realize config=nrt-composed.yaml update=update.yaml >nrt.yaml
 
 # Define NRTDIR in terms of NOW variable (changes every run).
