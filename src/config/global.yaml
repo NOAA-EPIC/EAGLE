@@ -3,11 +3,7 @@
 # yamllint disable rule:anchors rule:line-length
 
 grids_and_meshes:
-  conus_grid_resolution_km: 15
-  filenames:
-    latent_mesh: '{{ val.filenames.latent_mesh }}'
   latent_mesh_global_resolution_deg: 2.0
-  latent_mesh_conus_coarsen_factor: 2
 inference:
   anemoi:
     input_dataset_kwargs: &dataset-kwargs
@@ -251,10 +247,9 @@ training:
           attributes: ${graph.attributes.nodes}
         hidden:
           node_builder:
-            _target_: anemoi.graphs.nodes.NPZFileNodes
-            npz_file: ${system.input.latent_mesh}
-            lat_key: lat
-            lon_key: lon
+            _target_: anemoi.graphs.nodes.AnemoiDatasetNodes
+            dataset: ${dataloader.training.datasets.data.dataset_config}
+          attributes: ${graph.attributes.nodes}
       edges:
         # Encoder
         - source_name: data
