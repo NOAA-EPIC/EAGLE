@@ -10,7 +10,8 @@ default_paths:
   eagle_2m_t_image: "eagle_2m_temperature.png"
   eagle_10m_barb_image: "eagle_10m_windbarb.png"
   eagle_2m_t_10m_wind_image: "eagle_2m_temperature_10m_windbarb_overlay.png"
+  eagle_sfp_image: "eagle_sfp.png"
   eagle_850hPa_t_image: "eagle_850hPa_temperature.png"
   eagle_500hPa_gh_image: "eagle_500hPa_geoheight.png"
   eagle_250hPa_barb_image: "eagle_250hPa_barb.png"
-  show_on_screen: false
+  show_on_screen: true

@@ -59,27 +59,27 @@ class EAGLEVisualizer:
         """Opens datasets, extracts coordinate arrays, and calculates wind metrics."""
         try:
             self.nc_2m_t_path = self.config["nc_2m_t"]
-            self.dt = xr.open_dataset(self.nc_2m_t_path)
+            self.ds_t2m = xr.open_dataset(self.nc_2m_t_path)
         except Exception as e:
             print(f"\n[ERROR] Failed to open NetCDF files. File structure might be corrupt.\nDetails: {e}", file=sys.stderr)
             sys.exit(1)
 
         # Extract variables and drop single-value dimensions
-        self.t2m = self.dt["t2m"].squeeze().values
-        self.longitude = self.dt["longitude"].values
-        self.latitude = self.dt["latitude"].values
-        self.x_coords = self.dt["x"].values
-        self.y_coords = self.dt["y"].values
+        self.t2m = self.ds_t2m["t2m"].squeeze().values
+        self.longitude = self.ds_t2m["longitude"].values
+        self.latitude = self.ds_t2m["latitude"].values
+        self.x_coords = self.ds_t2m["x"].values
+        self.y_coords = self.ds_t2m["y"].values
 
         # Extract Temperature metadata units
-        self.t2m_units = self.dt["t2m"].attrs.get("units", "unknown")
+        self.t2m_units = self.ds_t2m["t2m"].attrs.get("units", "unknown")
 
         # Build Map Projections
         self._setup_projection()
 
     def _setup_projection(self):
         """Parses CRS metadata map parameters to set up Lambert Conformal Conic."""
-        crs_attrs = self.dt["CRS"].attrs
+        crs_attrs = self.ds_t2m["CRS"].attrs
         lat_origin = crs_attrs["latitude_of_projection_origin"]
         lon_central = crs_attrs["longitude_of_central_meridian"]
         std_parallels = crs_attrs["standard_parallel"]
@@ -145,7 +145,79 @@ class EAGLEVisualizer:
                              transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
 
         title="Temperature at 2 meter height"
-        cb_label = "Temperature ({self.t2m_units})"
+        cb_label = f"Temperature ({self.t2m_units})"
+        self._add_color_bar(fig, ax, mesh, cb_label)
+        plt.title(title, fontsize=14, pad=20)
+        self._finalize_and_save(fig, image_name)
+
+    def plot_gh_500hPa(self, image_name):
+        """Plot Geopotential Height at 500hPa"""
+
+        try:
+            nc_gh_500hPa_path = self.config["nc_500hPa_gh"]
+            ds_gh_500hPa = xr.open_dataset(nc_gh_500hPa_path)
+        except Exception as e:
+            print(f"\n[ERROR] Failed to open NetCDF files. File structure might be corrupt.\nDetails: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        ghvalue = ds_gh_500hPa["gh"].squeeze().values
+        fig, ax = self._create_base_map()
+
+        # color raster
+        mesh = ax.pcolormesh(self.longitude, self.latitude, ghvalue,
+                             transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
+
+        ghunits = ds_gh_500hPa["gh"].attrs.get("units", "unknown")
+        title="Geopotential Height at 500hPa"
+        cb_label = f"Geopotential Height at 500hPa({ghunits})"
+        self._add_color_bar(fig, ax, mesh, cb_label)
+        plt.title(title, fontsize=14, pad=20)
+        self._finalize_and_save(fig, image_name)
+
+    def plot_t_850hPa(self, image_name):
+        """Plot Temperature at 850hPa"""
+
+        try:
+            nc_850hPa_t_path = self.config["nc_850hPa_t"]
+            ds_t_850hPa = xr.open_dataset(nc_850hPa_t_path)
+        except Exception as e:
+            print(f"\n[ERROR] Failed to open NetCDF files. File structure might be corrupt.\nDetails: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        tvalue = ds_t_850hPa["t"].squeeze().values
+        fig, ax = self._create_base_map()
+
+        # color raster
+        mesh = ax.pcolormesh(self.longitude, self.latitude, tvalue,
+                             transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
+
+        tunits = ds_t_850hPa["t"].attrs.get("units", "unknown")
+        title="Temperature at 850hPa"
+        cb_label = f"Temperature at 850hPa ({tunits})"
+        self._add_color_bar(fig, ax, mesh, cb_label)
+        plt.title(title, fontsize=14, pad=20)
+        self._finalize_and_save(fig, image_name)
+
+    def plot_surface_pressure(self, image_name):
+        """Plot Surface Pressure"""
+
+        try:
+            nc_sfp_path = self.config["nc_sfp"]
+            ds_sfp = xr.open_dataset(nc_sfp_path)
+        except Exception as e:
+            print(f"\n[ERROR] Failed to open NetCDF files. File structure might be corrupt.\nDetails: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        sfpvalue = ds_sfp["sp"].squeeze().values
+        fig, ax = self._create_base_map()
+
+        # color raster
+        mesh = ax.pcolormesh(self.longitude, self.latitude, sfpvalue,
+                             transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
+
+        sfpunits = ds_sfp["sp"].attrs.get("units", "unknown")
+        title="Surface Pressure"
+        cb_label = f"Surface Pressure ({sfpunits})"
         self._add_color_bar(fig, ax, mesh, cb_label)
         plt.title(title, fontsize=14, pad=20)
         self._finalize_and_save(fig, image_name)
@@ -154,33 +226,33 @@ class EAGLEVisualizer:
         """Plot 20 meter barbs."""
 
         try:
-            self.nc_10m_u_path = self.config["nc_10m_u"]
-            self.nc_10m_v_path = self.config["nc_10m_v"]
-            self.nc_10m_u = xr.open_dataset(self.nc_10m_u_path)
-            self.nc_10m_v = xr.open_dataset(self.nc_10m_v_path)
+            nc_10m_u_path = self.config["nc_10m_u"]
+            nc_10m_v_path = self.config["nc_10m_v"]
+            ds_u_10m = xr.open_dataset(nc_10m_u_path)
+            ds_v_10m = xr.open_dataset(nc_10m_v_path)
         except Exception as e:
             print(f"\n[ERROR] Failed to open NetCDF files. File structure might be corrupt.\nDetails: {e}", file=sys.stderr)
             sys.exit(1)
 
         # Extract variables and drop single-value dimensions
-        self.u = self.nc_10m_u["u10"].squeeze().values
-        self.v = self.nc_10m_v["v10"].squeeze().values
+        self.u10m = ds_u_10m["u10"].squeeze().values
+        self.v10m = ds_v_10m["v10"].squeeze().values
 
         # Calculate wind speed magnitude (m/s) before knot conversion
-        self.wind_speed = np.sqrt(self.u**2 + self.v**2)
+        self.spd10m = np.sqrt(self.u10m**2 + self.v10m**2)
 
         fig, ax = self._create_base_map()
 
         # Wind Speed lines
-        contour_levels = np.arange(5, self.wind_speed.max(), 5)
+        contour_levels = np.arange(5, self.spd10m.max(), 5)
         if len(contour_levels) > 0:
-            contours = ax.contour(self.longitude, self.latitude, self.wind_speed, levels=contour_levels,
-                                  colors="white", linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
+            contours = ax.contour(self.longitude, self.latitude, self.spd10m, levels=contour_levels,
+                                  colors="blue", linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
             ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="blue")
 
         # 2. Convert raw m/s vector arrays dynamically to Knots for windbarb specifications
-        u_knots = self.u * 1.94384
-        v_knots = self.v * 1.94384
+        u_knots = self.u10m * 1.94384
+        v_knots = self.v10m * 1.94384
 
         skip_barbs = 12
         ax.barbs(
@@ -206,16 +278,16 @@ class EAGLEVisualizer:
                              transform=ccrs.PlateCarree(), cmap="turbo", shading="auto")
 
         # 2. Add Contour lines
-        contour_levels = np.arange(5, self.wind_speed.max(), 5)
+        contour_levels = np.arange(5, self.spd10m.max(), 5)
         if len(contour_levels) > 0:
-            contours = ax.contour(self.longitude, self.latitude, self.wind_speed,
+            contours = ax.contour(self.longitude, self.latitude, self.spd10m,
                                   levels=contour_levels, colors="white",
                                   linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
             ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="white")
 
         # 3. Add Wind Barbs
-        u_knots = self.u * 1.94384
-        v_knots = self.v * 1.94384
+        u_knots = self.u10m * 1.94384
+        v_knots = self.v10m * 1.94384
         skip_barbs = 12
         ax.barbs(
             self.longitude[::skip_barbs, ::skip_barbs],
@@ -228,9 +300,56 @@ class EAGLEVisualizer:
             linewidth=0.8
         )
 
-        cb_label = "Temperature ({self.t2m_units})"
+        cb_label = f"Temperature ({self.t2m_units})"
         self._add_color_bar(fig, ax, mesh, cb_label)
         plt.title("Wind Field Composition (Temperature, Contours & Barbs)", fontsize=14, pad=20)
+        self._finalize_and_save(fig, image_name)
+
+    def plot_250hPa_windbarb_only(self, image_name):
+        """Plot 20 meter barbs."""
+
+        try:
+            nc_250hPa_u_path = self.config["nc_250hPa_u"]
+            nc_250hPa_v_path = self.config["nc_250hPa_v"]
+            ds_u_250hPa = xr.open_dataset(nc_250hPa_u_path)
+            ds_v_250hPa = xr.open_dataset(nc_250hPa_v_path)
+        except Exception as e:
+            print(f"\n[ERROR] Failed to open NetCDF files. File structure might be corrupt.\nDetails: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Extract variables and drop single-value dimensions
+        u = ds_u_250hPa["u"].squeeze().values
+        v = ds_v_250hPa["v"].squeeze().values
+
+        # Calculate wind speed magnitude (m/s) before knot conversion
+        wind_speed = np.sqrt(u**2 + v**2)
+
+        fig, ax = self._create_base_map()
+
+        # Wind Speed lines
+        contour_levels = np.arange(5, wind_speed.max(), 5)
+        if len(contour_levels) > 0:
+            contours = ax.contour(self.longitude, self.latitude, wind_speed, levels=contour_levels,
+                                  colors="blue", linewidths=0.8, alpha=0.7, transform=ccrs.PlateCarree())
+            ax.clabel(contours, inline=True, fmt="%d m/s", fontsize=8, colors="blue")
+
+        # 2. Convert raw m/s vector arrays dynamically to Knots for windbarb specifications
+        u_knots = u * 1.94384
+        v_knots = v * 1.94384
+
+        skip_barbs = 12
+        ax.barbs(
+            self.longitude[::skip_barbs, ::skip_barbs],
+            self.latitude[::skip_barbs, ::skip_barbs],
+            u_knots[::skip_barbs, ::skip_barbs],
+            v_knots[::skip_barbs, ::skip_barbs],
+            transform=ccrs.PlateCarree(),
+            color="black",
+            length=5.5,
+            linewidth=0.8
+        )
+
+        plt.title("Wind Barb at 250hPa (Velocity Vectors in Knots)", fontsize=14, pad=20)
         self._finalize_and_save(fig, image_name)
 
 #---------------------------------------------------------------------------------------------------
@@ -265,3 +384,15 @@ if __name__ == "__main__":
 
     t2m_10m_wind_overlay_img = config.get("eagle_2m_t_10m_wind_image", "eagle_2m_t_10m_wind.png")
     visualizer.plot_10m_windbarb_overlay_2m_t(t2m_10m_wind_overlay_img)
+
+    gh_500hPa_img = config.get("eagle_500hPa_gh_image", "eagle_gh_500hPa.png")
+    visualizer.plot_gh_500hPa(gh_500hPa_img)
+
+    sfp_img = config.get("eagle_sfp_image", "eagle_sfp.png")
+    visualizer.plot_surface_pressure(sfp_img)
+
+    t_850hPa_img = config.get("eagle_t_850hPa_image", "eagle_t_850hPa.png")
+    visualizer.plot_t_850hPa(t_850hPa_img)
+
+    barb_250hPa_img = config.get("eagle_250hPa_barb", "eagle_250hPa_barb.png")
+    visualizer.plot_250hPa_windbarb_only(barb_250hPa_img)
