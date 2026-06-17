@@ -23,7 +23,7 @@ class WXVX(DriverTimeInvariant):
         nc_dir = Path(self.config["prewxvx"]["eagle_tools"]["output_path"])
         pre_dir = Path(self.config["prewxvx"]["rundir"])
         pre_path = pre_dir / f"prewxvx-{extent}.yaml"
-        nc = f"nested-{extent}.*.nc"
+        nc = f"*{extent}.*.nc"
         yield {
             "config": Asset(pre_path, pre_path.is_file),
             "ncfiles": Asset(nc_dir, lambda: any(nc_dir.glob(nc))),

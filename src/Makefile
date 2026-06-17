@@ -2,7 +2,7 @@ BASHSRCS = $(wildcard ../.github/scripts/*) format setup
 HELPERS  = vx zarr
 MODULES  = data inference training visualization wxvx
 PACKAGE  = eagle
-STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam zarr-gfs zarr-hrrr
+STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam
 TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
@@ -44,9 +44,9 @@ config:
 	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
+	$(call activate,data)
 	@$(make) grids-and-meshes
-	@$(make) zarr-gfs
-	@$(make) zarr-hrrr
+	@for x in gfs hrrr; do test -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)" && $(make) zarr source=$$x || true; done
 
 devenv:
 	$(call check,$(cudascript),cudascript)
@@ -190,9 +190,3 @@ else
 	$(call check,$(source),source)
 	$(call exec,data,zarr,Zarr,$(or $(task),run) --key-path zarrs.$(source) --batch)
 endif
-
-zarr-gfs:
-	@$(make) zarr source=gfs
-
-zarr-hrrr:
-	@$(make) zarr source=hrrr
