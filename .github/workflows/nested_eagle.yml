@@ -12,6 +12,10 @@ permissions:
 jobs:
 
   cleanup:
+    concurrency:
+      group: nested-eagle-ci-cleanup
+      cancel-in-progress: false
+      queue: max
     name: Clean old conda installs
     if: >-
       ${{
@@ -26,6 +30,10 @@ jobs:
         run: .github/scripts/clean-old-conda-installs
 
   run_pipeline:
+    concurrency:
+      group: nested-eagle-ci-run-pipeline
+      cancel-in-progress: false
+      queue: max
     name: Run Nested EAGLE end-to-end on Ursa
     if: >-
       ${{
