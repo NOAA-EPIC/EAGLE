@@ -102,6 +102,8 @@ Contributions to the ``EAGLE`` project are made through a branch and pull reques
 #. Create a branch in your local clone for the change. All development should take place on a branch, not on ``main``.
 #. Make, commit, and push your changes to that branch.
 #. Open a pull request to merge your changes into the upstream repository.
+#. When merging your PR, select "Squash and merge" unless there's a reason to preserve all individual commits from the feature branch.
+#. After your PR merges, delete the feature branch, either using the button provided in the GitHub PR interface, or manually.
 
 Open or review issues on the `EAGLE issues page <https://github.com/NOAA-EPIC/EAGLE/issues>`_.
 
