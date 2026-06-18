@@ -2,8 +2,6 @@
 
 # yamllint disable rule:anchors rule:line-length
 
-grids_and_meshes:
-  latent_mesh_global_resolution_deg: 2.0
 inference:
   anemoi:
     input_dataset_kwargs: &dataset-kwargs
@@ -296,7 +294,6 @@ training:
     system:
       input:
         global_dataset: '{{ val.data.rundir }}/gfs.zarr'
-        latent_mesh: '{{ val.data.rundir }}/latentx2.spongex1.combined.sorted.npz'
       hardware:
         num_gpus_per_model: 1
       output:
@@ -370,9 +367,6 @@ training:
                 - u
                 - v
                 - w
-val:
-  filenames:
-    latent_mesh: latentx2.spongex1.combined.sorted.npz
 vx:
   grid2grid:
     global:
