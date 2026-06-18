@@ -90,24 +90,23 @@ The resulting verbose logging, which will include stacktraces from any unhandled
 Pull Requests
 ------------------------------------------------------------------------------
 
-.. _BranchPR:
+.. _ForkPR:
 
-Branch and PR Overview
+Fork and PR Overview
 ==============================================================================
 
-Contributions to the ``EAGLE`` project are made through a branch and pull request model. GitHub provides a thorough overview in their `Contributing to a project quickstart <https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project>`_, but the process for EAGLE can be summarized as:
+Contributions to the ``EAGLE`` project are made through a fork and pull request model. GitHub provides a thorough overview in their `Contributing to a project quickstart <https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project>`_, but the process for EAGLE can be summarized as:
 
 #. Create or identify a GitHub issue to document the proposed change.
-#. Clone the `EAGLE repository <https://github.com/NOAA-EPIC/EAGLE>`_ onto your development system.
-#. Create a branch in your local clone for the change. All development should take place on a branch, not on ``main``.
-#. Make, commit, and push your changes to that branch.
-#. Open a pull request to merge your changes into the upstream repository.
+#. Fork the `EAGLE repository <https://github.com/NOAA-EPIC/EAGLE>`_ into your personal GitHub account.
+#. Clone your fork onto your development system.
+#. Create a branch in your clone for the change. All development should take place on a branch, not on ``main``.
+#. Make, commit, and push your changes to that branch in your fork.
 #. When merging your PR, select "Squash and merge" unless there's a reason to preserve all individual commits from the feature branch.
-#. After your PR merges, delete the feature branch, either using the button provided in the GitHub PR interface, or manually.
 
 Open or review issues on the `EAGLE issues page <https://github.com/NOAA-EPIC/EAGLE/issues>`_.
 
-For future contributions, keep your local ``main`` branch current by pulling updates from ``NOAA-EPIC/EAGLE``.
+For future contributions, keep your fork current by syncing it with the upstream ``NOAA-EPIC/EAGLE`` repository.
 
 .. _DevTest:
 
