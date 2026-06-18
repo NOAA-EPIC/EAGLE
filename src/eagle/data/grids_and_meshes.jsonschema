@@ -8,6 +8,22 @@
             "properties": {
               "filenames": {
                 "required": [
+                  "hrrr_target_grid"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "conus_grid_resolution_km"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "filenames": {
+                "required": [
                   "latent_mesh"
                 ]
               }
@@ -15,7 +31,9 @@
           },
           "then": {
             "required": [
-              "latent_mesh_global_resolution_deg"
+              "conus_grid_resolution_km",
+              "latent_mesh_global_resolution_deg",
+              "latent_mesh_conus_coarsen_factor"
             ]
           }
         }
