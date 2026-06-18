@@ -84,7 +84,7 @@ To run NRT:
 
   wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/nested-eagle/inference-last.ckpt
 
-#. Before running ``make realize``, update:
+Before running ``make realize``, update:
 
    * ``app.base`` to the absolute path of your local ``src/`` directory
    * ``inference.anemoi.checkpoint_dir`` to the checkpoint you downloaded from Azure (inference-last.ckpt)
