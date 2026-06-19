@@ -102,6 +102,7 @@ Contributions to the ``EAGLE`` project are made through a fork and pull request 
 #. Clone your fork onto your development system.
 #. Create a branch in your clone for the change. All development should take place on a branch, not on ``main``.
 #. Make, commit, and push your changes to that branch in your fork.
+#. Open a pull request to merge your changes into the upstream repository.
 #. When merging your PR, select "Squash and merge" unless there's a reason to preserve all individual commits from the feature branch.
 
 Open or review issues on the `EAGLE issues page <https://github.com/NOAA-EPIC/EAGLE/issues>`_.
