@@ -1,34 +1,28 @@
-# Configuration for the NOAA RDHPCS Ursa platform.
+# Configuration for the Azure Cycle Cloud platform.
 
 # yamllint disable rule:anchors rule:line-length
 
 app:
   gpu:
     batchargs: &gpu-batchargs
-      --gres: 'gpu:h100:1'
       nodes: 1
-      partition: u1-h100
-      queue: gpuwf
+      partition: gpu
   launcher: srun --export=ALL
   partitions:
     netaccess: htc
   platform: &platform
     account: epic
     scheduler: slurm
-inference:
-  execution:
-    envcmds: !list '{{ val.slurm_script + val.inference.envcmds  }}'
-training:
-  execution:
-    envcmds: !list '{{ val.slurm_script + val.training.envcmds }}'
-val:
-  slurm_script:
-    - source /etc/profile.d/profile-slurm.sh
 zarrs:
   common:
     execution:
       batchargs:
-        --mem-per-cpu: 3G
-      envcmds: !list '{{ val.slurm_script + val.zarrs.envcmds }}'
+        cores: 1
+        walltime: '00:20:00'
+        --mem-per-cpu: 6G
       mpiargs:
         - "--export=ALL"
+ufs2arco:
+  mover:
+    name: datamover
+    batch_size: 1
