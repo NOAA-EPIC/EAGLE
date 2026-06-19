@@ -5,6 +5,7 @@ channels:
 dependencies:
   - cf-xarray 0.10.11
   - impi_rt 2021.13.*
+  - libfabric 2.5.*
   - mpi4py 4.1.*
   - numpy 1.26.4
   - pandas 2.3.3
