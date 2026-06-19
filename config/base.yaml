@@ -3,7 +3,7 @@
 # yamllint disable rule:anchors rule:line-length
 
 app:
-  base: /path/to/eagle/src
+  base: /path/to/eagle
   experiment_name: default
   gpu: # set by platform config
   partitions: # set by platform config
@@ -23,7 +23,6 @@ grids_and_meshes:
     gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
   rundir: '{{ val.data.rundir }}'
   global_grid_resolution_deg: 1.0
-  latent_mesh_global_resolution_deg: 2.0
 inference:
   anemoi:
     checkpoint_path: /path/to/checkpoint # NB: If a value for inference.checkpoint_dir is provided, it will override this value with the latest checkpoint in that directory.
@@ -41,10 +40,7 @@ inference:
       memory: 16G
       rundir: '{{ inference.rundir }}'
       walltime: '00:10:00'
-    envcmds:
-      - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate anemoi
-      - set -e
+    envcmds: !list '{{ val.inference.envcmds }}'
     executable: '{{ app.launcher | default("") }} eagle-tools inference inference.yaml'
   rundir: '{{ app.rundir }}/inference'
 platform: !dict '{{ app.platform }}'
@@ -66,13 +62,7 @@ training:
       memory: 128G
       rundir: '{{ training.rundir }}'
       walltime: '01:00:00'
-    envcmds:
-      - source {{ val.conda }}/etc/profile.d/conda.sh
-      - conda activate anemoi
-      - export MLFLOW_ALLOW_FILE_STORE=true
-      - export SLURM_GPUS_PER_NODE=1
-      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
-      - set -e
+    envcmds: !list '{{ val.training.envcmds }}'
     executable: '{{ app.launcher | default("") }} anemoi-training train --config-name=training'
   remove:
     # Dot-separated config keys paths to delete from the composed runtime config.
@@ -141,11 +131,24 @@ val:
     rundir: '{{ app.rundir }}/data'
   filenames:
     gfs_target_grid: global_one_degree.nc
+  inference:
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate anemoi
+      - set -ex
   levels: [100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
   statsdelta:
     aligned: !timedelta '{{ (val.statsdelta.raw - val.statsdelta.raw % app.time.step).total_seconds() / 3600 }}'
     raw: !timedelta '{{ ((app.time.stop - app.time.start) * 0.8).total_seconds() / 3600 }}'
   step: !int '{{ (app.time.step.total_seconds() / 3600) | int }}'
+  training:
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate anemoi
+      - export MLFLOW_ALLOW_FILE_STORE=true
+      - export SLURM_GPUS_PER_NODE=1
+      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+      - set -ex
   variables:
     analysis:
       # 3D Prognostic
@@ -175,6 +178,11 @@ val:
     rundir: '{{ app.rundir }}/visualization'
   vx:
     rundir: '{{ app.rundir }}/vx'
+  zarrs:
+    envcmds:
+      - source {{ val.conda }}/etc/profile.d/conda.sh
+      - conda activate data
+      - set -ex
 visualization:
   common:
     postwxvx: &postwxvx-common
@@ -374,10 +382,7 @@ zarrs:
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
         walltime: '00:10:00'
-      envcmds:
-        - source {{ val.conda }}/etc/profile.d/conda.sh
-        - conda activate data
-        - set -e
+      envcmds: !list '{{ val.zarrs.envcmds }}'
       mpiargs: []
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'
   gfs:
