@@ -165,4 +165,17 @@ Building and Running :term:`EAGLE`
       
       make inference config=nrt.yaml
 
-   Your forecast will save to ``path/to/eagle/run/default/nrt_inference/YYYY/MM/DD/HH/inference``.
+   Your forecast will save to ``path/to/eagle/src/run/default/nrt_inference/YYYY/MM/DD/HH/inference``.
+
+   f. Verify your forecast
+
+   .. code-block:: bash
+      
+      make vx-grid-global config=nrt.yaml
+      make vx-grid-lam config=nrt.yaml
+      make vx-obs-global config=nrt.yaml
+      make vx-obs-lam config=nrt.yaml
+
+   Verification requires completed forecast output, so wait until the inference window has completed before running these commands. 
+   For example, if you created a 48 hour forecast, you will need to wait 48 hours to verify it. Once the output is available, run 
+   the same ``vx`` targets shown above to verify against gridded analyses or observations.
