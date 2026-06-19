@@ -4,7 +4,7 @@
 Quickstart Guide
 ====================
 
-This section provides a recipe for an end-to-end run of nested-EAGLE on :term:`Ursa`. At present, Ursa is the only supported 
+This section provides a recipe for an end-to-end run of nested- and global-EAGLE on :term:`Ursa`. To run a global configuration with this quickstart guide, replace references to ``nested`` with ``global``. At present, Ursa is the only supported 
 platform. Future development will include additional platforms.
 
 .. note::
@@ -98,6 +98,8 @@ Building and Running :term:`EAGLE`
       make vx-obs-global config=eagle.yaml
       make vx-obs-lam config=eagle.yaml
 
+   For running just the global verification run, only submit ``vx-grid-global`` and ``vx-obs-global``.
+
    Before running verification, the :term:`WXVX` driver will run ``prewxvx`` to prepare forecast output from the previous step. See the files ``run/<expname>/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
    
    These steps perform verification of the ``global`` or :term:`LAM` forecasts against gridded analyses (``*-grid-*``) or 
@@ -115,6 +117,8 @@ Building and Running :term:`EAGLE`
       make vis-obs-global config=eagle.yaml
       make vis-obs-lam config=eagle.yaml
 
+   For running just the global visualization run, only submit ``vis-grid-global`` and ``vis-obs-global``.
+
    These steps will first call ``eagle-tools``'s ``postwxvx`` tool to create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of basic plots (provided by `DataArray.plot() <https://docs.xarray.dev/en/latest/generated/xarray.DataArray.plot.html#xarray.DataArray.plot>`_ from the ``xarray`` library) in the ``run/<expname>/visualization/grid2{grid,obs}/{global,lam}/plots-basic`` directory.
 
    For the grid-based ``vis-grid-global`` and ``vis-grid-lam`` targets, additional error plots (forecast vs truth differences) will be created under ``run/<expname>/visualization/grid2grid/{global,lam}/plots-spatial-stats/``. These plots depend on 1. The config value at key-path ``vx.grid2grid.{global,lam}.wxvx.wxvx.ncdiffs`` being set to ``true``, which instructs MET to produce netCDF difference files during verification; and 2. The config block at key-path ``visualization.grid2grid.{global,lam}.visualization.spatial_stat_plots``, which enables and configures plot generation, being present.
@@ -125,7 +129,7 @@ Building and Running :term:`EAGLE`
    
    .. code-block:: bash
 
-      make config compose=base:nested:ursa:nrt > nrt-composed.yaml
+      make config compose=base:nested:ursa:nrt-nested > nrt-composed.yaml
 
    b. Set the ``app.base`` value in ``nrt-composed.yaml`` to the absolute path to the current (repository root) directory.
 
