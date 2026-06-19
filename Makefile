@@ -17,7 +17,7 @@ check    = @$(if $(1),,$(error $(2)= argument required))
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
 modenv   = $(env4mod_$(1))
-modloop  = @set -e && for mod in $(PACKAGE) $(MODULES); do $(make) mod=$$mod $(1); done
+modloop  = @set -eo pipefail && for mod in $(PACKAGE) $(MODULES); do $(make) mod=$$mod $(1); done
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
 
 env4mod_$(PACKAGE)    = base
@@ -46,7 +46,7 @@ config:
 data:
 	$(call activate,data)
 	@$(make) grids-and-meshes
-	@for x in gfs hrrr; do test -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)" && $(make) zarr source=$$x || true; done
+	@for x in gfs hrrr; do if [[ -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)" ]]; then $(make) zarr source=$$x; fi; done
 
 devenv:
 	$(call check,$(cudascript),cudascript)
