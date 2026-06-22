@@ -8,6 +8,7 @@ grids_and_meshes:
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
     latent_mesh: '{{ val.filenames.latent_mesh }}'
   latent_mesh_conus_coarsen_factor: 2
+  latent_mesh_global_resolution_deg: 2.0
 inference:
   anemoi:
     input_dataset_kwargs: &dataset-kwargs

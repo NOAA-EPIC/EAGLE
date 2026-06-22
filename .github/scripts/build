@@ -3,5 +3,5 @@
 # shellcheck disable=1091
 
 set -euo pipefail
-time make -C src devenv cudascript=dummy
-. src/conda/etc/profile.d/conda.sh
+time make devenv cudascript=dummy
+. conda/etc/profile.d/conda.sh
