@@ -73,6 +73,12 @@ Configuration for the ``Inference`` driver.
 ``checkpoint_dir``
    The ``checkpoint_dir:`` parameter specifies the location of the checkpoints created by the training step.
 
+``anemoi.checkpoint_path``
+   The ``anemoi.checkpoint_path:`` parameter can be set to an explicit checkpoint file, such as the official nested-EAGLE pretrained checkpoint. If ``checkpoint_dir`` is configured, it takes precedence by selecting the latest checkpoint in that directory.
+
+``anemoi.input_dataset_kwargs``
+   The ``anemoi.input_dataset_kwargs:`` block controls the dataset used as input for inference. Update this block when using a different initial-condition dataset.
+
 platform
 ------------------------------------------------------------------------------
 
@@ -150,6 +156,11 @@ Configuration for the ``Zarr`` driver.
 
 ``gfs`` and ``hrrr``
    The ``gfs:`` and ``hrrr:`` sub-blocks provide refinements for ingesting GFS and HRRR data, respectively, for EAGLE.
+
+To ingest a different data source, update or add a ``zarrs.<source>`` block with
+the source, transforms, and target settings needed by ``ufs2arco``. Downstream
+training and inference dataset paths must be updated to point to the resulting
+Zarr output.
 
 .. _ConfigRealization:
 

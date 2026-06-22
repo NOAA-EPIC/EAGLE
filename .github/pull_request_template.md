@@ -21,18 +21,21 @@ Refs NOAA-EPIC/repo#5678
 ## Type of change:
 <!--
 Indicate PR type of change.
-Delete options that are not applicable. 
+Check all that apply.
 -->
 - [ ] Bug fix
-- [ ] New feature
+- [ ] Enhancement / new feature
 - [ ] Refactor / cleanup
 - [ ] Documentation
 - [ ] CI/CD or tooling
+- [ ] Subcomponent update
 - [ ] Other:
 
 ## Area(s) affected
 <!-- Check all that apply -->
 - [ ] nested_eagle workflow
+- [ ] Training
+- [ ] Inference
 - [ ] Verification / evaluation (via WXVX)
 - [ ] Data prep / UFS2ARCO
 - [ ] Config (YAML)
@@ -51,6 +54,7 @@ Delete options that are not applicable.
 - [ ] I have performed a self-review of my own code
 - [ ] My changes generate no new warnings
 - [ ] I have made corresponding changes to the system documentation if necessary
+- [ ] I checked whether this PR requires subcomponent PRs and completed the subcomponent checklist below
 
 ## Testing / Verification:
 <!--
@@ -76,10 +80,23 @@ Fill in if you ran on HPC or a specific system. Delete if not applicable.
   - `wxvx --version` (if applicable):
   - MET version (if applicable):
 
-## Commit Message:
+## Suggested labels:
 <!--
-Provide a concise commit message for any subcomponents; delete unnecessary info.
+Check labels that maintainers should consider applying to this PR.
 -->
+- [ ] bug
+- [ ] enhancement
+- [ ] documentation
+- [ ] configuration
+- [ ] data
+- [ ] training
+- [ ] inference
+- [ ] verification
+- [ ] CI/CD
+
+## Commit Message:
+<!-- Provide a concise commit message summary for affected components. -->
+* EAGLE -
 * UFS2ARCO -
 * WXVX (verification) -
 
@@ -92,8 +109,8 @@ Example:
 * WXVX: NOAA-EPIC/WXVX#33
 Delete sections that are not needed.
 -->
+- [ ] No subcomponent PRs are required for this change.
+- [ ] Required subcomponent PRs are linked below.
 * EAGLE: NOAA-EPIC/EAGLE#
 * UFS2ARCO: NOAA-PSL/UFS2ARCO#
 * WXVX (verification): NOAA-EPIC/WXVX#
-* None
-

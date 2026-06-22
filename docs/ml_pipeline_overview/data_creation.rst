@@ -140,6 +140,25 @@ in the ``source`` block of ``recipe.yaml``. See the `ufs2arco documentation
 <https://ufs2arco.readthedocs.io/en/latest/>`_ for the supported variables and
 configuration details.
 
+Using a Different Dataset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+EAGLE expects training and inference data to be available in a format compatible
+with the anemoi data stack. There are two common ways to use a different
+dataset:
+
+* Generate a new Zarr dataset with ``ufs2arco`` by updating the appropriate
+  ``zarrs.<source>.zarr.ufs2arco`` config block. In most cases this means
+  changing the source archive, date range, variables, levels, transforms, and
+  target Zarr path.
+* Point EAGLE at an existing compatible Zarr dataset by updating the training
+  dataloader dataset path and the inference input dataset settings in the
+  composed EAGLE config.
+
+When changing datasets, make sure the variable names, vertical levels, grid,
+time frequency, forcing fields, and normalization/statistics settings are
+consistent with the model configuration and any checkpoint used for inference.
+
 .. _MPIUsage:
 
 MPI Usage
