@@ -309,7 +309,6 @@ training:
           variables: !list '{{ training.anemoi.data.datasets.data.processors.normalizer.config.std }}'
       num_channels: 512
       processor:
-        attention_implementation: scaled_dot_product_attention
         window_size: 4320
     training:
       multistep_input: !int '{{ app.time.multistep_input }}'
