@@ -12,6 +12,8 @@ dependencies:
   - pip
   - python 3.12
   - setuptools 81.0.*
+  - torch 2.10.*
+  - triton 3.6.*
   - uwtools 2.16.*
   - pip:
       - anemoi-inference==0.10.*
