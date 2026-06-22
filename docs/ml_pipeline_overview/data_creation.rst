@@ -153,3 +153,52 @@ not want to use MPI, update the ``mover`` block as follows:
     mover:
       name: datamover
       batch_size: 2
+
+.. _DifferentDatasets:
+
+Using Different Datasets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use different datasets in EAGLE by changing the ``source`` section of
+your ufs2arco recipe while keeping the same overall workflow.
+
+Typical workflow:
+
+#. Choose a supported source dataset (for example, GFS, HRRR, GEFS, AORC, or
+   ERA5 reanalysis).
+#. Update ``source`` settings (such as dates, variables, and levels).
+#. Run ``ufs2arco recipe.yaml`` to generate the Zarr dataset.
+#. Point your EAGLE configuration to that dataset for downstream pipeline steps.
+
+A minimal example recipe is shown below:
+
+.. code-block:: yaml
+
+    mover:
+      name: datamover
+      batch_size: 2
+
+    directories:
+      zarr: gefs.zarr
+      cache: cache
+      logs: logs
+
+    source:
+      name: gefs_archive  # example GEFS source
+      t0:
+        start: 2024-01-01T00
+        end: 2024-01-10T00
+        freq: 6h
+      fhr:
+        start: 0
+        end: 0
+        step: 6
+      variables: [gh, u, v, t, q]
+      levels: [500, 850]
+
+    target:
+      name: anemoi
+
+For source-specific options and examples, see:
+
+* `ufs2arco documentation <https://ufs2arco.readthedocs.io/en/latest/>`_

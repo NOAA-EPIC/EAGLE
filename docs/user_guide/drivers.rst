@@ -5,7 +5,7 @@ Drivers
 ==============================================================================
 
 The various software components required by EAGLE are executed by :term:`uwtools` drivers implemented as Python 
-modules under ``src/eagle/``. By default, the targets in ``src/Makefile`` invoke drivers' most comprehensive 
+modules under ``eagle/``. By default, the targets in ``Makefile`` invoke drivers' most comprehensive 
 tasks, i.e. those that configure and execute the component to produce its final output. However, each driver 
 provides a number of tasks, some of which depend on others, and lower-level tasks can be invoked to request less 
 than full execution of the driver, which can be useful during development and debugging.

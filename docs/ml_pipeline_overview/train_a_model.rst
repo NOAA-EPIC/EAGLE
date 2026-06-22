@@ -56,8 +56,8 @@ data folder, which then provides the training process with information on the
 training data such as variables used and temporal frequency.
 
 Throughout this repository, we have consolidated a lot of useful information in
-``src/config/base.yaml``, especially under the ``training.anemoi`` section.
-This means ``src/config/base.yaml`` contains many of the model configurations
+``config/base.yaml``, especially under the ``training.anemoi`` section.
+This means ``config/base.yaml`` contains many of the model configurations
 that are most useful to note, and it also makes those configurations easier to
 change.
 

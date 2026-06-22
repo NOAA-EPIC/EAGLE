@@ -4,7 +4,7 @@
 
 set -euo pipefail
 export SETVARS_CALL=${SETVARS_CALL:-0}
-cd "$GITHUB_WORKSPACE/src"
+cd "$GITHUB_WORKSPACE"
 
 time make env cudascript=ursa INSTALLDIR="$INSTALLDIR"
 
@@ -96,29 +96,25 @@ echo Experiment name: $EXP
 
 make config compose=base:nested:ursa INSTALLDIR="$INSTALLDIR" >eagle.yaml
 
-SRC_ABS="$GITHUB_WORKSPACE/src"
+BASEDIR="$GITHUB_WORKSPACE"
 
 cat <<EOF >update.yaml
 app:
-  base: $SRC_ABS
+  base: $BASEDIR
   experiment_name: $EXP
 inference:
   anemoi:
-    checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
+    checkpoint_path: $BASEDIR/run/$EXP/training/outputs/checkpoint
 EOF
 uw config realize -i eagle.yaml -o eagle.yaml -u update.yaml
 
 make validate config=eagle.yaml INSTALLDIR="$INSTALLDIR"
 
-RUNROOT="$SRC_ABS/run/$EXP"
+RUNROOT="$BASEDIR/run/$EXP"
 
 # Run data-prep and check artifacts.
 
-make grids-and-meshes config=eagle.yaml INSTALLDIR="$INSTALLDIR"
-
-for datasource in gfs hrrr; do
-  make zarr-$datasource config=eagle.yaml INSTALLDIR="$INSTALLDIR"
-done
+make data config=eagle.yaml INSTALLDIR="$INSTALLDIR"
 
 for datasource in gfs hrrr; do
   wait_runscript_batch "$RUNROOT/data" "zarr-$datasource" "Zarr $datasource"
@@ -204,13 +200,13 @@ done
 
 cat <<EOF >update.yaml
 app:
-  base: $SRC_ABS
+  base: $BASEDIR
   experiment_name: $EXP
 inference:
   anemoi:
-    checkpoint_path: $SRC_ABS/run/$EXP/training/outputs/checkpoint
+    checkpoint_path: $BASEDIR/run/$EXP/training/outputs/checkpoint
 EOF
-make config compose=base:nested:ursa:nrt >nrt-composed.yaml
+make config compose=base:nested:ursa:nrt-nested >nrt-composed.yaml
 make realize config=nrt-composed.yaml update=update.yaml >nrt.yaml
 
 # Define NRTDIR in terms of NOW variable (changes every run).
