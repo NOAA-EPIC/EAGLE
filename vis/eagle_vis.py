@@ -49,7 +49,7 @@ class EAGLEVisualizer:
                 ncflnm = self.config[item]
                 print(f"Item No. {n}: {item} -> {ncflnm}")
                 if not os.path.exists(ncflnm):
-                    print(f"  - {item}: Path not found -> '{nclnm}'")
+                    print(f"  - {item}: Path not found -> '{ncflnm}'")
                     sys.exit(1)
 
         self.show_on_screen = self.config["show_on_screen"]

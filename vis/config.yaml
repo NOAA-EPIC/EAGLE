@@ -1,3 +1,5 @@
+BASE_DIR: "/scratch5/purged/Wei.Huang/src/EAGLE/src/run/learning_eagle/nrt_inference/2026/06/17/12/vx/grid2grid/lam/grids/forecast/20260617/12/048"
+
 default_paths:
   nc_2m_t: "/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/2t-heightAboveGround-0002.nc"
   nc_10m_u: "/scratch5/purged/Wei.Huang/src/nv/data/eagle/forecast/10u-heightAboveGround-0010.nc"
