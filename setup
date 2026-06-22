@@ -72,6 +72,16 @@ install_conda() {
   rm -v $installer
 }
 
+clean_conda_pkgs_maybe() {
+  if [[ -n ${EAGLE_CLEAN_CONDA_PKGS+x} ]]; then
+    (
+      env_activate base
+      msg Cleaning conda package cache
+      mamba clean --all --yes
+    )
+  fi
+}
+
 install_devpkgs_maybe() {
   local name
   if [[ -v EAGLEDEV ]]; then
@@ -147,6 +157,7 @@ if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
 fi
 EOF
   )
+  clean_conda_pkgs_maybe
 }
 
 prep_env_anemoi() {
@@ -182,6 +193,7 @@ prep_env_base() {
     msg Updating environment: $name
     mamba env update ${MAMBAFLAGS[@]} --file envs/$name.yaml
     install_devpkgs_maybe $name
+    clean_conda_pkgs_maybe
   )
 }
 

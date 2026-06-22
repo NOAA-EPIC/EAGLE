@@ -38,12 +38,12 @@ else
   )
   dirs=(
     /home/runner/{.cargo,.dotnet,.rustup}
-    /opt/hostedtoolcache/{Ruby,PyPy,node,go,CodeQL}
-    /opt/{az,google,microsoft,pipx}
+    /opt/hostedtoolcache/{Python,Ruby,PyPy,node,go,CodeQL}
+    /opt/{az,ghc,google,microsoft,pipx}
     /usr/lib/{firefox,google-cloud-sdk,jvm,snapd}
     /usr/local/lib/android
-    /usr/local/share/{chromium,powershell}
-    /usr/local/{aws-*,julia*}
+    /usr/local/share/{boost,chromium,powershell,vcpkg}
+    /usr/local/{.ghcup,aws-*,julia*}
     /usr/share/{az_*,dotnet,gradle-*,kotlinc,miniconda,swift}
   )
   (
