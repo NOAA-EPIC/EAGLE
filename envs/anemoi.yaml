@@ -11,8 +11,8 @@ dependencies:
   - numpy 2.2.6.*
   - pip
   - python 3.12
+  - pytorch 2.10.*
   - setuptools 81.0.*
-  - torch 2.10.*
   - triton 3.6.*
   - uwtools 2.16.*
   - pip:
