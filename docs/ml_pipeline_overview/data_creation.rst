@@ -144,7 +144,7 @@ Using a Different Dataset
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 EAGLE expects training and inference data to be available in a format compatible
-with the anemoi data stack. There are two common ways to use a different
+with the Anemoi data stack. There are two common ways to use a different
 dataset:
 
 * Generate a new Zarr dataset with ``ufs2arco`` by updating the appropriate

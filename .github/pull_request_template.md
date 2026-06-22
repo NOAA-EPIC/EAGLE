@@ -22,6 +22,7 @@ Refs NOAA-EPIC/repo#5678
 <!--
 Indicate PR type of change.
 Check all that apply.
+Maintainers can use these selections when applying repository labels.
 -->
 - [ ] Bug fix
 - [ ] Enhancement / new feature
@@ -32,7 +33,7 @@ Check all that apply.
 - [ ] Other:
 
 ## Area(s) affected
-<!-- Check all that apply -->
+<!-- Check all that apply. Maintainers can use these selections when applying repository labels. -->
 - [ ] nested_eagle workflow
 - [ ] Training
 - [ ] Inference
@@ -79,20 +80,6 @@ Fill in if you ran on HPC or a specific system. Delete if not applicable.
   - `python --version`:
   - `wxvx --version` (if applicable):
   - MET version (if applicable):
-
-## Suggested labels:
-<!--
-Check labels that maintainers should consider applying to this PR.
--->
-- [ ] bug
-- [ ] enhancement
-- [ ] documentation
-- [ ] configuration
-- [ ] data
-- [ ] training
-- [ ] inference
-- [ ] verification
-- [ ] CI/CD
 
 ## Commit Message:
 <!-- Provide a concise commit message summary for affected components. -->

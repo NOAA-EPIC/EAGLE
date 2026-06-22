@@ -143,6 +143,28 @@ GitHub will automatically populate the PR description with the repository's
 Complete the checklist, including the subcomponent PR check, before requesting
 review.
 
+.. _ForkPRCI:
+
+CI for Fork-Based Pull Requests
+==============================================================================
+
+Pull requests from forks use the repository's normal GitHub Actions checks,
+subject to GitHub's maintainer approval flow for fork-based contributions.
+Maintainers should inspect the proposed changes before approving workflow runs,
+especially when a PR changes files under ``.github/workflows/``.
+
+The Ursa end-to-end workflow is intentionally opt-in. After a maintainer has
+reviewed the PR and is comfortable running it on the self-hosted Ursa runner,
+they can add the ``eagle-ursa`` label to trigger the label-gated workflow. If
+GitHub marks the workflow as awaiting approval because the PR came from a fork,
+a maintainer with write access must approve the workflow run from the PR checks
+or Actions page.
+
+If repository or organization settings prevent the Ursa workflow from running
+directly from a fork, a maintainer can create a branch in the upstream
+``NOAA-EPIC/EAGLE`` repository from the contributor's changes and run the
+label-gated workflow from that branch.
+
 .. _Docs:
 
 Documentation
