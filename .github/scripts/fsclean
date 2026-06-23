@@ -2,7 +2,7 @@
 
 # shellcheck disable=2068,2086
 
-GIGSREQD=57
+GIGSREQD=47
 
 gigsfree() { df . -BG --output=avail | tail -n1 | sed 's/[^0-9]//g'; }
 msg() { echo $GIGSREQD GB NEEDED, $1 GB AVAILABLE: $2; }
