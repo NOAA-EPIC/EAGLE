@@ -19,4 +19,5 @@ dependencies:
       - anemoi-inference==0.10.*
       - anemoi-models==0.13.*
       - anemoi-training==0.10.*
+      - anemoi-transform==0.1.29
       - eagle-tools==0.8.1
