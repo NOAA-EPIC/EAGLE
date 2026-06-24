@@ -42,15 +42,15 @@ Building and Running :term:`EAGLE`
    create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, 
    typechecking, unit testing, and :term:`YAML` linting.
 
-.. note::
+   .. note::
 
-   EAGLE virtual environments are built using both conda and pip packages. If you examine the output from the ``make env`` command above, you may see messages like the following, from pip:
+      EAGLE virtual environments are built using both conda and pip packages. If you examine the output from the ``make env`` command above, you may see messages like the following, from pip:
 
-   .. code-block:: text
+      .. code-block:: text
 
-      ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+         ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
 
-   This will be followed by a report of packages pip believes are not installed or are installed with incompatible versions. These messages are due to fundamental differences in how conda and pip operate, and are generally safe to ignore. But please open an :ref:`Issue <Issues>` if you later encounter problems you believe are related to package versions.
+      This will be followed by a report of packages pip believes are not installed or are installed with incompatible versions. These messages are due to fundamental differences in how conda and pip operate, and are generally safe to ignore. But please open an :ref:`Issue <Issues>` if you later encounter problems you believe are related to package versions.
 
 #. Create the EAGLE YAML config
 
@@ -131,9 +131,9 @@ Building and Running :term:`EAGLE`
 
    For the grid-based ``vis-grid-global`` and ``vis-grid-lam`` targets, additional error plots (forecast vs truth differences) will be created under ``run/<expname>/visualization/grid2grid/{global,lam}/plots-spatial-stats/``. These plots depend on 1. The config value at key-path ``vx.grid2grid.{global,lam}.wxvx.wxvx.ncdiffs`` being set to ``true``, which instructs MET to produce netCDF difference files during verification; and 2. The config block at key-path ``visualization.grid2grid.{global,lam}.visualization.spatial_stat_plots``, which enables and configures plot generation, being present.
 
-.. _NRT:
+#. .. _NRT:
 
-#. Run inference in near-real-time (NRT)
+   Run inference in near-real-time (NRT)
 
    a. Create the EAGLE NRT config 
    
