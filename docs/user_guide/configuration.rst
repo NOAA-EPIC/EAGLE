@@ -15,7 +15,7 @@ EAGLE runs (see the Quickstart Guide for an example.) The composed config can th
 edited for experiment-specific requirements.
 
 For advanced use cases, for example for composing configs in arbitrary locations, the underlying :term:`uwtools` 
-command can be used. In the ``src/`` directory:
+command can be used. In the repository root:
 
 .. code-block:: bash
 

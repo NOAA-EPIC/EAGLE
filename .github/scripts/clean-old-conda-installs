@@ -2,7 +2,7 @@
 
 # shellcheck disable=2086
 
-find $GITHUB_WORKSPACE/src -mindepth 1 -maxdepth 1 -regex "^.*/conda\.[0-9]+$" | sort | while read -r x; do
+find $GITHUB_WORKSPACE -mindepth 1 -maxdepth 1 -regex "^conda\.[0-9]+$" | sort | while read -r x; do
   echo Removing $x
   rm -rf $x
 done

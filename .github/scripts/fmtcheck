@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-make -C src format
+make format
 if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
   git --no-pager diff
   echo UNFORMATTED CODE DETECTED
