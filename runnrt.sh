@@ -117,7 +117,7 @@ case "${step}" in
         #    echo "Then wait and re-run when training is done."
         #    exit 15
         #fi
-	mamba activate ${EAGLEhome}/conda/envs/inference
+	mamba activate ${EAGLEhome}/conda/envs/anemoi
         make inference config=nrt.yaml
 	mamba deactivate
         ;;
