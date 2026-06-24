@@ -1,3 +1,6 @@
+app:
+  nrt:
+    multistep_input_offset: !timedelta 6
 grids_and_meshes:
   global_grid_resolution_deg: 0.25
 training: !remove
