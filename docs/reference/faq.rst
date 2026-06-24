@@ -35,7 +35,7 @@ configuration and apply it to the relevant ``PlotSample`` callback with
 for details.
 
 Can I add an HRRR-only variable, such as reflectivity, to nested-EAGLE training?
-===============================================================================
+================================================================================
 
 Not directly with the current nested :term:`HRRR`-over-:term:`GFS` training
 setup. The nested pipeline combines HRRR and GFS data into a single Anemoi
