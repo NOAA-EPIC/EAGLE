@@ -77,16 +77,22 @@ starting point for NRT runs of nested-EAGLE.
 To run NRT:
 
 #. Check out the ``nested-eagle-v1`` branch.
-#. Follow the NRT workflow in :ref:`Quickstart` (see "Run inference in near-real-time (NRT)").
+
+   .. code-block:: bash
+
+      git checkout nested-eagle-v1
+
+#. Follow the :ref:`NRT workflow <NRT>`.
+
 #. EPIC hosts the checkpoint on Azure. To download the checkpoint to your machine, simply run: 
 
-.. code-block:: bash
+   .. code-block:: bash
 
-  wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/nested-eagle/inference-last.ckpt
+      wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/nested-eagle/inference-last.ckpt
 
 Before running ``make realize``, update:
 
-   * ``app.base`` to the absolute path of your local ``src/`` directory
+   * ``app.base`` to the absolute path of your local repository root
    * ``inference.anemoi.checkpoint_dir`` to the checkpoint you downloaded from Azure (inference-last.ckpt)
 
 After those updates, realize the config and continue with the remaining quickstart

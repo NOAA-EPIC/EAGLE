@@ -11,9 +11,17 @@ platform. Future development will include additional platforms.
 
    GNU ``make`` version 3.82 or higher is required.
 
-**Complete the following steps from the repository root.**
-
 .. note:: The EAGLE runtime software environment currently requires over 50 GB of disk space. Consider available space, quota, etc. when choosing where to clone the EAGLE repository and run the following steps.
+
+If you do not already have the repository, clone it and change into the
+repository root:
+
+.. code-block:: bash
+
+   git clone https://github.com/NOAA-EPIC/EAGLE.git
+   cd EAGLE
+
+**Complete the following steps from the repository root.**
 
 .. _QuickstartWorkflow:
 
@@ -122,6 +130,8 @@ Building and Running :term:`EAGLE`
    These steps will first call ``eagle-tools``'s ``postwxvx`` tool to create and save a series of netCDF files with all relevant statistics in the corresponding ``wxvx`` directory for each variable. It will then create a series of basic plots (provided by `DataArray.plot() <https://docs.xarray.dev/en/latest/generated/xarray.DataArray.plot.html#xarray.DataArray.plot>`_ from the ``xarray`` library) in the ``run/<expname>/visualization/grid2{grid,obs}/{global,lam}/plots-basic`` directory.
 
    For the grid-based ``vis-grid-global`` and ``vis-grid-lam`` targets, additional error plots (forecast vs truth differences) will be created under ``run/<expname>/visualization/grid2grid/{global,lam}/plots-spatial-stats/``. These plots depend on 1. The config value at key-path ``vx.grid2grid.{global,lam}.wxvx.wxvx.ncdiffs`` being set to ``true``, which instructs MET to produce netCDF difference files during verification; and 2. The config block at key-path ``visualization.grid2grid.{global,lam}.visualization.spatial_stat_plots``, which enables and configures plot generation, being present.
+
+.. _NRT:
 
 #. Run inference in near-real-time (NRT)
 
