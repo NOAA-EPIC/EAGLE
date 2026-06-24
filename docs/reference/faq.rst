@@ -22,17 +22,26 @@ At present, :term:`Ursa` is the only supported platform for EAGLE, but support f
 Can I generate Anemoi training plots only for the nested HRRR domain?
 ===============================================================================
 
-Yes. Anemoi Training plotting callbacks support a ``focus_area`` setting that
-can restrict plots to a latitude/longitude bounding box or graph mask. For a
-:term:`CONUS` area similar to the :term:`HRRR` domain, a bounding box such as
-``latlon_bbox: [22.0, -135.0, 50.0, -60.0]`` may be used and adjusted as
-needed. The values are ordered as ``[lat_min, lon_min, lat_max, lon_max]``.
+Yes. Users can define multiple bounding boxes to specify subset regions, such
+as :term:`CONUS` or Europe, by adding focus-area configuration to the
+``PlotSample`` callback in the EAGLE pipeline ``base.yaml``. This configuration
+generates plots that exclude the surrounding global domain. Define named boxes
+under ``focus_areas`` and reference the selected box from ``PlotSample`` with
+``focus_area``.
 
-In EAGLE, define the focus area in the nested training diagnostics plot
-configuration and apply it to the relevant ``PlotSample`` callback with
-``focus_area``. See the `Anemoi Training diagnostics documentation
+Although users can modify ``base.yaml`` directly for reference, it is
+recommended that they instead add the configuration to the ``eagle.yaml`` file
+created during the Quickstart workflow. Changes made directly to ``base.yaml``
+may be overwritten during configuration composition, whereas updates made in
+``eagle.yaml`` are preserved.
+
+For example, for the :term:`HRRR`/:term:`CONUS` domain, use
+``latlon_bbox: [22.0, -135.0, 50.0, -60.0]`` or adjust as needed. Once added,
+the diagnostics will generate plots restricted to the configured region. For
+more information, see the `plot adaptor compatibility section
 <https://anemoi.readthedocs.io/projects/training/en/latest/modules/diagnostics.html#plot-adapter-compatibility>`_
-for details.
+of the `Anemoi Training diagnostic documentation
+<https://anemoi.readthedocs.io/projects/training/en/latest/modules/diagnostics.html>`_.
 
 Can I add an HRRR-only variable, such as reflectivity, to nested-EAGLE training?
 ================================================================================
