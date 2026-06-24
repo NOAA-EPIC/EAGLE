@@ -1,0 +1,54 @@
+grids_and_meshes:
+  global_grid_resolution_deg: 0.25
+training: !remove
+prewxvx: !remove
+ufs2arco:
+  slices:
+    sel:
+      latitude: [90.0, -90.0]
+  source:
+    variables:
+    - gh
+    - u
+    - v
+    - w
+    - t
+    - q
+    - sp
+    - u10
+    - v10
+    - u80
+    - v80
+    - t2m
+    - d2m
+    - t_surface
+    - prmsl
+    - sh2                                                                                        
+    - lsm
+    - orog
+  target:
+    rename:
+      gh: z
+      u10: 10u
+      v10: 10v
+      t2m: 2t
+      d2m: 2d
+      t_surface: skt
+      u80: 100u
+      v80: 100v
+      prmsl: msl
+val:
+  filenames:
+    gfs_target_grid: global_quarter_degree.nc
+  levels: [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+visualization: !remove
+vx: !remove
+zarrs:
+  common:
+    execution:
+      batchargs:                                                                                                           
+        --mem-per-cpu: 20G
+  gfs:
+    zarr:
+      ufs2arco:
+        transforms: !remove
