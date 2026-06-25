@@ -5,7 +5,8 @@ channels:
 dependencies:
   - cartopy 0.25.*
   - matplotlib 3.10.*
-  - numpy 2.2.6
+  - numpy 2.2.6.*
+  - pandas 2.3.*
   - pip
   - python 3.13
   - uwtools 2.16.*
