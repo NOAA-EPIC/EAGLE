@@ -33,3 +33,26 @@ simplified YAML configuration looks like:
     output: 2026-01-01T00.240hr.nc
 
 This simple setup will successfully execute inference.
+
+Using the Official Nested-EAGLE Checkpoint
+--------------------------------------------------
+
+The official pretrained nested-EAGLE checkpoint can be downloaded with:
+
+.. code-block:: bash
+
+    wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/nested-eagle/inference-last.ckpt
+
+To use this checkpoint for inference, set ``inference.anemoi.checkpoint_path``
+to the downloaded file:
+
+.. code-block:: yaml
+
+    inference:
+      anemoi:
+        checkpoint_path: /path/to/inference-last.ckpt
+
+If ``inference.checkpoint_dir`` is also present, the ``Inference`` driver will
+use the latest checkpoint from that directory instead of the explicit
+``checkpoint_path``. Remove or override ``checkpoint_dir`` when you want to
+force use of a specific pretrained checkpoint.
