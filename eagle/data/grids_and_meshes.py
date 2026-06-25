@@ -54,20 +54,24 @@ class GridsAndMeshes(AssetsTimeInvariant):
         The global grid, provisioned to the rundir.
         """
         res = self.config["global_grid_resolution_deg"]
-        if res == 0.25 or "gfs_target_grid" not in self.config["filenames"]:
-            yield self.taskname("global data grid (skipping)")
-            yield Asset(None, lambda: True)
-            yield None
-        else:
-            path = self.rundir / self.config["filenames"]["gfs_target_grid"]
-            yield self.taskname(f"global data grid {path}")
-            yield Asset(path, path.is_file)
-            yield None
-            path.parent.mkdir(parents=True, exist_ok=True)
-            ds = xesmf.util.grid_global(res, res, cf=True, lon1=360)
-            ds = ds.drop_vars("latitude_longitude")
-            ds = ds.sortby("lat", ascending=False)  # GFS goes north -> south
-            ds.to_netcdf(path)
+        if "gfs_target_grid" not in self.config["filenames"]:
+            return
+        path = self.rundir / self.config["filenames"]["gfs_target_grid"]
+        yield self.taskname(f"global data grid {path}")
+        yield Asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        lon = np.arange(0, 360, res)
+        lat = np.arange(-90, 90, res)
+        ds = xr.Dataset(
+            coords={
+                "lon": ("lon", lon),
+                "lat": ("lat", lat),
+            }
+        )
+        ds = ds.sel(lat=slice(-89.9, 89.9))
+        ds = ds.sortby("lat", ascending=False)
+        ds.to_netcdf(path)
 
     @task
     def latent_mesh(self):

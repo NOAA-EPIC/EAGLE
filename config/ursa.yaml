@@ -28,7 +28,7 @@ zarrs:
   common:
     execution:
       batchargs:
-        --mem-per-cpu: 3G
+        --mem-per-cpu: 20G
       envcmds: !list '{{ val.slurm_script + val.zarrs.envcmds }}'
       mpiargs:
         - "--export=ALL"
