@@ -49,7 +49,7 @@ vx: !remove
 zarrs:
   common:
     execution:
-      batchargs:                                                                                                           
+      batchargs:
         --mem-per-cpu: 20G
   gfs:
     zarr:
