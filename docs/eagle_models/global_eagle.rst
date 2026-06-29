@@ -56,3 +56,39 @@ The graph configuration connects targets to nodes through nearest neighbors in
 the encoder and decoder, with ``encoder_knn=12`` and ``decoder_knn=3``.
 
 The latent mesh is four times coarser than the native data resolution.
+
+Near-Real-Time Forecasting
+--------------------------
+
+The global-EAGLE model can be run in near real time (NRT) using the
+``feature/global_eagle`` branch in this repository. That branch includes the required 
+dependencies (including compatible ``anemoi`` versions) and is the recommended
+starting point for NRT runs of global-EAGLE.
+
+To run NRT:
+
+#. Check out the ``feature/global_eagle`` branch.
+
+   .. code-block:: bash
+
+      git checkout feature/global_eagle
+
+#. Follow the :ref:`NRT workflow <NRT>`.
+
+#. EPIC hosts the checkpoint on Azure. To download the checkpoint to your machine, simply run: 
+
+   .. code-block:: bash
+
+      wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/global-eagle/era5_gdas_global_check.ckpt
+
+Before running ``make realize``, update:
+
+   * ``app.base`` to the absolute path of your local repository root
+   * ``inference.anemoi.checkpoint_dir`` to the checkpoint you downloaded from Azure (inference-last.ckpt)
+
+After those updates, realize the config and continue with the remaining quickstart
+NRT steps.
+
+EPIC runs this global-EAGLE workflow in near-real-time every 6 hours. You can
+view project information and current forecast results on the `NOAA EPIC website <https://www.epic.noaa.gov/ai/eagle-overview/>`_.
+
