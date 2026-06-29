@@ -1,14 +1,15 @@
 channels:
   - nodefaults
   - conda-forge
-  - oar-gsl
   - ufs-community
 dependencies:
+  - cartopy 0.25.*
+  - matplotlib 3.10.*
+  - numpy 2.2.6.*
+  - pandas 2.3.*
   - pip
   - python 3.13
   - uwtools 2.16.*
-  - wxvx >=0.7.2
-  - xesmf 0.8.*
-  - zarr 2.18.*
+  - xarray 2026.2.0
   - pip:
       - eagle-tools==0.8.1

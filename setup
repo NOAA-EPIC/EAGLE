@@ -16,6 +16,16 @@ cachedir() {
   )
 }
 
+clean_conda_pkgs_maybe() {
+  if [[ -n ${EAGLE_CLEAN_CONDA_PKGS+x} ]]; then
+    (
+      env_activate base
+      msg Cleaning conda package cache
+      mamba clean --all --yes
+    )
+  fi
+}
+
 cuda_command_file() {
   local path val
   val=${ARGS[cudascript]}
@@ -113,9 +123,15 @@ prep_env() {
       mamba env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
     else
       msg Creating environment: $name
+      export PIP_VERBOSE=1
       mamba env create ${args[@]}
     fi
   )
+  cat <<EOF
+
+Note: Apparent pip errors, if any, about not installed or incompatible packages are generally safe to ignore.
+
+EOF
   install_devpkgs_maybe $name
   # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
   # files in the runtime area, rather than in the user's home directory, which might impact their
@@ -142,6 +158,7 @@ if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
 fi
 EOF
   )
+  clean_conda_pkgs_maybe
 }
 
 prep_env_anemoi() {
@@ -177,6 +194,7 @@ prep_env_base() {
     msg Updating environment: $name
     mamba env update ${MAMBAFLAGS[@]} --file envs/$name.yaml
     install_devpkgs_maybe $name
+    clean_conda_pkgs_maybe
   )
 }
 

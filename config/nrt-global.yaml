@@ -18,14 +18,8 @@ app:
     leadtime: !int '{{ (app.nrt.leadtime.total_seconds() / 3600) | int }}'
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
 grids_and_meshes:
-  rundir: '{{ app.base }}/run/{{ app.experiment_name }}/data'
+  rundir: '{{ app.rundir }}/data'
 inference:
-  anemoi:
-    input_dataset_kwargs:
-      cutout:
-        - dataset: '{{ val.data.rundir }}/hrrr.zarr'
-          trim_edge: [10, 11, 10, 11]
-        - dataset: '{{ val.data.rundir }}/gfs.zarr'
   checkpoint_dir: '{{ app.base }}/run/{{ app.experiment_name }}/training/outputs/checkpoint'
 training: !remove
 ufs2arco:
@@ -79,15 +73,3 @@ zarrs:
         transforms:
           horizontal_regrid:
             target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'
-  hrrr:
-    zarr:
-      ufs2arco:
-        multisource: !remove
-        source: !dict '{{ dict(ufs2arco.source, name="aws_hrrr_archive") }}'
-        transforms:
-          horizontal_regrid:
-            target_grid_path: '{{ grids_and_meshes.rundir }}/{{ val.filenames.hrrr_target_grid }}'
-          rotate_vectors:
-            vector_pairs:
-              - ['u', 'v']
-              - ['u10', 'v10']
