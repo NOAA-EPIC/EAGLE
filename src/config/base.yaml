@@ -294,18 +294,22 @@ vx:
           name: 2t
         gh:
           level_type: isobaricInhPa
-          levels: [500]
+          levels: [250, 500, 850]
           name: gh
         sp:
           level_type: surface
           name: sp
+        q:
+          level_type: isobaricInhPa
+          levels: [250, 500, 850]
+          name: q
         t:
           level_type: isobaricInhPa
-          levels: [850]
+          levels: [250, 500, 850]
           name: t
         u:
           level_type: isobaricInhPa
-          levels: [250]
+          levels: [250, 500, 850]
           name: u
         u10:
           level_type: heightAboveGround
@@ -313,7 +317,7 @@ vx:
           name: 10u
         v:
           level_type: isobaricInhPa
-          levels: [250]
+          levels: [250, 500, 850]
           name: v
         v10:
           level_type: heightAboveGround
