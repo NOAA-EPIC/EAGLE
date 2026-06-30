@@ -54,7 +54,7 @@ class Inference(DriverTimeInvariant):
     @task
     def valid_checkpoint(self, ckpt_path: Path):
         """
-        Checkpoint is compatible with the current anemoi-inference environment.
+        Validate checkpoint compatibility against the current inference environment.
         """
         taskname = "Validating checkpoint compatibility %s" % ckpt_path
         yield taskname
