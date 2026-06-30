@@ -279,7 +279,7 @@ vx:
             inittime: forecast_reference_time
             validtime: time
       leadtimes:
-        start: '{{ app.time.leadtime }}'
+        start: '{{ app.time.step }}'
         step: '{{ app.time.step }}'
         stop: '{{ app.time.leadtime }}'
       meta:
