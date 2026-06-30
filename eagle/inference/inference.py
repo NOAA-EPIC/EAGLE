@@ -7,7 +7,7 @@ from uwtools.api.driver import DriverTimeInvariant
 
 class Inference(DriverTimeInvariant):
     """
-    Runs anemoi-inference.
+    Rns anemoi-inference.
     """
 
     # Public tasks
