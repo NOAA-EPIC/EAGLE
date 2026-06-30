@@ -4,7 +4,7 @@ on:
     branches:
       - develop
       - main/*
-      - *
+      - global_eagle_instructions
   pull_request_target:
     types: [opened, reopened, synchronize]
     paths:
