@@ -86,9 +86,9 @@ def test_anemoi_config__validate_false(driverobj, tmp_path):
     driverobj._config["anemoi"]["checkpoint_path"] = str(ckptfile)
     driverobj._config["rundir"] = tmp_path
     driverobj._config["validate"] = False
-    with patch.object(inference, "Checkpoint") as checkpoint:
+    with patch.object(driverobj, "valid_checkpoint") as valid_checkpoint:
         driverobj.anemoi_config()
-    checkpoint.assert_not_called()
+    valid_checkpoint.assert_not_called()
     assert (tmp_path / "inference.yaml").is_file()
 
 
