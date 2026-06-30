@@ -4,9 +4,10 @@ from iotaa import Asset, collection, external, task  # provided by uwtools
 from uwtools.api.config import get_yaml_config
 from uwtools.api.driver import DriverTimeInvariant
 
+
 class Inference(DriverTimeInvariant):
     """
-    Runs anemoi-inference.
+    Runs anemoi-inference
     """
 
     # Public tasks
