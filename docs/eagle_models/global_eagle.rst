@@ -86,8 +86,8 @@ Before running ``make realize``, update:
    * ``app.base`` to the absolute path of your local repository root
    * ``inference.anemoi.checkpoint_dir`` to the checkpoint you downloaded from Azure (inference-last.ckpt)
 
-After those updates, realize the config and continue with the remaining quickstart NRT
-steps.
+After those updates, realize the config and continue with the remaining quickstart 
+NRT steps.
 
 EPIC runs this global-EAGLE workflow in near-real-time every 6 hours. You can
 view project information and current forecast results on the `NOAA EPIC website <https://www.epic.noaa.gov/ai/eagle-overview/>`_.
