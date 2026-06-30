@@ -162,6 +162,7 @@ def test_inference(config, logged, tmp_path, validator, with_del, with_set):
     for key in ["anemoi", "execution", "rundir"]:
         assert not ok(with_del(config, key))
         assert logged(f"'{key}' is a required property")
+    # Some keys have boolean values:
     for key in ["validate"]:
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'boolean'")
