@@ -1,5 +1,5 @@
 # This is the Global EAGLE case.
-#
+
 # yamllint disable rule:anchors rule:line-length
 
 inference:
