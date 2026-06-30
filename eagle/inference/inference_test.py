@@ -92,16 +92,6 @@ def test_anemoi_config__validate_false(driverobj, tmp_path):
     assert (tmp_path / "inference.yaml").is_file()
 
 
-@mark.parametrize("exists", [True, False])
-def test__checkpoint(driverobj, tmp_path, exists):
-    ckpt_path = tmp_path / "inference-last.ckpt"
-    if exists:
-        ckpt_path.touch()
-    result = driverobj._checkpoint(ckpt_path)
-    assert result.ref == ckpt_path
-    assert result.ready is exists
-
-
 @mark.parametrize("valid", [True, False])
 def test_valid_checkpoint(driverobj, tmp_path, valid):
     ckpt_path = tmp_path / "inference-last.ckpt"
@@ -130,6 +120,16 @@ def test_provisioned_rundir(driverobj, readytask, tmp_path):
         driverobj.provisioned_rundir()
     anemoi_config.assert_called_once_with()
     assert runscript.is_file()
+
+
+@mark.parametrize("exists", [True, False])
+def test__checkpoint(driverobj, tmp_path, exists):
+    ckpt_path = tmp_path / "inference-last.ckpt"
+    if exists:
+        ckpt_path.touch()
+    result = driverobj._checkpoint(ckpt_path)
+    assert result.ref == ckpt_path
+    assert result.ready is exists
 
 
 # Schema tests.
