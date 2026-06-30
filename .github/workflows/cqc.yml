@@ -1,6 +1,6 @@
 name: Code Quality Checks
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
