@@ -79,7 +79,7 @@ To run NRT:
 
       wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/global-eagle/era5_gdas_global_check.ckpt
 
-#. Follow the :ref:`NRT workflow <NRT>` but, before running its ``make realize`` step, update:
+#. Follow the :ref:`NRT workflow <NRT>`, but before running its ``make realize`` step, update:
 
    * ``app.base`` to the absolute path of your local repository root
    * ``inference.anemoi.checkpoint_dir`` to the checkpoint you downloaded from Azure (inference-last.ckpt)

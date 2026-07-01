@@ -82,15 +82,13 @@ To run NRT:
 
       git checkout release/public-v1.1.0
 
-#. Follow the :ref:`NRT workflow <NRT>`.
-
 #. EPIC hosts the checkpoint on Azure. To download the checkpoint to your machine, simply run: 
 
    .. code-block:: bash
 
       wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/nested-eagle/inference-last.ckpt
 
-Before running ``make realize``, update:
+#. Follow the :ref:`NRT workflow <NRT>`, but before running ``make realize`` step, update:
 
    * ``app.base`` to the absolute path of your local repository root
    * ``inference.anemoi.checkpoint_dir`` to the checkpoint you downloaded from Azure (inference-last.ckpt)
