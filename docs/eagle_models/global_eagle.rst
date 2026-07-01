@@ -70,13 +70,17 @@ To run NRT:
 #. Check out the ``feature/global_eagle`` branch.
 
    .. code-block:: bash
+
       git checkout feature/global_eagle
+
 #. Follow the :ref:`NRT workflow <NRT>`.
 
 #. EPIC hosts the checkpoint on Azure. To download the checkpoint to your machine, simply run: 
 
    .. code-block:: bash
+
       wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/global-eagle/era5_gdas_global_check.ckpt
+
 Before running ``make realize``, update:
 
    * ``app.base`` to the absolute path of your local repository root
