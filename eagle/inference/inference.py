@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from anemoi.inference.checkpoint import Checkpoint  # type: ignore[import-untyped]
 from iotaa import Asset, collection, external, task  # provided by uwtools
 from uwtools.api.config import get_yaml_config
 from uwtools.api.driver import DriverTimeInvariant
@@ -30,7 +31,10 @@ class Inference(DriverTimeInvariant):
             if ckpt_dir
             else Path(config["checkpoint_path"])
         )
-        yield self._checkpoint(ckpt_path)
+        if self.config.get("validate", True):
+            yield self.valid_checkpoint(ckpt_path)
+        else:
+            yield self._checkpoint(ckpt_path)
         if ckpt_dir:
             config["checkpoint_path"] = str(ckpt_path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -46,6 +50,18 @@ class Inference(DriverTimeInvariant):
             self.anemoi_config(),
             self.runscript(),
         ]
+
+    @task
+    def valid_checkpoint(self, ckpt_path: Path):
+        """
+        Validate checkpoint compatibility against the current inference environment.
+        """
+        taskname = "Validating checkpoint compatibility %s" % ckpt_path
+        yield taskname
+        valid: list[bool] = []
+        yield Asset(None, lambda: valid == [True])
+        yield self._checkpoint(ckpt_path)
+        valid.append(Checkpoint(ckpt_path).validate_environment())
 
     # Public methods
 
