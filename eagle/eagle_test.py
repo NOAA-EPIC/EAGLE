@@ -21,7 +21,7 @@ CONFIG: dict = {
         "time": {
             "inference_start": "2026-04-01T00:00:00",
             "inference_stop": "2026-04-08T12:00:00",
-            "leadtime": 24,
+            "max_leadtime": 24,
             "start": "2026-04-01T00:00:00",
             "step": 6,
             "stop": "2026-04-08T12:00:00",
@@ -214,7 +214,7 @@ def test_app__gpu__time(caplog, logged, tmp_path, validator, with_del, with_set)
     for key in [
         "inference_start",
         "inference_stop",
-        "leadtime",
+        "max_leadtime",
         "start",
         "step",
         "stop",
@@ -228,7 +228,7 @@ def test_app__gpu__time(caplog, logged, tmp_path, validator, with_del, with_set)
         assert "is not of type 'string'" in caplog.text
         assert logged("At least one must match")
     # Some keys have integer values:
-    for key in ["leadtime"]:
+    for key in ["max_leadtime"]:
         assert not ok(with_set(config, None, key))
         assert logged("is not of type 'integer'")
     # Some keys have timedelta values:
