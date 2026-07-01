@@ -13,7 +13,7 @@ app:
     freq: '{{ (app.time.step.total_seconds() / 3600) | int }}h'
     inference_start: !datetime 2022-02-03T12
     inference_stop: !datetime '{{ app.time.inference_start }}'
-    leadtime: 24
+    max_leadtime: 24
     multistep_input: 1
     start: !datetime 2022-02-01T00
     step: !timedelta 6
@@ -28,7 +28,7 @@ inference:
     checkpoint_path: /path/to/checkpoint # NB: If a value for inference.checkpoint_dir is provided, it will override this value with the latest checkpoint in that directory.
     end_date: !datetime '{{ app.time.inference_stop }}'
     freq: '{{ app.time.freq }}'
-    lead_time: !int '{{ app.time.leadtime }}'
+    lead_time: !int '{{ app.time.max_leadtime }}'
     output_path: '{{ inference.rundir }}/output'
     start_date: !datetime '{{ app.time.inference_start }}'
     use_mpi: true
@@ -191,8 +191,8 @@ visualization:
       end_date: !datetime '{{ app.time.inference_stop }}'
       freq: '{{ app.time.freq }}'
       leadtimes:
-        start: 0
-        end: 24
+        start: !int '{{ val.step }}'
+        end: !int '{{ app.time.max_leadtime }}'
         step: !int '{{ val.step }}'
       variable_prefixes: # These names are from the wxvx output.
         - 2t_heightAboveGround_0002
@@ -280,12 +280,13 @@ vx:
             inittime: forecast_reference_time
             validtime: time
       leadtimes:
-        start: '{{ app.time.leadtime }}'
+        start: '{{ app.time.step }}'
         step: '{{ app.time.step }}'
-        stop: '{{ app.time.leadtime }}'
+        stop: '{{ app.time.max_leadtime }}'
       meta:
         workdir: '{{ val.vx.rundir }}/TRUTH/EXTENT'
         grids: '{{ val.vx.rundir }}/TRUTH/EXTENT/grids'
+        max_leadtime: !int '{{ app.time.max_leadtime }}'
         post_files: '{{ val.vx.rundir }}/postprocessed_files/EXTENT'
       variables:
         t2m:
