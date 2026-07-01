@@ -1,0 +1,19 @@
+BASE_DIR: "/scratch5/purged/Wei.Huang/src/EAGLE/src/run/learning_eagle/nrt_inference/2026/06/17/12/vx/grid2grid/lam/grids/forecast/20260617/12/048"
+
+default_paths:
+  nc_2m_t: "${BASE_DIR}/2t-heightAboveGround-0002.nc"
+  nc_10m_u: "${BASE_DIR}/10u-heightAboveGround-0010.nc"
+  nc_10m_v: "${BASE_DIR}/10v-heightAboveGround-0010.nc"
+  nc_500hPa_gh: "${BASE_DIR}/gh-isobaricInhPa-0500.nc"
+  nc_sfp: "${BASE_DIR}/sp-surface.nc"
+  nc_850hPa_t: "${BASE_DIR}/t-isobaricInhPa-0850.nc"
+  nc_250hPa_u: "${BASE_DIR}/u-isobaricInhPa-0250.nc"
+  nc_250hPa_v: "${BASE_DIR}/v-isobaricInhPa-0250.nc"
+  eagle_2m_t_image: "eagle_2m_temperature.png"
+  eagle_10m_barb_image: "eagle_10m_windbarb.png"
+  eagle_2m_t_10m_wind_image: "eagle_2m_temperature_10m_windbarb_overlay.png"
+  eagle_sfp_image: "eagle_sfp.png"
+  eagle_850hPa_t_image: "eagle_850hPa_temperature.png"
+  eagle_500hPa_gh_image: "eagle_500hPa_geoheight.png"
+  eagle_250hPa_barb_image: "eagle_250hPa_barb.png"
+  show_on_screen: true
