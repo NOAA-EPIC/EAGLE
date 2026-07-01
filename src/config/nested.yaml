@@ -449,7 +449,7 @@ vx:
         wxvx:
           forecast:
             name: nested_global
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
 
@@ -461,7 +461,7 @@ vx:
             cores: 1
             export: false
             partition: '{{ app.partitions.netaccess }}'
-            walltime: '00:30:00'
+            walltime: '1:00:00'
             rundir: '{{ vx.grid2grid.lam.wxvx.rundir }}'
           envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
@@ -479,7 +479,7 @@ vx:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_lam
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc'
             projection:
               a: 6371229
               b: 6371229
@@ -499,7 +499,7 @@ vx:
       wxvx:
         wxvx:
           forecast:
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
     lam:
@@ -511,7 +511,7 @@ vx:
             export: false
             partition: '{{ app.partitions.netaccess }}'
             rundir: '{{ vx.grid2obs.lam.wxvx.rundir }}'
-            walltime: '00:30:00'
+            walltime: '1:00:00'
           envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
@@ -525,7 +525,7 @@ vx:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.name }}'
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.240h.nc'
             projection: !dict '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.projection }}'
           leadtimes: !dict '{{ vx.common.wxvx.leadtimes }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
