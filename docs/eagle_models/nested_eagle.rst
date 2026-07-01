@@ -70,19 +70,17 @@ Near-Real-Time Forecasting
 --------------------------
 
 The nested-EAGLE model can be run in near real time (NRT) using the
-``nested-eagle-v1`` branch in this repository. That branch includes the required 
+``release/public-v1.1.0`` branch in this repository. That branch includes the required 
 dependencies (including compatible ``anemoi`` versions) and is the recommended
 starting point for NRT runs of nested-EAGLE.
 
 To run NRT:
 
-#. Check out the ``nested-eagle-v1`` branch.
+#. Check out the ``release/public-v1.1.0`` branch.
 
    .. code-block:: bash
 
-      git checkout nested-eagle-v1
-
-#. Follow the :ref:`NRT workflow <NRT>`.
+      git checkout release/public-v1.1.0
 
 #. EPIC hosts the checkpoint on Azure. To download the checkpoint to your machine, simply run: 
 
@@ -90,7 +88,7 @@ To run NRT:
 
       wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/nested-eagle/inference-last.ckpt
 
-Before running ``make realize``, update:
+#. Follow the :ref:`NRT workflow <NRT>`, but before running ``make realize`` step, update:
 
    * ``app.base`` to the absolute path of your local repository root
    * ``inference.anemoi.checkpoint_dir`` to the checkpoint you downloaded from Azure (inference-last.ckpt)
