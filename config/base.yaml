@@ -43,6 +43,7 @@ inference:
     envcmds: !list '{{ val.inference.envcmds }}'
     executable: '{{ app.launcher | default("") }} eagle-tools inference inference.yaml'
   rundir: '{{ app.rundir }}/inference'
+  validate: true
 platform: !dict '{{ app.platform }}'
 training:
   anemoi:
