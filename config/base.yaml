@@ -190,8 +190,8 @@ visualization:
       end_date: !datetime '{{ app.time.inference_stop }}'
       freq: '{{ app.time.freq }}'
       leadtimes:
-        start: 0
-        end: 24
+        start: !int '{{ val.step }}'
+        end: !int '{{ app.time.max_leadtime }}'
         step: !int '{{ val.step }}'
       variable_prefixes: # These names are from the wxvx output.
         - 2t_heightAboveGround_0002
