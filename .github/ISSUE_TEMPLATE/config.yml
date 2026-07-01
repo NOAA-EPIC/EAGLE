@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Enhancement requests
+    url: https://github.com/NOAA-EPIC/EAGLE/discussions/new?category=enhancement-discussion
+    about: Please propose new capabilities in an Enhancement Discussion instead of opening an issue.
+  - name: Questions and answers
+    url: https://github.com/NOAA-EPIC/EAGLE/discussions/categories/q-a
+    about: Please use GitHub Discussions for usage questions and general help.

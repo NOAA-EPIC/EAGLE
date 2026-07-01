@@ -16,6 +16,16 @@ cachedir() {
   )
 }
 
+clean_conda_pkgs_maybe() {
+  if [[ -n ${EAGLE_CLEAN_CONDA_PKGS+x} ]]; then
+    (
+      env_activate base
+      msg Cleaning conda package cache
+      mamba clean --all --yes
+    )
+  fi
+}
+
 cuda_command_file() {
   local path val
   val=${ARGS[cudascript]}
@@ -113,6 +123,7 @@ prep_env() {
       mamba env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
     else
       msg Creating environment: $name
+      export PIP_VERBOSE=1
       mamba env create ${args[@]}
     fi
   )
@@ -147,6 +158,7 @@ if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
 fi
 EOF
   )
+  clean_conda_pkgs_maybe
 }
 
 prep_env_anemoi() {
@@ -182,6 +194,7 @@ prep_env_base() {
     msg Updating environment: $name
     mamba env update ${MAMBAFLAGS[@]} --file envs/$name.yaml
     install_devpkgs_maybe $name
+    clean_conda_pkgs_maybe
   )
 }
 

@@ -1,0 +1,90 @@
+name: Bug report
+description: Report something that is incorrect or broken
+type: "bug"
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve EAGLE.
+
+        Before opening a bug report, please search the existing issues to check whether the problem has already been reported.
+        Enhancement requests should be opened as an Enhancement Discussion instead of an issue.
+
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: What is wrong?
+      description: Describe the incorrect or broken behavior.
+      placeholder: Include short log snippets here. For long logs, create a GitHub gist and link it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: What should have happened?
+      description: Describe the behavior you expected.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area affected
+      multiple: true
+      options:
+        - Data prep / UFS2ARCO
+        - Training
+        - Inference
+        - Verification / WXVX
+        - Visualization / plotting
+        - Configuration
+        - Documentation
+        - CI/CD or tooling
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: System or environment
+      multiple: true
+      options:
+        - Ursa
+        - Cloud
+        - Local workstation
+        - Other HPC
+        - Unknown / not applicable
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: EAGLE version, branch, or commit
+      placeholder: main, v1.1.0, or a commit SHA
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide enough detail for another developer to reproduce the problem.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add links, logs, screenshots, or related issues.
+    validations:
+      required: false
