@@ -461,7 +461,7 @@ vx:
             cores: 1
             export: false
             partition: '{{ app.partitions.netaccess }}'
-            walltime: '1:00:00'
+            walltime: '2:00:00'
             rundir: '{{ vx.grid2grid.lam.wxvx.rundir }}'
           envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c wxvx-grid2grid-lam.yaml -t plots -f
@@ -511,7 +511,7 @@ vx:
             export: false
             partition: '{{ app.partitions.netaccess }}'
             rundir: '{{ vx.grid2obs.lam.wxvx.rundir }}'
-            walltime: '1:00:00'
+            walltime: '2:00:00'
           envcmds: !list '{{ vx.common.execution.envcmds }}'
           executable: wxvx -c wxvx-grid2obs-lam.yaml -t plots -f
         name: grid2obs-lam
