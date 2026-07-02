@@ -79,6 +79,9 @@ Configuration for the ``Inference`` driver.
 ``anemoi.input_dataset_kwargs``
    The ``anemoi.input_dataset_kwargs:`` block controls the dataset used as input for inference. Update this block when using a different initial-condition dataset.
 
+``validate``
+   The ``validate:`` parameter controls whether the Anemoi checkpoint is validated against the current inference environment. When ``true`` or omitted, the checkpoint is checked for compatibility with the current ``anemoi-inference`` environment. When ``false``, EAGLE only checks that the checkpoint file exists.
+
 platform
 ------------------------------------------------------------------------------
 
