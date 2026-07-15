@@ -20,6 +20,8 @@ app:
 grids_and_meshes:
   rundir: '{{ app.rundir }}/data'
   global_grid_resolution_deg: 0.25
+inference:
+  validate: false
 prewxvx:
   global:
     prewxvx:
