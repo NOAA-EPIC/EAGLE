@@ -2,7 +2,7 @@
 
 app:
   nrt:
-    multistep_input_offset: !timedelta 0
+    multistep_input_offset: !timedelta 6
     now: !datetime '{{ "NOW" | env }}'
     ic_start: !datetime '{{ app.nrt.inference_start - app.nrt.multistep_input_offset }}'
     inference_start: !datetime '{{ app.nrt.now - app.nrt.offset - app.nrt.latency }}'
@@ -19,13 +19,28 @@ app:
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
 grids_and_meshes:
   rundir: '{{ app.rundir }}/data'
-inference:
-  checkpoint_dir: '{{ app.base }}/run/{{ app.experiment_name }}/training/outputs/checkpoint'
+  global_grid_resolution_deg: 0.25
+prewxvx:
+  global:
+    prewxvx:
+      eagle_tools:
+        vars_of_interest:
+          - 2t
+          - z
+          - sp
+          - t
+          - u
+          - 10u
+          - v
+          - 10v
 training: !remove
 ufs2arco:
   mover:
     name: datamover
     batch_size: 2
+  slices:
+    sel:
+      latitude: [90.0, -90.0]
   source:
     analysis: !remove
     forecast: !remove
@@ -33,16 +48,57 @@ ufs2arco:
       start: 0
       step: !int '{{ val.step }}'
       end: 0
-    levels: !list '{{ val.levels }}'
+    levels:
+    - 50
+    - 100
+    - 150
+    - 200
+    - 250
+    - 300
+    - 400
+    - 500
+    - 600
+    - 700
+    - 850
+    - 925
+    - 1000
     t0:
       start: '{{ (app.time.start).strftime("%Y-%m-%dT%H") }}'
       freq: '{{ val.step }}h'
       end: '{{ (app.time.stop).strftime("%Y-%m-%dT%H") }}'
-    variables: !list '{{ val.variables }}'
+    variables:
+    - u80
+    - v80
+    - gh
+    - u
+    - v
+    - w
+    - t
+    - q
+    - sp
+    - u10
+    - v10
+    - t2m
+    - d2m
+    - t_surface
+    - sh2
+    - lsm
+    - orog
+    - prmsl
   target:
     name: anemoi_inference_with_forcings
     multistep_input: !int '{{ app.time.multistep_input }}'
     statistics_period: !remove
+    rename:
+      u10: 10u
+      v10: 10v
+      t2m: 2t
+      d2m: 2d
+      gh: z
+      t_surface: skt
+      u80: 100u
+      v80: 100v
+      prmsl: msl
 val:
   statsdelta: !remove
   variables:
@@ -65,11 +121,10 @@ zarrs:
     execution:
       batchargs:
         cores: 1
+        --mem-per-cpu: 20G
   gfs:
     zarr:
       ufs2arco:
         multisource: !remove
         source: !dict '{{ dict(ufs2arco.source, name="gfs_archive", slices=ufs2arco.slices) }}'
-        transforms:
-          horizontal_regrid:
-            target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'
+        transforms: !remove
