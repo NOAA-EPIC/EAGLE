@@ -11,7 +11,7 @@ prewxvx:
     prewxvx: &prewxvx-common
       forecast_path: '{{ inference.anemoi.output_path }}'
       freq: '{{ app.time.freq }}'
-      lead_time: !int '{{ app.time.leadtime }}'
+      lead_time: !int '{{ app.time.max_leadtime }}'
       lam_index: 64220
       lcc_info:
         n_x: 338
@@ -374,7 +374,7 @@ vx:
         wxvx:
           forecast:
             name: global
-            path: '{{ meta.post_files }}/global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
   grid2obs:
@@ -382,7 +382,7 @@ vx:
       wxvx:
         wxvx:
           forecast:
-            path: '{{ meta.post_files }}/global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
 visualization:
