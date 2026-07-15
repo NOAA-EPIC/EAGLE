@@ -106,7 +106,7 @@
             "inference_stop": {
               "$ref": "#/$defs/datetime"
             },
-            "leadtime": {
+            "max_leadtime": {
               "type": "integer"
             },
             "start": {
@@ -122,7 +122,7 @@
           "required": [
             "inference_start",
             "inference_stop",
-            "leadtime",
+            "max_leadtime",
             "start",
             "step",
             "stop"

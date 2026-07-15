@@ -23,7 +23,7 @@ prewxvx:
     prewxvx: &prewxvx-common
       forecast_path: '{{ inference.anemoi.output_path }}'
       freq: '{{ app.time.freq }}'
-      lead_time: !int '{{ app.time.leadtime }}'
+      lead_time: !int '{{ app.time.max_leadtime }}'
       lam_index: 64220
       lcc_info:
         n_x: 338
@@ -450,7 +450,7 @@ vx:
         wxvx:
           forecast:
             name: nested_global
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
 
@@ -480,7 +480,7 @@ vx:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_lam
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
             projection:
               a: 6371229
               b: 6371229
@@ -500,7 +500,7 @@ vx:
       wxvx:
         wxvx:
           forecast:
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
     lam:
@@ -526,7 +526,7 @@ vx:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.name }}'
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % fh }}h.nc'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
             projection: !dict '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.projection }}'
           leadtimes: !dict '{{ vx.common.wxvx.leadtimes }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'
