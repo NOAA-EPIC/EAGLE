@@ -134,7 +134,7 @@ If you do not have permission to push a branch to ``NOAA-EPIC/EAGLE``, coordinat
 Development and Testing Process
 ==============================================================================
 
-#. **Branch and develop:** Work on a fork branch dedicated to a single change or closely related set of changes.
+#. **Branch and develop:** Work on a branch dedicated to a single change or closely related set of changes.
 #. **Build the development environment:** Use the commands in the `Development` section above to create the required environments and install development tools.
 #. **Format code/data and run code-quality checks:** Before opening a pull request, format code and data and perform code-quality checks by running ``make format && make test``.
 #. **Update documentation:** If your change affects workflow behavior, capabilities, or developer setup, update the appropriate RST files in ``docs/``.
@@ -152,27 +152,17 @@ GitHub will automatically populate the PR description with the repository's
 Complete the checklist, including the subcomponent PR check, before requesting
 review.
 
-.. _ForkPRCI:
+.. _BranchPRCI:
 
-CI for Fork-Based Pull Requests
+CI for Branch-Based Pull Requests
 ==============================================================================
 
-Pull requests from forks use the repository's normal GitHub Actions checks,
-subject to GitHub's maintainer approval flow for fork-based contributions.
-Maintainers should inspect the proposed changes before approving workflow runs,
-especially when a PR changes files under ``.github/workflows/``.
+Pull requests from branches in the upstream ``NOAA-EPIC/EAGLE`` repository use
+the repository's normal GitHub Actions checks.
 
 The Ursa end-to-end workflow is intentionally opt-in. After a maintainer has
 reviewed the PR and is comfortable running it on the self-hosted Ursa runner,
-they can add the ``eagle-ursa`` label to trigger the label-gated workflow. If
-GitHub marks the workflow as awaiting approval because the PR came from a fork,
-a maintainer with write access must approve the workflow run from the PR checks
-or Actions page.
-
-If repository or organization settings prevent the Ursa workflow from running
-directly from a fork, a maintainer can create a branch in the upstream
-``NOAA-EPIC/EAGLE`` repository from the contributor's changes and run the
-label-gated workflow from that branch.
+they can add the ``eagle-ursa`` label to trigger the label-gated workflow.
 
 .. _Docs:
 
