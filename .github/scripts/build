@@ -3,5 +3,7 @@
 # shellcheck disable=1091
 
 set -euo pipefail
-time make -C src devenv cudascript=dummy
-. src/conda/etc/profile.d/conda.sh
+export EAGLE_CLEAN_CONDA_PKGS=1
+export PIP_NO_CACHE_DIR=1
+time make devenv cudascript=dummy
+. conda/etc/profile.d/conda.sh

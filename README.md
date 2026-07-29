@@ -16,8 +16,13 @@ To learn about EAGLE and how to use the provided workflows, please see our [docu
 ## Collaboration
 
 - If you encounter a problem using EAGLE that appears to be a bug, please open an [issue](https://github.com/NOAA-EPIC/EAGLE/issues) with us.
+- For enhancement requests, please start an [Enhancement Discussion](https://github.com/NOAA-EPIC/EAGLE/discussions/new?category=enhancement-discussion).
 - For free-form sharing of ideas, questions, tips and tricks, etc., please start or join a [discussion](https://github.com/NOAA-EPIC/EAGLE/discussions).
 - To contribute to the codebase, please see our [docs](https://epic-eagle.readthedocs.io/en/latest/contributing.html).
+
+## Citation
+
+The Earth Prediction Innovation Center (EPIC) and the NOAA AI for Numerical Weather Prediction (AI4NWP) Working Group. (2026). The nested-EAGLE (Experimental AI Global and Limited-area Ensemble forecast system) (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.19672026
 
 ## Acknowledgments
 

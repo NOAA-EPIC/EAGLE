@@ -9,9 +9,14 @@ Support
 Issues
 ------------------------------------------------------------------------------
 
-If you encounter a problem, please
+If you encounter a problem that appears to be a bug, please
 `open an issue <https://github.com/NOAA-EPIC/EAGLE/issues/new>`_ and include
 enough detail for the team to understand and reproduce the problem.
+
+An enhancement request should be opened as an
+`Enhancement Discussion <https://github.com/NOAA-EPIC/EAGLE/discussions/new?category=enhancement-discussion>`_
+instead of an issue. This gives maintainers and users space to discuss scope,
+design options, and acceptance criteria before implementation work begins.
 
 .. _QA:
 

@@ -237,7 +237,6 @@ def test_grids_and_meshes(config, logged, tmp_path, validator, with_del, with_se
     assert not ok(with_set(config, "foo", "bar"))
     # Certain keys are required:
     for key in [
-        "conus_grid_resolution_km",
         "filenames",
         "global_grid_resolution_deg",
         "rundir",
@@ -367,6 +366,29 @@ def test_grids_and_meshes__filenames(
         assert logged("is not of type 'string'")
 
 
+def test_grids_and_meshes__conus_grid_settings_conditional_required(
+    config, logged, tmp_path, validator, with_del, with_set
+):
+    ok = validator(
+        __file__, "grids_and_meshes", tmp_path, "properties", "grids_and_meshes"
+    )
+    config = config["grids_and_meshes"]
+    # If HRRR target grid is requested, the CONUS resolution is required.
+    assert not ok(with_del(config, "conus_grid_resolution_km"))
+    assert logged("'conus_grid_resolution_km' is a required property")
+    # If no CONUS grid or latent mesh is requested, CONUS resolution may be omitted.
+    filenames = with_del(config["filenames"], "hrrr_target_grid")
+    filenames = with_del(filenames, "latent_mesh")
+    config_without_conus_outputs = with_set(config, filenames, "filenames")
+    config_without_conus_outputs = with_del(
+        config_without_conus_outputs, "latent_mesh_global_resolution_deg"
+    )
+    config_without_conus_outputs = with_del(
+        config_without_conus_outputs, "latent_mesh_conus_coarsen_factor"
+    )
+    assert ok(with_del(config_without_conus_outputs, "conus_grid_resolution_km"))
+
+
 def test_grids_and_meshes__latent_mesh_settings_conditional_required(
     config, logged, tmp_path, validator, with_del, with_set
 ):
@@ -374,15 +396,20 @@ def test_grids_and_meshes__latent_mesh_settings_conditional_required(
         __file__, "grids_and_meshes", tmp_path, "properties", "grids_and_meshes"
     )
     config = config["grids_and_meshes"]
+    filenames_without_hrrr = with_del(config["filenames"], "hrrr_target_grid")
+    config = with_set(config, filenames_without_hrrr, "filenames")
     # If latent mesh is requested, latent mesh settings are required.
+    assert not ok(with_del(config, "conus_grid_resolution_km"))
+    assert logged("'conus_grid_resolution_km' is a required property")
     assert not ok(with_del(config, "latent_mesh_global_resolution_deg"))
     assert logged("'latent_mesh_global_resolution_deg' is a required property")
     assert not ok(with_del(config, "latent_mesh_conus_coarsen_factor"))
     assert logged("'latent_mesh_conus_coarsen_factor' is a required property")
-    # If latent mesh is not requested, latent mesh settings may be omitted.
+    # If latent mesh is not requested, CONUS/latent settings may be omitted.
     filenames_without_latent_mesh = with_del(config["filenames"], "latent_mesh")
     config_without_latent_mesh = with_set(
         config, filenames_without_latent_mesh, "filenames"
     )
+    assert ok(with_del(config_without_latent_mesh, "conus_grid_resolution_km"))
     assert ok(with_del(config_without_latent_mesh, "latent_mesh_global_resolution_deg"))
     assert ok(with_del(config_without_latent_mesh, "latent_mesh_conus_coarsen_factor"))

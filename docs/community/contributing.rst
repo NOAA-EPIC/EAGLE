@@ -26,7 +26,7 @@ The ``cudascript=`` argument is described :ref:`here <RuntimeEnvironment>`.
 
     If an existing, non-development :ref:`runtime environment <RuntimeEnvironment>` has already been built, the ``make devenv`` command can be used to quickly upgrade it to a development environment. There is no need to remove existing conda environments or the underlying conda installation: The development packages will be installed into the existing environments.
 
-    Likewise, if local changes are made to package versions defined in the ``src/envs/*.yaml`` files, re-running the ``make devenv`` or ``make env`` commands will quickly bring the existing conda environments up-to-date with those newly specified versions: There is no need to remove existing environments or the underlying conda installation.
+    Likewise, if local changes are made to package versions defined in the ``envs/*.yaml`` files, re-running the ``make devenv`` or ``make env`` commands will quickly bring the existing conda environments up-to-date with those newly specified versions: There is no need to remove existing environments or the underlying conda installation.
 
 After successful completion, the following ``make`` targets will be available:
 
@@ -123,6 +123,7 @@ Contributions to the ``EAGLE`` project should currently be made through a branch
       git push origin <branch-name>
 
 #. Open a pull request to merge your changes into the upstream repository.
+#. When merging your PR, select "Squash and merge" unless there's a reason to preserve all individual commits from the feature branch.
 
 Open or review issues on the `EAGLE issues page <https://github.com/NOAA-EPIC/EAGLE/issues>`_.
 
@@ -133,7 +134,7 @@ If you do not have permission to push a branch to ``NOAA-EPIC/EAGLE``, coordinat
 Development and Testing Process
 ==============================================================================
 
-#. **Branch and develop:** Work on a branch dedicated to a single change or closely related set of changes.
+#. **Branch and develop:** Work on a fork branch dedicated to a single change or closely related set of changes.
 #. **Build the development environment:** Use the commands in the `Development` section above to create the required environments and install development tools.
 #. **Format code/data and run code-quality checks:** Before opening a pull request, format code and data and perform code-quality checks by running ``make format && make test``.
 #. **Update documentation:** If your change affects workflow behavior, capabilities, or developer setup, update the appropriate RST files in ``docs/``.
@@ -146,115 +147,39 @@ When your changes are ready, open a pull request through this repository's `PR p
 PR Template
 ==============================================================================
 
-Use the following pull request template when opening a PR:
+GitHub will automatically populate the PR description with the repository's
+`pull request template <https://github.com/NOAA-EPIC/EAGLE/blob/main/.github/pull_request_template.md>`_.
+Complete the checklist, including the subcomponent PR check, before requesting
+review.
 
-.. code-block:: md
+.. _ForkPRCI:
 
-    <!-- INSTRUCTIONS:
-    - READ/FOLLOW THE DIRECTIONS IN EACH SECTION
-    - Complete the 'Commit Requirements' below
-    - Use GitHub markup as much as possible (https://docs.github.com/en/get-started/writing-on-github)
-    - Leave your PR in a draft state until all underlying work is completed.
-    -->
+CI for Fork-Based Pull Requests
+==============================================================================
 
-    ## Description:
-    <!-- This description will become the commit message for the PR. -->
-    <!-- See https://cbea.ms/git-commit for commit message suggestions. -->
-    <!--
-    Provide a clear and concise description of *what* this PR does and *why*.
-    Explain why this change is needed and any context that helps reviewers.
-    Add the related GitHub Issues here.
-    Please be sure to add the issue this PR resolves using the word "Resolves". If there are any issues that are related but not yet resolved (including in other repos), you may use "Refs".
-    Resolves #1234
-    Refs #4321
-    Refs NOAA-EPIC/repo#5678
-    -->
+Pull requests from forks use the repository's normal GitHub Actions checks,
+subject to GitHub's maintainer approval flow for fork-based contributions.
+Maintainers should inspect the proposed changes before approving workflow runs,
+especially when a PR changes files under ``.github/workflows/``.
 
-    ## Type of change:
-    <!--
-    Indicate PR type of change.
-    Delete options that are not applicable.
-    -->
-    - [ ] Bug fix
-    - [ ] New feature
-    - [ ] Refactor / cleanup
-    - [ ] Documentation
-    - [ ] CI/CD or tooling
-    - [ ] Other:
+The Ursa end-to-end workflow is intentionally opt-in. After a maintainer has
+reviewed the PR and is comfortable running it on the self-hosted Ursa runner,
+they can add the ``eagle-ursa`` label to trigger the label-gated workflow. If
+GitHub marks the workflow as awaiting approval because the PR came from a fork,
+a maintainer with write access must approve the workflow run from the PR checks
+or Actions page.
 
-    ## Area(s) affected
-    <!-- Check all that apply -->
-    - [ ] nested_eagle workflow
-    - [ ] Verification / evaluation (via WXVX)
-    - [ ] Data prep / UFS2ARCO
-    - [ ] Config (YAML)
-    - [ ] Plotting / post-processing
-    - [ ] Infrastructure / Slurm scripts
-    - [ ] Other:
-
-    ## Commit Requirements:
-    <!--
-    - Check off completed items. Use [X] for a filled in checkbox or leave it [ ] for an empty checkbox
-    - Your pull request (PR) will not be considered until all requirements are met.
-    - THIS IS YOUR RESPONSIBILITY
-    -->
-    - [ ] This PR addresses a relevant NOAA-EPIC/EAGLE issue (if not, create an issue); a person responsible for submitting the update has been assigned to the issue (link issue)
-    - [ ] Fill out all sections of this template.
-    - [ ] I have performed a self-review of my own code
-    - [ ] My changes generate no new warnings
-    - [ ] I have made corresponding changes to the system documentation if necessary
-
-    ## Testing / Verification:
-    <!--
-    Provide minimal reproducible steps and results.
-    Include configs, commands, and expected outputs where possible.
-    Delete this section if not applicable.
-    -->
-    - [ ] I ran and/or verified the changes (or provided a test plan)
-    - Commands/config used:
-      -
-    - Evidence (logs, key output paths, screenshots if relevant):
-      -
-
-    ## Runtime Environment:
-    <!--
-    Fill in if you ran on HPC or a specific system. Delete if not applicable.
-    -->
-    - System/HPC:
-    - Account/role:
-    - Conda env:
-    - Key versions (optional):
-      - `python --version`:
-      - `wxvx --version` (if applicable):
-      - MET version (if applicable):
-
-    ## Commit Message:
-    <!--
-    Provide a concise commit message for any subcomponents; delete unnecessary info.
-    -->
-    * UFS2ARCO -
-    * WXVX (verification) -
-
-    ## Subcomponent Pull Requests:
-    <!--
-    Provide a list of NOAA-EPIC/EAGLE and subcomponents involved with this PR and include links to subcomponent PRs.
-    Example:
-    * EAGLE: NOAA-EPIC/EAGLE#13
-    * UFS2ARCO: NOAA-PSL/UFS2ARCO#734
-    * WXVX: NOAA-EPIC/WXVX#33
-    Delete sections that are not needed.
-    -->
-    * EAGLE: NOAA-EPIC/EAGLE#
-    * UFS2ARCO: NOAA-PSL/UFS2ARCO#
-    * WXVX (verification): NOAA-EPIC/WXVX#
-    * None
+If repository or organization settings prevent the Ursa workflow from running
+directly from a fork, a maintainer can create a branch in the upstream
+``NOAA-EPIC/EAGLE`` repository from the contributor's changes and run the
+label-gated workflow from that branch.
 
 .. _Docs:
 
 Documentation
 ------------------------------------------------------------------------------
 
-If you are adding to or updating the documentation, wish to build and review changes locally, and have already built the EAGLE runtime software environment environment under ``src/`` (i.e., ``src/conda`` exists), then from the root directory of a clone of this repository:
+If you are adding to or updating the documentation, wish to build and review changes locally, and have already built the EAGLE runtime software environment environment (i.e., ``conda/`` exists), then from the root directory of a clone of this repository:
 
 .. code-block:: bash
 

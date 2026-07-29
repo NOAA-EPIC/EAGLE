@@ -20,14 +20,14 @@ jobs:
       - name: Check Formatting
         run: .github/scripts/fmtcheck
       - name: Run Python Linter
-        run: make -C src lint
+        run: make lint
       - name: Run Python Typechecker
-        run: make -C src typecheck
+        run: make typecheck
       - name: Run Python Unit Tests
-        run: make -C src unittest
+        run: make unittest
       - name: Run Shell Checker
-        run: make -C src shellcheck
+        run: make shellcheck
       - name: Run YAML Linter
-        run: make -C src yamllint
+        run: make yamllint
       - name: Show Disk Usage
         run: set -x && df -h . && du -hs .
