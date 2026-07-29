@@ -9,18 +9,9 @@ Contributing
 Development
 ------------------------------------------------------------------------------
 
-First, clone the main :term:`EAGLE` repository and create a branch on the machine where you will
-do the development work. Contributions should be submitted as pull requests from a
-branch separate from the main branch.
-
-.. code-block:: text
-
-    git clone https://github.com/NOAA-EPIC/EAGLE.git
-    cd EAGLE
-
-.. code-block:: text
-
-    git checkout -b <branch-name>
+Before starting development, follow the :ref:`Branch and PR Overview <BranchPR>` to clone the upstream
+:term:`EAGLE` repository, update your local ``main`` branch, and create a dedicated branch for your
+change. All development work should be committed to that branch, not directly to ``main``.
 
 To build the runtime virtual environments **and** install all required
 development packages in each environment:
