@@ -9,20 +9,9 @@ Contributing
 Development
 ------------------------------------------------------------------------------
 
-First, fork the main :term:`EAGLE` repository into your GitHub account, then
-clone your fork on the machine where you will do the development work. External
-contributions should be submitted as pull requests from a branch in your fork.
-
-.. code-block:: text
-
-    git clone https://github.com/<github-username>/EAGLE.git
-    cd EAGLE
-    git remote add upstream https://github.com/NOAA-EPIC/EAGLE.git
-    git fetch upstream
-
-.. code-block:: text
-
-    git checkout -b <branch-name> upstream/main
+Before starting development, follow the :ref:`Branch and PR Overview <BranchPR>` to clone the upstream
+:term:`EAGLE` repository, update your local ``main`` branch, and create a dedicated branch for your
+change. All development work should be committed to that branch, not directly to ``main``.
 
 To build the runtime virtual environments **and** install all required
 development packages in each environment:
@@ -92,46 +81,66 @@ The resulting verbose logging, which will include stacktraces from any unhandled
 Pull Requests
 ------------------------------------------------------------------------------
 
-.. _ForkPR:
+.. _BranchPR:
 
-Fork and PR Overview
+Branch and PR Overview
 ==============================================================================
 
-Contributions to the ``EAGLE`` project are made through a fork and pull request model. GitHub provides a thorough overview in their `Contributing to a project quickstart <https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project>`_, but the process for EAGLE can be summarized as:
+Contributions to the ``EAGLE`` project should currently be made through a branch and pull request model in the upstream ``NOAA-EPIC/EAGLE`` repository. Pull request CI does not currently run for branches opened from outside forks. GitHub provides a thorough overview of pull requests in their `Contributing to a project quickstart <https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project>`_, but the process for EAGLE can be summarized as:
 
 #. Create or identify a GitHub issue to document the proposed change.
-#. Fork the `EAGLE repository <https://github.com/NOAA-EPIC/EAGLE>`_ into your personal GitHub account.
-#. Clone your fork onto your development system.
-#. Add the upstream remote, if your clone does not already have one: ``git remote add upstream https://github.com/NOAA-EPIC/EAGLE.git``.
-#. Create a branch in your clone for the change. All development should take place on a branch in your fork, not on ``main``.
-#. Make, commit, and push your changes to that branch in your fork.
+#. Clone the `EAGLE repository <https://github.com/NOAA-EPIC/EAGLE>`_ onto your development system.
+
+   .. code-block:: bash
+
+      git clone https://github.com/NOAA-EPIC/EAGLE.git
+      cd EAGLE
+
+#. Update your local ``main`` branch.
+
+   .. code-block:: bash
+
+      git checkout main
+      git pull origin main
+
+#. Create a branch in your clone for the change. All development should take place on a branch, not directly on ``main``.
+
+   .. code-block:: bash
+
+      git checkout -b <branch-name>
+
+#. Make and commit your changes to that branch.
+
+   .. code-block:: bash
+
+      git add <files>
+      git commit -m "<commit-message>"
+
+#. Push your branch to the upstream repository.
+
+   .. code-block:: bash
+
+      git push origin <branch-name>
+
 #. Open a pull request to merge your changes into the upstream repository.
 #. When merging your PR, select "Squash and merge" unless there's a reason to preserve all individual commits from the feature branch.
 
 Open or review issues on the `EAGLE issues page <https://github.com/NOAA-EPIC/EAGLE/issues>`_.
 
-For future contributions, keep your fork current by syncing it with the upstream ``NOAA-EPIC/EAGLE`` repository.
+If you do not have permission to push a branch to ``NOAA-EPIC/EAGLE``, coordinate with a maintainer before opening a pull request so the branch can be hosted where CI will run.
 
 .. _DevTest:
 
 Development and Testing Process
 ==============================================================================
 
-#. **Branch and develop:** Work on a fork branch dedicated to a single change or closely related set of changes.
+#. **Branch and develop:** Work on a branch dedicated to a single change or closely related set of changes.
 #. **Build the development environment:** Use the commands in the `Development` section above to create the required environments and install development tools.
 #. **Format code/data and run code-quality checks:** Before opening a pull request, format code and data and perform code-quality checks by running ``make format && make test``.
 #. **Update documentation:** If your change affects workflow behavior, capabilities, or developer setup, update the appropriate RST files in ``docs/``.
 #. **Open the pull request:** Push your branch to GitHub and open a pull request against the upstream repository.
 
-When your changes are ready, commit them on your feature branch and push the branch to your fork:
-
-.. code-block:: bash
-
-    git add <files>
-    git commit -m "<commit-message>"
-    git push origin <branch-name>
-
-Then open a pull request from your fork branch to the upstream ``NOAA-EPIC/EAGLE`` repository through this repository's `PR page <https://github.com/NOAA-EPIC/EAGLE/pulls>`_. For general guidance on creating pull requests, see this `GitHub documentation <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_.
+When your changes are ready, open a pull request through this repository's `PR page <https://github.com/NOAA-EPIC/EAGLE/pulls>`_. For general guidance on creating pull requests, see this `GitHub documentation <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_.
 
 .. _PRTemplate:
 
@@ -143,27 +152,17 @@ GitHub will automatically populate the PR description with the repository's
 Complete the checklist, including the subcomponent PR check, before requesting
 review.
 
-.. _ForkPRCI:
+.. _BranchPRCI:
 
-CI for Fork-Based Pull Requests
+CI for Branch-Based Pull Requests
 ==============================================================================
 
-Pull requests from forks use the repository's normal GitHub Actions checks,
-subject to GitHub's maintainer approval flow for fork-based contributions.
-Maintainers should inspect the proposed changes before approving workflow runs,
-especially when a PR changes files under ``.github/workflows/``.
+Pull requests from branches in the upstream ``NOAA-EPIC/EAGLE`` repository use
+the repository's normal GitHub Actions checks.
 
 The Ursa end-to-end workflow is intentionally opt-in. After a maintainer has
 reviewed the PR and is comfortable running it on the self-hosted Ursa runner,
-they can add the ``eagle-ursa`` label to trigger the label-gated workflow. If
-GitHub marks the workflow as awaiting approval because the PR came from a fork,
-a maintainer with write access must approve the workflow run from the PR checks
-or Actions page.
-
-If repository or organization settings prevent the Ursa workflow from running
-directly from a fork, a maintainer can create a branch in the upstream
-``NOAA-EPIC/EAGLE`` repository from the contributor's changes and run the
-label-gated workflow from that branch.
+they can add the ``eagle-ursa`` label to trigger the label-gated workflow.
 
 .. _Docs:
 
