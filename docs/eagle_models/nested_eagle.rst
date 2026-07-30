@@ -69,10 +69,12 @@ The nested-EAGLE model uses the following architecture:
 Near-Real-Time Forecasting
 --------------------------
 
-The nested-EAGLE model can be run in near real time (NRT) using the
+The nested-EAGLE model can be run on NOAA RDHPCS Ursa and Microsoft's native Azure CycleCloud with Slurm in near-real time (NRT) using the
 ``release/public-v1.1.0`` branch in this repository. That branch includes the required 
 dependencies (including compatible ``anemoi`` versions) and is the recommended
 starting point for NRT runs of nested-EAGLE.
+
+To run on Microsoft's native Azure CycleCloud with Slurm, users will need a subscription to native Azure and access to a cluster with CPU and GPU (either A100 or H100) availability.  Please reach out to support.epic@noaa.gov.
 
 To run NRT:
 

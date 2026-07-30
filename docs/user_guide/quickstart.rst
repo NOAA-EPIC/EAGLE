@@ -4,8 +4,12 @@
 Quickstart Guide
 ====================
 
-This section provides a recipe for an end-to-end run of nested- and global-EAGLE on :term:`Ursa`. To run a global configuration with this quickstart guide, replace references to ``nested`` with ``global``. At present, Ursa is the only supported 
-platform. Future development will include additional platforms.
+This section provides a recipe for an end-to-end run of nested- and global-EAGLE on :term:`Ursa`. 
+To run a global configuration with this quickstart guide, replace references to ``nested`` with 
+``global``. At present, Ursa is the only supported 
+platform to run the entire quickstart guide from preprocessing, training and inference, to verificaiton 
+and visualization. Users with credentials to native Microsoft Azure cloud are directed to 
+:doc:`eagle_models/nested-eagle` to run the near-real time pipeline. Future development will include additional platforms.
 
 .. note::
 
