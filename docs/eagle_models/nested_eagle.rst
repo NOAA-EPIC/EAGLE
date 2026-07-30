@@ -95,6 +95,7 @@ To run NRT:
    * Create the environment: ``make env cudascript=dummy``
    * Compose the NRT configuration: ``make config compose=base:nested:azure:nrt-nested > nrt-composed.yaml``
 
+
 #. Follow the :ref:`NRT workflow <NRT>`, but before running ``make realize`` step, update:
 
    * ``app.base`` to the absolute path of your local repository root
