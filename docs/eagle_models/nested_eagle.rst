@@ -90,7 +90,12 @@ To run NRT:
 
       wget -O inference-last.ckpt https://eaglecheckpoints.blob.core.windows.net/eagle-checkpoints/nested-eagle/inference-last.ckpt
 
-#. If running on Microsoft Azure CycleCloud, the quickstart guide requires two modifications. To create the environment, users will use ``make env cudascript=dummy``, and to compose the NRT configuration ``make config compose=base:nested:azure:nrt-nested > nrt-composed.yaml``.
+#. If running on Microsoft Azure CycleCloud, make the following Azure-specific changes before continuing with the NRT workflow:
+
+   .. code-block:: bash
+
+      Create the environment: ``make env cudascript=dummy``
+      Compose the NRT configuration: ``make config compose=base:nested:azure:nrt-nested > nrt-composed.yaml``
 
 #. Follow the :ref:`NRT workflow <NRT>`, but before running ``make realize`` step, update:
 
