@@ -9,7 +9,7 @@ To run a global configuration with this quickstart guide, replace references to 
 ``global``. At present, Ursa is the only supported 
 platform to run the entire quickstart guide from preprocessing, training and inference, to verification 
 and visualization. Users with credentials to native Microsoft Azure cloud are directed to 
-:doc:`eagle_models/nested_eagle` to run the near-real time pipeline. Future development will include additional platforms.
+:doc:`../eagle_models/nested_eagle` to run the near-real time pipeline. Future development will include additional platforms.
 
 .. note::
 
