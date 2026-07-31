@@ -22,7 +22,7 @@ To learn about EAGLE and how to use the provided workflows, please see our [docu
 
 ## Citation
 
-The Earth Prediction Innovation Center (EPIC) and the NOAA AI for Numerical Weather Prediction (AI4NWP) Working Group. (2026). The nested-EAGLE (Experimental AI Global and Limited-area Ensemble forecast system) (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.19672026
+The Earth Prediction Innovation Center (EPIC) and the NOAA AI for Numerical Weather Prediction (AI4NWP) Working Group. (2026). The nested-EAGLE (Experimental AI Global and Limited-area Ensemble forecast system) (v1.1.0). Zenodo. https://doi.org/10.5281/zenodo.19672026
 
 ## Acknowledgments
 
