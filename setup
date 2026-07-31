@@ -202,7 +202,8 @@ prep_env_data() {
   local name
   name=data
   prep_env $name
-  # Add logic to the [de]activation scripts to silence a run-time complaint:
+  # Add logic to the [de]activation scripts to silence run-time complaints and avoid
+  # segfaults when importing mpi4py in environments without InfiniBand hardware:
   (
     env_activate $name
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
@@ -213,6 +214,10 @@ if [[ -v FI_PSM3_UUID ]]; then
   export EAGLE_OLD_FI_PSM3_UUID=\$FI_PSM3_UUID
 fi
 export FI_PSM3_UUID=eagle
+if [[ -v FI_PROVIDER ]]; then
+  export EAGLE_OLD_FI_PROVIDER=\$FI_PROVIDER
+fi
+export FI_PROVIDER=tcp
 EOF
     dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
     mkdir -pv $dir_deactivate
@@ -222,6 +227,11 @@ unset FI_PSM3_UUID
 if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
   export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
   unset EAGLE_OLD_FI_PSM3_UUID
+fi
+unset FI_PROVIDER
+if [[ -v EAGLE_OLD_FI_PROVIDER ]]; then
+  export FI_PROVIDER=\$EAGLE_OLD_FI_PROVIDER
+  unset EAGLE_OLD_FI_PROVIDER
 fi
 EOF
   )
