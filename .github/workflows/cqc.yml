@@ -24,7 +24,7 @@ jobs:
       - name: Run Python Typechecker
         run: make typecheck
       - name: Run Python Unit Tests
-        run: make unittest
+        run: PYTEST_DEBUG_TEMPROOT=$GITHUB_WORKSPACE make unittest
       - name: Run Shell Checker
         run: make shellcheck
       - name: Run YAML Linter
