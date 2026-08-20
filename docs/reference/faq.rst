@@ -54,14 +54,14 @@ baseline:
      - Notes
    * - CPU compute nodes
      - ``Standard_HC44rs``
-     - Non-GPU HPC compute nodes; 44 vCPUs and 352 GiB memory per node.
+     - Non-GPU HPC compute nodes; 44 vCPUs and 352 GB memory per node.
    * - GPU compute nodes
      - ``Standard_NC24ads_A100_v4``
-     - NVIDIA A100 GPU nodes; 24 vCPUs, 220 GiB memory, and one 80 GB A100 GPU
+     - NVIDIA A100 GPU nodes; 24 vCPUs, 220 GB memory, and one 80 GB A100 GPU
        per node.
    * - Controller nodes
      - ``Standard_D4as_v5``
-     - Controller/head-node services; 4 vCPUs and 16 GiB memory per node.
+     - Controller/head-node services; 4 vCPUs and 16 GB memory per node.
    * - Network
      - ``10.0.0.0/24``
      - Default virtual network range used in prior testing.
