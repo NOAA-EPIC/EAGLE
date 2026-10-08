@@ -396,4 +396,3 @@ zarrs:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_weights_gfs.nc") }}'
             target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
     platform: !dict '{{ app.platform }}'
-
