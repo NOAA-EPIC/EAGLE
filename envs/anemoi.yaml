@@ -16,8 +16,8 @@ dependencies:
   - triton 3.6.*
   - uwtools 2.16.*
   - pip:
-      - anemoi-inference==0.10.*
-      - anemoi-models==0.13.*
-      - anemoi-training==0.10.*
-      - anemoi-transform==0.1.29
+      - anemoi-inference==0.12.*
+      - anemoi-models==0.19.*
+      - anemoi-training==0.17.*
+      - anemoi-transform==0.5.*
       - eagle-tools==0.8.1
