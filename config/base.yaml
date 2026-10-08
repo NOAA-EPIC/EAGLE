@@ -46,16 +46,6 @@ inference:
   validate: true
 platform: !dict '{{ app.platform }}'
 training:
-  anemoi:
-    defaults:
-      - data: zarr
-      - dataloader: native_grid
-      - diagnostics: evaluation
-      - graph: encoder_decoder_only
-      - model: transformer
-      - system: slurm
-      - training: stretched
-      - _self_
   execution:
     batchargs:
       <<: *gpu-batchargs
@@ -65,9 +55,6 @@ training:
       walltime: '01:00:00'
     envcmds: !list '{{ val.training.envcmds }}'
     executable: '{{ app.launcher | default("") }} anemoi-training train --config-name=training'
-  remove:
-    # Dot-separated config keys paths to delete from the composed runtime config.
-    - graph.nodes.hidden.node_builder.grid
   rundir: '{{ app.rundir }}/training'
 ufs2arco:
   dirs:
@@ -409,3 +396,4 @@ zarrs:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_weights_gfs.nc") }}'
             target_grid_path: '{{ val.data.rundir}}/{{ val.filenames.gfs_target_grid }}'
     platform: !dict '{{ app.platform }}'
+
