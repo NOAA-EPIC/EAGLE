@@ -666,6 +666,9 @@ training:
                 - u
                 - v
                 - w
+  remove:
+    # Dot-separated config keys paths to delete from the composed runtime config.
+    - graph.nodes.hidden.node_builder.grid
 val:
   filenames:
     hrrr_target_grid: hrrr_15km.nc

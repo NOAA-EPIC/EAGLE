@@ -66,6 +66,9 @@ training:
       walltime: '01:00:00'
     envcmds: !list '{{ val.training.envcmds }}'
     executable: '{{ app.launcher | default("") }} anemoi-training train --config-name=training'
+  remove:
+    # Dot-separated config keys paths to delete from the composed runtime config.
+    - graph.nodes.hidden.node_builder.grid
   rundir: '{{ app.rundir }}/training'
 ufs2arco:
   dirs:
