@@ -60,6 +60,16 @@ prewxvx:
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
 training:
   anemoi:
+    defaults:
+      - data: zarr
+      - dataloader: native_grid
+      - diagnostics: evaluation
+      - graph: encoder_decoder_only
+      - model: transformer
+      - system: slurm
+      - task: forecaster
+      - training: stretched
+      - _self_
     config_validation: True
     data:
       format: zarr

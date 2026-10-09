@@ -5,6 +5,7 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
+  - datashader 0.19.*
   - flash-attn 2.8.*
   - matplotlib >=3.7.1,<3.9 # low bound per anemoi-training; high bound per matplotlib Issue 28317
   - mpi4py 4.1.*

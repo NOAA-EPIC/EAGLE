@@ -46,6 +46,17 @@ inference:
   validate: true
 platform: !dict '{{ app.platform }}'
 training:
+  anemoi:
+    defaults:
+      - data: zarr
+      - dataloader: native_grid
+      - diagnostics: evaluation
+      - graph: encoder_decoder_only
+      - model: transformer
+      - system: slurm
+      - task: forecaster
+      - training: stretched
+      - _self_
   execution:
     batchargs:
       <<: *gpu-batchargs
