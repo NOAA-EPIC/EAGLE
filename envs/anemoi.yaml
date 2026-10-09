@@ -5,6 +5,7 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
+  - datashader 0.19.*
   - flash-attn 2.8.*
   - matplotlib >=3.7.1,<3.9 # low bound per anemoi-training; high bound per matplotlib Issue 28317
   - mpi4py 4.1.*
@@ -16,8 +17,8 @@ dependencies:
   - triton 3.6.*
   - uwtools 2.16.*
   - pip:
-      - anemoi-inference==0.10.*
-      - anemoi-models==0.13.*
-      - anemoi-training==0.10.*
-      - anemoi-transform==0.1.29
+      - anemoi-inference==0.12.*
+      - anemoi-models==0.19.*
+      - anemoi-training==0.17.*
+      - anemoi-transform==0.5.*
       - eagle-tools==0.8.1

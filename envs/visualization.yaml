@@ -8,6 +8,7 @@ dependencies:
   - numpy 2.2.6.*
   - pandas 2.3.*
   - pip
+  - pyproj 3.8.0.*
   - python 3.13
   - uwtools 2.16.*
   - xarray 2026.2.0

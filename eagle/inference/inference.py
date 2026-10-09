@@ -61,7 +61,7 @@ class Inference(DriverTimeInvariant):
         valid: list[bool] = []
         yield Asset(None, lambda: valid == [True])
         yield self._checkpoint(ckpt_path)
-        valid.append(Checkpoint(ckpt_path).validate_environment())
+        valid.append(Checkpoint(str(ckpt_path)).validate_environment() is True)
 
     # Public methods
 

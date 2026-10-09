@@ -18,4 +18,4 @@ dependencies:
   - pip:
       - anemoi-datasets==0.5.*
       - anemoi-graphs==0.9.*
-      - anemoi-transform==0.1.29
+      - anemoi-transform==0.5.*
