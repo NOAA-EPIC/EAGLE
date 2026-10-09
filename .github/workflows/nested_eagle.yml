@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
+  schedule:
+    # Runs every Saturday at 06:00 UTC
+    - cron: '0 6 * * 6'
+
 permissions:
   contents: read
   pull-requests: write
