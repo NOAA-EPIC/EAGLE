@@ -378,6 +378,7 @@ training:
             norm: unit-std
     system:
       input:
+        dataset: null
         global_dataset: '{{ val.data.rundir }}/gfs.zarr'
         graph: '{{ val.data.rundir }}/graph.latentx2.spongex1.12knn.pt'
         lam_dataset: '{{ val.data.rundir }}/hrrr.zarr'
