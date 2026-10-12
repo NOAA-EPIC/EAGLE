@@ -71,6 +71,7 @@ training:
       - training: stretched
       - _self_
     config_validation: True
+    # Blocks to customize default Anemoi training config.
     data:
       format: zarr
       frequency: 6h
@@ -127,7 +128,6 @@ training:
                   - q_925
                   - q_1000
     dataloader:
-      prefetch_factor: 1
       pin_memory: true
       persistent_workers: True
       fake_dataloading: False
@@ -147,6 +147,7 @@ training:
         training: null
         validation: null
         test: 1
+      prefetch_factor: 1
       num_workers:
         test: 1
         training: 1
@@ -196,6 +197,7 @@ training:
       check_val_every_n_epoch: 1
       print_memory_summary: false
       log:
+        interval: 100
         mlflow:
           enabled: True
           offline: True
@@ -215,7 +217,6 @@ training:
           system: False
           terminal: True
           save_dir: ${system.output.logs.mlflow}
-        interval: 100
         wandb:
           enabled: false
           entity: null+
@@ -225,6 +226,7 @@ training:
           project: placeholder
           gradients: False
           parameters: False
+          interval: ${diagnostics.log.interval}
       plot:
         frequency:
           batch: 50
@@ -287,7 +289,6 @@ training:
           - _target_: anemoi.training.diagnostics.callbacks.plot.BatchOutputPlot
             tag_infix: histo
             dataset_names: ${diagnostics.plot.datasets_to_plot}
-            sample_idx: ${diagnostics.plot.sample_idx}
             every_n_batches: ${diagnostics.plot.frequency.batch}
             parameters:
               - gh_500
@@ -299,6 +300,7 @@ training:
               _target_: anemoi.training.diagnostics.evaluation.plotting.batch_output.histogram_plot_fn
               _partial_: true
               log_scale: false
+            sample_idx: ${diagnostics.plot.sample_idx}
       benchmark_profiler:
         memory:
           enabled: true
@@ -591,7 +593,7 @@ training:
           _target_: timm.scheduler.CosineLRScheduler
           t_initial: ${training.max_steps}
           lr_min: 3.e-7
-          warmup: 2
+          warmup_t: 2
           t_in_epochs: false
       metrics:
         datasets:
