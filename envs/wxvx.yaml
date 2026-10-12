@@ -12,4 +12,4 @@ dependencies:
   - xesmf 0.8.*
   - zarr 2.18.*
   - pip:
-      - eagle-tools==0.8.1
+      - eagle-tools==0.9.1

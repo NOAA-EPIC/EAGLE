@@ -21,4 +21,4 @@ dependencies:
       - anemoi-models==0.19.*
       - anemoi-training==0.17.*
       - anemoi-transform==0.5.*
-      - eagle-tools==0.8.1
+      - eagle-tools==0.9.1

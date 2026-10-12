@@ -13,4 +13,4 @@ dependencies:
   - uwtools 2.16.*
   - xarray 2026.2.0
   - pip:
-      - eagle-tools==0.8.1
+      - eagle-tools==0.9.1
