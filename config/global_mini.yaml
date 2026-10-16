@@ -387,7 +387,7 @@ training:
         plots: plots
         profiler: profiler
     model:
-      num_channels: 128
+      num_channels: 256
       cpu_offload: false
       keep_batch_sharded: false
       model:
@@ -410,11 +410,11 @@ training:
       processor:
         _target_: anemoi.models.layers.processor.TransformerProcessor
         num_channels: ${model.num_channels}
-        num_layers: 4
+        num_layers: 6
         num_chunks: 1
         mlp_hidden_ratio: 2
         mlp_implementation: mlp
-        num_heads: 4
+        num_heads: 8
         window_size: 256
         dropout_p: 0.0
         attention_implementation: scaled_dot_product_attention
@@ -516,7 +516,7 @@ training:
       check_variables_compatibility:
         ignore_units: False
         ignore_processing_period: False
-      precision: 32-true
+      precision: bf16-mixed
       accum_grad_batches: 1
       num_sanity_val_steps: 2
       gradient_clip:
@@ -540,7 +540,7 @@ training:
                 - node_weights
               ignore_nans: true
       max_epochs: null
-      max_steps: 20000
+      max_steps: 40000
       submodules_to_freeze: []
       weight_averaging: null
       optimization:
