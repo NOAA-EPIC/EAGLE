@@ -24,7 +24,7 @@ ufs2arco:
   target:
     statistics_period:
       start: '{{ ufs2arco.source.analysis.t0.start }}'
-      end: 2022-01-07T18
+      end: 2022-01-02T18
 prewxvx:
   common:
     prewxvx: &prewxvx-common
