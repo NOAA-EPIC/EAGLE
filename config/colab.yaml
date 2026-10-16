@@ -28,7 +28,8 @@ training:
   execution:
     envcmds: !list '{{ val.slurm_script + val.training.envcmds }}'
   anemoi:
-    validation_rollout: 1
+    task:
+      validation_rollout: 1
 val:
   slurm_script:
     - source /etc/profile.d/profile-slurm.sh
