@@ -4,6 +4,11 @@
 
 app:
   base: /content/EAGLE
+  time:
+    inference_start: !datetime 2022-01-03T12
+    max_leadtime: 24
+    start: !datetime 2022-01-01T00
+    stop: !datetime 2022-01-04T18
   gpu:
     batchargs: &gpu-batchargs
       --gres: 'gpu:h100:1'
@@ -22,6 +27,8 @@ inference:
 training:
   execution:
     envcmds: !list '{{ val.slurm_script + val.training.envcmds }}'
+  anemoi:
+    validation_rollout: 1
 val:
   slurm_script:
     - source /etc/profile.d/profile-slurm.sh
