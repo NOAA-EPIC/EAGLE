@@ -11,7 +11,7 @@ app:
     multistep_input: 2
     start: !datetime 2022-01-01T00
     step: !timedelta 6
-    stop: !datetime 2022-01-15T18
+    stop: !datetime 2022-01-04T18
 grids_and_meshes:
   global_grid_resolution_deg: 1.0
   filenames:
@@ -150,8 +150,8 @@ training:
             dataset_config:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
-            start: 2022-01-16
-            end: 2022-01-22
+            start: 2022-01-05
+            end: 2022-01-06
       training:
         datasets:
           data:
@@ -159,15 +159,15 @@ training:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
             start: 2022-01-01
-            end: 2022-01-07
+            end: 2022-01-02
       validation:
         datasets:
           data:
             dataset_config:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
-            start: 2022-01-08
-            end: 2022-01-15
+            start: 2022-01-03
+            end: 2022-01-04
     diagnostics:
       debug:
         anomaly_detection: false

@@ -3,7 +3,7 @@
 # yamllint disable rule:anchors rule:line-length
 
 app:
-  base: /content
+  base: /content/EAGLE
   gpu:
     batchargs: &gpu-batchargs
       --gres: 'gpu:h100:1'
