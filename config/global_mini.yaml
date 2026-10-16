@@ -5,13 +5,13 @@
 app:
   experiment_name: global_mini
   time:
-    inference_start: !datetime 2025-02-03T12
+    inference_start: !datetime 2025-01-05T12
     inference_stop: !datetime '{{ app.time.inference_start }}'
     max_leadtime: 48
     multistep_input: 2
-    start: !datetime 2020-01-01T00
+    start: !datetime 2022-01-01T00
     step: !timedelta 6
-    stop: !datetime 2025-12-31T18
+    stop: !datetime 2022-01-15T18
 grids_and_meshes:
   global_grid_resolution_deg: 1.0
   filenames:
@@ -24,7 +24,7 @@ ufs2arco:
   target:
     statistics_period:
       start: '{{ ufs2arco.source.analysis.t0.start }}'
-      end: 2024-12-31T18
+      end: 2022-01-07T18
 prewxvx:
   common:
     prewxvx: &prewxvx-common
@@ -150,24 +150,24 @@ training:
             dataset_config:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
-            start: 2026-01-01
-            end: 2026-09-31
+            start: 2022-01-16
+            end: 2022-01-22
       training:
         datasets:
           data:
             dataset_config:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
-            start: 2020-01-01
-            end: 2024-12-31
+            start: 2022-01-01
+            end: 2022-01-07
       validation:
         datasets:
           data:
             dataset_config:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
-            start: 2025-01-01
-            end: 2025-12-31
+            start: 2022-01-08
+            end: 2022-01-15
     diagnostics:
       debug:
         anomaly_detection: false
