@@ -540,7 +540,7 @@ training:
                 - node_weights
               ignore_nans: true
       max_epochs: null
-      max_steps: 40000
+      max_steps: 100
       submodules_to_freeze: []
       weight_averaging: null
       optimization:
@@ -553,7 +553,7 @@ training:
           _target_: timm.scheduler.CosineLRScheduler
           t_initial: ${training.max_steps}
           lr_min: 0.000001
-          warmup_t: 500
+          warmup_t: 10
           t_in_epochs: false
       metrics:
         datasets:
