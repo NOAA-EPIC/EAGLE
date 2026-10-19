@@ -1,43 +1,79 @@
-# Configuration for the NOAA RDHPCS Ursa platform.
+# Colab cleanup overlay for feature/global_mini.
+# Intended usage:
+#   uw config compose config/base.yaml config/global_mini.yaml config/colab.yaml > eagle.yaml
 
 # yamllint disable rule:anchors rule:line-length
 
 app:
   base: /content/EAGLE
+  experiment_name: global_mini
+  # Remove launcher so execution commands run directly in the notebook/runtime.
+  launcher: !remove
   time:
     inference_start: !datetime 2022-01-03T12
     max_leadtime: 24
     start: !datetime 2022-01-01T00
     stop: !datetime 2022-01-04T18
+  # Placeholder objects retained for schema compatibility.
+  # The anchor is kept because base.yaml aliases *gpu-batchargs.
   gpu:
     batchargs: &gpu-batchargs
-      --gres: 'gpu:h100:1'
       nodes: 1
-      partition: u1-h100
-      queue: gpuwf
-  launcher: srun --export=ALL
+      partition: placeholder
+      queue: placeholder
   partitions:
-    netaccess: u1-service
-  platform: &platform
-    account: epic
+    netaccess: placeholder
+  platform:
+    account: placeholder
     scheduler: slurm
-inference:
-  execution:
-    envcmds: !list '{{ val.slurm_script + val.inference.envcmds  }}'
+val:
+  slurm_script: !remove
+  inference:
+    envcmds:
+      - set -ex
+  training:
+    envcmds:
+      - export MLFLOW_ALLOW_FILE_STORE=true
+      - export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+      - set -ex
+  zarrs:
+    envcmds:
+      - set -ex
 training:
   execution:
-    envcmds: !list '{{ val.slurm_script + val.training.envcmds }}'
+    batchargs: !remove
+    envcmds: !list '{{ val.training.envcmds }}'
+    executable: anemoi-training train --config-name=training
   anemoi:
-    task:
-      validation_rollout: 1
-val:
-  slurm_script:
-    - source /etc/profile.d/profile-slurm.sh
+    defaults:
+      - data: zarr
+      - dataloader: native_grid
+      - diagnostics: evaluation
+      - graph: encoder_decoder_only
+      - model: transformer
+      - task: forecaster
+      - training: single
+      - _self_
+inference:
+  execution:
+    batchargs: !remove
+    envcmds: !list '{{ val.inference.envcmds }}'
+    executable: eagle-tools inference inference.yaml
 zarrs:
   common:
     execution:
-      batchargs:
-        --mem-per-cpu: 3G
-      envcmds: !list '{{ val.slurm_script + val.zarrs.envcmds }}'
-      mpiargs:
-        - "--export=ALL"
+      # Schema-compatible placeholder, replacing inherited batch settings.
+      batchargs: !dict '{walltime: "00:10:00"}'
+      envcmds:
+        - set -ex
+      mpiargs: []
+      mpicmd: mpiexec
+  gfs:
+    zarr:
+      execution:
+        batchargs: !dict '{walltime: "00:10:00"}'
+        envcmds:
+          - set -ex
+        executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+        mpiargs: []
+        mpicmd: mpiexec
