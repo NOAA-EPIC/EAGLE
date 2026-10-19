@@ -1,6 +1,7 @@
 # Colab cleanup overlay for feature/global_mini.
 # Intended usage:
-#   uw config compose config/base.yaml config/global_mini.yaml config/colab.yaml > eagle.yaml
+#   uw config compose config/base.yaml \
+#     config/global_mini.yaml config/colab.yaml > eagle.yaml
 
 # yamllint disable rule:anchors rule:line-length
 
@@ -77,3 +78,4 @@ zarrs:
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
         mpiargs: []
         mpicmd: mpiexec
+        
