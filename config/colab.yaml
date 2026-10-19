@@ -78,4 +78,3 @@ zarrs:
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
         mpiargs: []
         mpicmd: mpiexec
-        
