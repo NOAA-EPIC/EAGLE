@@ -79,10 +79,9 @@ training:
     training:
       max_steps: 50
       optimization:
-        optimizer:
-          lr_scheduler:
-            warmup_t: 10
-            t_initial: 50
+        lr_scheduler:
+          warmup_t: 10
+          t_initial: 50
 inference:
   execution:
     batchargs: !remove
