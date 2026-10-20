@@ -68,12 +68,18 @@ training:
         datasets:
           start: 2022-01-03
           end: 2022-01-04
-    max_steps: 50
-      optimization:
-        optimizer:
-          lr_scheduler:
-            warmup_t: 10
-            t_initial: 50
+    task:
+      validation_rollout: 1
+      rollout:
+        epoch_increment: 0
+        maximum: 1
+    training:
+      max_steps: 50
+        optimization:
+          optimizer:
+            lr_scheduler:
+              warmup_t: 10
+              t_initial: 50
 inference:
   execution:
     batchargs: !remove
