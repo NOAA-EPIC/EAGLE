@@ -58,16 +58,19 @@ training:
     dataloader:
       test:
         datasets:
-          start: 2022-01-03
-          end: 2022-01-04
+          data:
+            start: 2022-01-03
+            end: 2022-01-04
       training:
         datasets:
-          start: 2022-01-01
-          end: 2022-01-02
+          data:
+            start: 2022-01-01
+            end: 2022-01-02
       validation:
         datasets:
-          start: 2022-01-03
-          end: 2022-01-04
+          data:
+            start: 2022-01-03
+            end: 2022-01-04
     task:
       validation_rollout: 1
       rollout:
