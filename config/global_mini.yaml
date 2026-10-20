@@ -9,9 +9,9 @@ app:
     inference_stop: !datetime '{{ app.time.inference_start }}'
     max_leadtime: 48
     multistep_input: 2
-    start: !datetime 2022-01-01T00
+    start: !datetime 2020-01-01T00
     step: !timedelta 6
-    stop: !datetime 2022-01-04T18
+    stop: !datetime 2025-12-31T18
 grids_and_meshes:
   global_grid_resolution_deg: 1.0
   filenames:
@@ -150,24 +150,24 @@ training:
             dataset_config:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
-            start: 2022-01-05
-            end: 2022-01-06
+            start: 2026-01-01
+            end: 2026-09-30
       training:
         datasets:
           data:
             dataset_config:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
-            start: 2022-01-01
-            end: 2022-01-02
+            start: 2020-01-01
+            end: 2024-12-31
       validation:
         datasets:
           data:
             dataset_config:
               dataset: ${dataloader.dataset}
               frequency: ${data.frequency}
-            start: 2022-01-03
-            end: 2022-01-04
+            start: 2025-01-01
+            end: 2025-12-31
     diagnostics:
       debug:
         anomaly_detection: false
@@ -186,7 +186,7 @@ training:
       progress_bar:
         _target_: pytorch_lightning.callbacks.TQDMProgressBar
         refresh_rate: 1
-      check_val_every_n_epoch: 1
+      check_val_every_n_epoch: 2
       print_memory_summary: false
       log:
         interval: 100
@@ -198,13 +198,13 @@ training:
           tracking_uri: null
           expand_hyperparams:
             - config
-          experiment_name: Global-2deg-cpu-capable
+          experiment_name: Global-1deg-cpu-capable
           http_max_retries: 35
           on_resume_create_child: True
           prefix: ''
           log_hyperparams: True
           max_params_length: 2000
-          project_name: Global-2deg-cpu-capable
+          project_name: Global-1deg-cpu-capable
           run_name: null
           system: False
           terminal: True
@@ -387,7 +387,7 @@ training:
         plots: plots
         profiler: profiler
     model:
-      num_channels: 256
+      num_channels: 320
       cpu_offload: false
       keep_batch_sharded: false
       model:
@@ -410,7 +410,7 @@ training:
       processor:
         _target_: anemoi.models.layers.processor.TransformerProcessor
         num_channels: ${model.num_channels}
-        num_layers: 6
+        num_layers: 8
         num_chunks: 1
         mlp_hidden_ratio: 2
         mlp_implementation: mlp
@@ -499,11 +499,11 @@ training:
       multistep_input: '{{ app.time.multistep_input }}'
       multistep_output: 1
       timestep: "6H"
-      validation_rollout: 8
+      validation_rollout: 24
       rollout:
         start: 1
-        epoch_increment: 0
-        maximum: 1
+        epoch_increment: 1
+        maximum: 4
     training:
       run_id: null
       fork_run_id: null
@@ -540,7 +540,7 @@ training:
                 - node_weights
               ignore_nans: true
       max_epochs: null
-      max_steps: 100
+      max_steps: 60000
       submodules_to_freeze: []
       weight_averaging: null
       optimization:
@@ -553,7 +553,7 @@ training:
           _target_: timm.scheduler.CosineLRScheduler
           t_initial: ${training.max_steps}
           lr_min: 0.000001
-          warmup_t: 10
+          warmup_t: 500
           t_in_epochs: false
       metrics:
         datasets:

@@ -55,6 +55,25 @@ training:
       - task: forecaster
       - training: single
       - _self_
+    dataloader:
+      test:
+        datasets:
+          start: 2022-01-03
+          end: 2022-01-04
+      training:
+        datasets:
+          start: 2022-01-01
+          end: 2022-01-02
+      validation:
+        datasets:
+          start: 2022-01-03
+          end: 2022-01-04
+    max_steps: 50
+      optimization:
+        optimizer:
+          lr_scheduler:
+            warmup_t: 10
+            t_initial: 50
 inference:
   execution:
     batchargs: !remove
