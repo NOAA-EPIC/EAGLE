@@ -40,6 +40,10 @@ val:
   zarrs:
     envcmds:
       - set -ex
+ufs2arco:
+  target:
+    statistics_period:
+      end: 2022-01-02T18
 training:
   execution:
     batchargs: !remove

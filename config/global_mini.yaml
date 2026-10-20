@@ -1,4 +1,7 @@
-# This is the Global EAGLE case.
+# This is the Global Mini case.
+# This configuration file is best used to learn the pipeline during
+# trainings or demos. It creates a a small-scale global model, 
+# with reduced resolution and CPU-only capability.
 
 # yamllint disable rule:anchors rule:line-length
 
@@ -24,7 +27,7 @@ ufs2arco:
   target:
     statistics_period:
       start: '{{ ufs2arco.source.analysis.t0.start }}'
-      end: 2022-01-02T18
+      end: 2024-12-31T18
 prewxvx:
   common:
     prewxvx: &prewxvx-common
