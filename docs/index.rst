@@ -42,6 +42,7 @@ Table of Contents
 
    eagle_models/nested_eagle
    eagle_models/global_eagle
+   eagle_models/global_mini
 
 .. toctree::
    :maxdepth: 1
