@@ -1,0 +1,66 @@
+name: NRT EAGLE CI Pipeline Weekly
+
+on:
+  schedule:
+    # Runs every Saturday at 06:00 UTC
+    - cron: '0 6 * * 6'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+
+  cleanup:
+    concurrency:
+      group: nested-eagle-ci-cleanup
+      cancel-in-progress: false
+      queue: max
+    name: Clean old conda installs
+    runs-on: ursa
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Clean old conda installs
+        run: .github/scripts/clean-old-conda-installs
+
+  run_pipeline:
+    concurrency:
+      group: nested-eagle-ci-run-pipeline
+      cancel-in-progress: false
+      queue: max
+    name: Run Nested EAGLE end-to-end on Ursa
+    runs-on: ursa
+    timeout-minutes: 1440
+    environment:
+      name: eagle-ursa
+
+    steps:
+
+      - name: Perform cleanup
+        run: .github/scripts/cleanup
+
+      - name: Checkout main develop head
+        uses: actions/checkout@v4
+        with:
+          ref: main 
+          fetch-depth: 0
+          clean: false 
+
+      - name: Build env and run pipeline
+        env:
+          INSTALLDIR: conda
+          PR_NUM: 99999
+        run: .github/scripts/nested-eagle
+    
+      - name: Send Slack Notification
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            {
+              "channel": "C0C7AJ84X3P", 
+              "text": ":spack: *${{ github.workflow }}* completed on *${{ matrix.runner }}* with status: *${{ job.status }}* }}"
+

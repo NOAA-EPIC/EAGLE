@@ -7,8 +7,8 @@ dependencies:
   - pip
   - python 3.13
   - requests 2.34.*
-  - uwtools 2.16.*
-  - wxvx >=0.7.3
+  - uwtools 2.21.*
+  - wxvx >=0.8.0
   - xesmf 0.8.*
   - zarr 2.18.*
   - pip:

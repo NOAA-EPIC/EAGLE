@@ -8,6 +8,7 @@ dependencies:
   - datashader 0.19.*
   - flash-attn 2.8.*
   - matplotlib >=3.7.1,<3.9 # low bound per anemoi-training; high bound per matplotlib Issue 28317
+  - mkl <2026 # 2026.x omits libmkl_gf_lp64.so.3 required by the resolved NumPy build
   - mpi4py 4.1.*
   - numpy 2.2.6.*
   - pip
@@ -17,7 +18,7 @@ dependencies:
   - torchvision 0.25.*
   - trimesh 5.1.*
   - triton 3.6.*
-  - uwtools 2.16.*
+  - uwtools 2.21.*
   - pip:
       - anemoi-inference==0.12.*
       - anemoi-models==0.19.*

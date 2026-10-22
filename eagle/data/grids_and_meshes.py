@@ -241,10 +241,15 @@ def _global_latent_grid(resolution_deg: float) -> Dataset:
 @contextmanager
 def _logging_to_file(path: Path) -> Iterator:
     logger = logging.getLogger()
-    stream_handler = logger.handlers[0]
-    logger.removeHandler(stream_handler)
+    # Save, then remove, original handlers:
+    handlers = list(logger.handlers)
+    for handler in handlers:
+        logger.removeHandler(handler)
+    # Add a file handler, then yield to the caller:
     file_handler = logging.FileHandler(path)
     logger.addHandler(file_handler)
     yield
+    # Remove the file handler, then restore original handlers:
     logger.removeHandler(file_handler)
-    logger.addHandler(stream_handler)
+    for handler in handlers:
+        logger.addHandler(handler)
