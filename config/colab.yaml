@@ -11,10 +11,10 @@ app:
   # Remove launcher so execution commands run directly in the notebook/runtime.
   launcher: !remove
   time:
-    inference_start: !datetime 2022-01-03T12
-    max_leadtime: 24
+    inference_start: !datetime 2022-01-02T00
+    max_leadtime: 12
     start: !datetime 2022-01-01T00
-    stop: !datetime 2022-01-04T18
+    stop: !datetime 2022-01-02T18
   # Placeholder objects retained for schema compatibility.
   # The anchor is kept because base.yaml aliases *gpu-batchargs.
   gpu:
@@ -43,7 +43,7 @@ val:
 ufs2arco:
   target:
     statistics_period:
-      end: 2022-01-02T18
+      end: 2022-01-01T18
 training:
   execution:
     batchargs: !remove
@@ -64,28 +64,28 @@ training:
         datasets:
           data:
             start: 2022-01-03
-            end: 2022-01-04
+            end: 2022-01-03
       training:
         datasets:
           data:
             start: 2022-01-01
-            end: 2022-01-02
+            end: 2022-01-01
       validation:
         datasets:
           data:
-            start: 2022-01-03
-            end: 2022-01-04
+            start: 2022-01-02
+            end: 2022-01-02
     task:
       validation_rollout: 1
       rollout:
         epoch_increment: 0
         maximum: 1
     training:
-      max_steps: 50
+      max_steps: 25
       optimization:
         lr_scheduler:
-          warmup_t: 10
-          t_initial: 50
+          warmup_t: 5
+          t_initial: 25
 inference:
   execution:
     batchargs: !remove
