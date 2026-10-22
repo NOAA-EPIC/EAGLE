@@ -10,7 +10,7 @@ designed to sit **between a toy model and an operational-quality model**.
   processor) as the other EAGLE models.
 * It is **not operational quality**. Its reduced resolution, smaller network,
   and shorter training budget mean its skill is lower than the
-  :doc:`global <global>` and :doc:`nested-EAGLE <nested_eagle>` models.
+  :doc:`global-EAGLE <global_eagle>` and :doc:`nested-EAGLE <nested_eagle>` models.
 
 It is trained so that **inference can run on a CPU or a local laptop**, with no
 GPU or HPC system required. This makes it useful for learning the workflow,
@@ -19,7 +19,7 @@ testing code and configuration changes, training sessions, and demos.
 .. note::
 
    global-mini is intended for education and demonstration. For scientific or
-   near-real-time forecasting, use the :doc:`global <global>` or
+   near-real-time forecasting, use the :doc:`global-EAGLE <global_eagle>` or
    :doc:`nested-EAGLE <nested_eagle>` models.
 
 
