@@ -84,19 +84,20 @@ training:
             start: 2022-01-02
             end: 2022-01-02
     diagnostics:
-      every_n_minutes:
-        save_frequency: null
-        num_models_saved: 0
-      every_n_epochs:
-        save_frequency: null
-        num_models_saved: 0
-      every_n_train_steps:
-        save_frequency: 10
-        num_models_saved: 2
-    plot:
-      frequency:
-        batch: 10
-        epoch: 2
+      checkpoint:
+        every_n_minutes:
+          save_frequency: null
+          num_models_saved: 0
+        every_n_epochs:
+          save_frequency: null
+          num_models_saved: 0
+        every_n_train_steps:
+          save_frequency: 10
+          num_models_saved: 2
+      plot:
+        frequency:
+          batch: 10
+          epoch: 2
     task:
       validation_rollout: 1
       rollout:
@@ -130,6 +131,6 @@ zarrs:
         envcmds:
           - set -ex
         executable: ufs2arco ufs2arco-gfs.yaml --overwrite
-        mpiargs: 
+        mpiargs:
           - -n 2
         mpicmd: mpiexec

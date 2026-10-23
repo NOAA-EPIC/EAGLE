@@ -105,7 +105,7 @@ pipeline on a small dataset and can be run in Google Colab:
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg
    :alt: Open In Colab
-   :target: https://colab.research.google.com/github/NOAA-EPIC/EAGLE/blob/feature/global_mini/notebooks/global_mini.ipynb
+   :target: https://colab.research.google.com/github/NOAA-EPIC/EAGLE/blob/main/notebooks/global_mini.ipynb
 
 The notebook covers:
 
