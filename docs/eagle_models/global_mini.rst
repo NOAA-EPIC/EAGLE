@@ -120,8 +120,7 @@ The notebook covers:
 
 The notebook trains for only a few steps on a very short period, so the
 resulting forecasts are for demonstration of the workflow and are not
-meaningful in terms of skill. A T4 GPU is recommended for training in Colab;
-a CPU works but training is much slower.
+meaningful in terms of skill. A T4 GPU is required for training in Colab.
 
 .. note::
 
