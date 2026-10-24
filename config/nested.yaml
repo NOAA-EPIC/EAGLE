@@ -57,6 +57,7 @@ prewxvx:
         <<: *prewxvx-common
         output_path: '{{ val.vx.rundir }}/postprocessed_files/{{ prewxvx.lam.prewxvx.name }}'
         model_type: nested-lam
+        vars_of_interest: !list '{{ dict(vx.common.wxvx.variables, accum_tp=vx.common.variables_stageiv.accum_tp).keys() | list }}'
       rundir: '{{ val.vx.rundir }}/prewxvx/{{ prewxvx.lam.prewxvx.name }}'
 training:
   anemoi:
@@ -716,13 +717,20 @@ visualization:
         stats: !list '{{ visualization.common.stats }}'
         variables: !list '{{ visualization.common.variables }}'
 vx:
+  common:
+    # Stage IV supports accumulated precipitation only, so keep this separate from
+    # the multi-variable GFS, HRRR, and PrepBUFR verification configurations.
+    variables_stageiv:
+      accum_tp:
+        level_type: surface
+        name: tp
   grid2grid:
     global:
       wxvx:
         wxvx:
           forecast:
             name: nested_global
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ meta.max_leadtime }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "global") }}'
 
@@ -752,7 +760,7 @@ vx:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: nested_lam
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ meta.max_leadtime }}h.nc'
             projection:
               a: 6371229
               b: 6371229
@@ -767,12 +775,42 @@ vx:
           paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2grid") | replace("EXTENT", "lam") }}'
           regrid: !dict '{{ vx.grid2grid.global.wxvx.wxvx.regrid }}'
           variables: !dict '{{ vx.common.wxvx.variables }}'
+  grid2stageiv:
+    lam:
+      platform: !dict '{{ app.platform }}'
+      wxvx: # config for the EAGLE driver
+        execution:
+          batchargs:
+            cores: 1
+            export: false
+            partition: '{{ app.partitions.netaccess }}'
+            rundir: '{{ vx.grid2stageiv.lam.wxvx.rundir }}'
+            walltime: '00:30:00'
+          envcmds: !list '{{ vx.common.execution.envcmds }}'
+          executable: wxvx -c wxvx-grid2stageiv-lam.yaml -t plots -f
+        name: grid2stageiv-lam
+        prewxvx:
+          <<: *prewxvx-lam
+        rundir: '{{ val.vx.rundir }}/grid2stageiv/lam'
+        wxvx: # config for the wxvx application
+          cycles: !dict '{{ vx.common.wxvx.cycles }}'
+          truth:
+            name: STAGEIV
+            type: grid
+            url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/pcpanl/prod/pcpanl.{{ yyyymmdd }}/st4_conus.{{ yyyymmdd }}{{ hh }}.01h.grb2
+          forecast: !dict '{{ vx.grid2grid.lam.wxvx.wxvx.forecast }}'
+          leadtimes: !dict '{{ vx.common.wxvx.leadtimes }}'
+          meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2stageiv") | replace("EXTENT", "lam") }}'
+          ncdiffs: !bool '{{ vx.grid2grid.global.wxvx.wxvx.ncdiffs }}'
+          paths: !dict '{{ vx.common.paths_grid | replace("TRUTH", "grid2stageiv") | replace("EXTENT", "lam") }}'
+          regrid: !dict '{{ vx.grid2grid.global.wxvx.wxvx.regrid }}'
+          variables: !dict '{{ vx.common.variables_stageiv }}'
   grid2obs:
     global:
       wxvx:
         wxvx:
           forecast:
-            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
+            path: '{{ meta.post_files }}/nested-global.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ meta.max_leadtime }}h.nc'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
           paths: !dict '{{ vx.common.paths_obs | replace("TRUTH", "grid2obs") | replace("EXTENT", "global") }}'
     lam:
@@ -798,7 +836,7 @@ vx:
             coords: !dict '{{ vx.common.wxvx.forecast.coords }}'
             name: '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.name }}'
             # NB: Retain relative 'meta.post_files' reference in 'path' value!
-            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ "%02d" % meta.max_leadtime }}h.nc'
+            path: '{{ meta.post_files }}/nested-lam.{{ yyyymmdd[:4] }}-{{ yyyymmdd[4:6] }}-{{ yyyymmdd[6:8] }}T{{ hh }}.{{ meta.max_leadtime }}h.nc'
             projection: !dict '{{ vx.grid2grid.lam.wxvx.wxvx.forecast.projection }}'
           leadtimes: !dict '{{ vx.common.wxvx.leadtimes }}'
           meta: !dict '{{ vx.common.wxvx.meta | replace("TRUTH", "grid2obs") | replace("EXTENT", "lam") }}'

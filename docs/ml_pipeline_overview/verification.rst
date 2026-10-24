@@ -44,14 +44,39 @@ and :term:`LAM` forecasts against:
 
 Before running verification, the driver runs the ``prewxvx`` component from ``eagle-tools`` to postprocess forecast output from the previous step.
 
-See the `wxvx repository <https://github.com/maddenp-cu/wxvx>`_ for further
+See the `wxvx repository <https://github.com/NOAA-GSL/wxvx>`_ for further
 information about the project itself.
+
+Precipitation Skill Scores
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``vx-stageiv-lam`` target verifies the LAM model's six-hour accumulated
+precipitation field, ``accum_tp``, as the canonical ``wxvx`` variable ``tp``.
+The truth source is the hourly Stage IV APCP analysis distributed by NOMADS.
+For each forecast valid time, ``wxvx`` downloads the six hourly Stage IV files
+ending at that time and uses MET's ``pcp_combine`` to create the six-hour truth
+accumulation. MET's ``grid_stat`` then regrids Stage IV to the LAM forecast grid.
+
+The default URL uses NOMADS' recent operational Stage IV archive, so this target
+is intended primarily for NRT forecasts. Data availability may lag the valid
+time. For historical verification, override
+``vx.grid2stageiv.lam.wxvx.wxvx.truth.url`` with a URL or local-path template for
+an archive that contains the required hourly files.
+
+``wxvx`` computes the categorical CSI and HSS scores and the neighborhood FSS
+at precipitation thresholds of 1, 5, 10, and 25 kg m\ :sup:`-2`. FSS is computed
+with circular neighborhoods 3, 5, and 11 grid points wide.
+
+Accumulated precipitation is not included in the grid-to-observation targets
+because the PrepBUFR point-observation truth source does not provide the
+corresponding field.
 
 wxvx Quick Tips
 ----------------------------------------------------
 
 * Use the ``vx-grid-*`` targets to verify against gridded analyses.
 * Use the ``vx-obs-*`` targets to verify against PrepBUFR observations.
+* Use ``vx-stageiv-lam`` to verify LAM accumulated precipitation against Stage IV.
 * The ``global`` and ``lam`` targets are independent, so they can be run in
   parallel.
 * Check the ``run/<expname>/vx/*.log`` files if a verification job fails.
@@ -60,7 +85,7 @@ wxvx Quick Tips
 Running Verification
 ~~~~~~~~~~~~~~~~~~~~~~
 
-EAGLE provides four standard verification targets:
+EAGLE provides five standard verification targets for a nested forecast:
 
 .. code-block:: bash
 
@@ -68,6 +93,7 @@ EAGLE provides four standard verification targets:
    make vx-grid-lam config=eagle.yaml
    make vx-obs-global config=eagle.yaml
    make vx-obs-lam config=eagle.yaml
+   make vx-stageiv-lam config=eagle.yaml
 
 These commands submit batch jobs for:
 
@@ -75,6 +101,7 @@ These commands submit batch jobs for:
 * ``grid-lam``: limited-area forecasts verified against gridded analyses
 * ``obs-global``: global forecasts verified against point observations
 * ``obs-lam``: limited-area forecasts verified against point observations
+* ``stageiv-lam``: limited-area accumulated precipitation verified against Stage IV
 
 Because these are separate jobs, they can be launched in quick succession to
 run in parallel.

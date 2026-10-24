@@ -7,7 +7,7 @@ This repository contains configuration and driver code for running an end-to-end
 - **Train an AI model:** Trains an Anemoi model using the provisioned datasets, producing checkpoints for inference.
 - **Generate a forecast:** Runs inference from training checkpoints using `anemoi-inference` to produce forecast output.
 - **Prepare output for verification:** Postprocesses forecast output into the formats and directory structure expected by `wxvx`.
-- **Verify model performance:** Runs `wxvx` verification against gridded analysis and/or observations, producing MET statistics and plots.
+- **Verify model performance:** Runs `wxvx` verification against gridded analyses, point observations, and Stage IV precipitation, producing MET statistics and plots.
 
 ## Documentation
 

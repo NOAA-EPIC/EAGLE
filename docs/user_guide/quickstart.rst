@@ -111,13 +111,19 @@ Building and Running :term:`EAGLE`
       make vx-obs-lam config=eagle.yaml
 
    For running just the global verification run, only submit ``vx-grid-global`` and ``vx-obs-global``.
+   The ``vx-stageiv-lam`` target is also available for the nested EAGLE configuration, but its default NOMADS URL
+   provides recent operational Stage IV data rather than the historical data used by this quickstart. Use it with
+   an NRT config as shown below, or override ``vx.grid2stageiv.lam.wxvx.wxvx.truth.url`` with an appropriate
+   historical archive or local-path template.
 
    Before running verification, the :term:`WXVX` driver will run ``prewxvx`` to prepare forecast output from the previous step. See the files ``run/<expname>/vx/prewxvx/{global,lam}/runscript.prewxvx-*.out`` for details.
    
-   These steps perform verification of the ``global`` or :term:`LAM` forecasts against gridded analyses (``*-grid-*``) or 
-   PrepBUFR observations (``*-obs-*``) as truth. Each submits a batch job, so the four ``make`` commands can be run in quick 
-   succession to get all the batch jobs running in parallel. When each batch job completes, MET ``.stat`` files and ``.png`` 
-   plot files can be found under the ``stats/`` and ``plots/`` subdirectories of ``run/<expname>/vx/grid2{grid,obs}/{global,lam}/run/``. 
+   These steps perform verification of the ``global`` or :term:`LAM` forecasts against gridded analyses (``*-grid-*``),
+   PrepBUFR observations (``*-obs-*``), or Stage IV precipitation (``vx-stageiv-lam``) as truth. Each submits a batch job,
+   so the ``make`` commands can be run in quick succession to get all the batch jobs running in parallel. When each batch
+   job completes, MET ``.stat`` files and ``.png`` plot files can be found under the ``stats/`` and ``plots/`` subdirectories
+   of ``run/<expname>/vx/grid2{grid,obs}/{global,lam}/run/``. Stage IV results are written beneath
+   ``run/<expname>/vx/grid2stageiv/lam/run/``.
    The files ``run/<expname>/vx/*.log`` contain the logs from each verification run.
 
 #. Make additional :term:`visualization` outputs
@@ -189,7 +195,8 @@ Building and Running :term:`EAGLE`
       make vx-grid-lam config=nrt.yaml
       make vx-obs-global config=nrt.yaml
       make vx-obs-lam config=nrt.yaml
+      make vx-stageiv-lam config=nrt.yaml
 
    Verification requires completed forecast output, so wait until the inference window has completed before running these commands. 
    For example, if you created a 48 hour forecast, you will need to wait 48 hours to verify it. Once the output is available, run 
-   the same ``vx`` targets shown above to verify against gridded analyses or observations.
+   the same ``vx`` targets shown above to verify against gridded analyses, observations, or Stage IV precipitation.

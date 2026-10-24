@@ -64,6 +64,9 @@ Glossary
    prewxvx
       The component used by EAGLE to prepare forecast output for :term:`wxvx` verification steps.
 
+   Stage IV
+      NCEP's gridded multisensor precipitation analysis, used by EAGLE as truth for limited-area accumulated-precipitation verification.
+
    ufs2arco
       The component used by EAGLE to prepare Zarr-formatted forecast and analysis data. See the `ufs2arco repository <https://github.com/NOAA-PSL/ufs2arco>`__.
 

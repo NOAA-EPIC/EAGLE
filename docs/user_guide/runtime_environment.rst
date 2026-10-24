@@ -76,6 +76,10 @@ Run ``make`` with no arguments to list available targets.
      - Verify LAM against obs
      - inference
      - wxvx
+   * - vx-stageiv-lam
+     - Verify LAM accumulated precipitation against Stage IV
+     - inference
+     - wxvx
    * - vis-grid-global
      - Visualize global VX results against gridded analysis
      - vx-grid-global

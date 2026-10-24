@@ -149,6 +149,9 @@ Configuration for the ``VX`` driver.
 ``grid2obs``
    The ``grid2obs:`` block provides configuration for running ``wxvx`` with MET's `point_stat <https://metplus.readthedocs.io/projects/met/en/latest/Users_Guide/point-stat.html>`_ tool to verify against point observations. Sub-blocks ``global:`` and ``lam:`` provide configuration refinements for verifying global and limited-area grids, respectively.
 
+``grid2stageiv``
+   The ``grid2stageiv:`` block provides the nested EAGLE configuration for verifying six-hour LAM accumulated precipitation against hourly Stage IV analyses. ``wxvx`` stages the six hourly files, combines them with MET's ``pcp_combine``, and runs ``grid_stat`` to calculate precipitation skill scores.
+
 zarrs
 ------------------------------------------------------------------------------
 

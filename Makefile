@@ -2,7 +2,7 @@ BASHSRCS = $(wildcard ../.github/scripts/*) format setup
 HELPERS  = vx zarr
 MODULES  = data inference training visualization wxvx
 PACKAGE  = eagle
-STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam
+STEPS    = data grids-and-meshes inference training vis-grid-global vis-grid-lam vis-obs-global vis-obs-lam vx-grid-global vx-grid-lam vx-obs-global vx-obs-lam vx-stageiv-lam
 TOOLING  = config devenv env format lint realize shellcheck test typecheck unittest validate yamllint
 VERBOSE  = $(if $(filter undefined,$(origin DEBUG)),, --verbose)
 
@@ -175,6 +175,9 @@ vx-obs-global:
 
 vx-obs-lam:
 	@$(make) vx truth=obs extent=lam
+
+vx-stageiv-lam:
+	@$(make) vx truth=stageiv extent=lam
 
 yamllint:
 	$(call activate,base)
