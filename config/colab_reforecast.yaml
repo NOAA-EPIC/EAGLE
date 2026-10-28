@@ -19,7 +19,7 @@ app:
     inference_stop: !datetime '{{ app.forcasting.inference_start }}'
     start: !datetime '{{ app.forcasting.ic_start }}'
     stop: !datetime '{{ app.forcasting.stop }}'
-    leadtime: !int '{{ (app.forcasting.leadtime.total_seconds() / 3600) | int }}'
+    max_leadtime: !int '{{ (app.forcasting.leadtime.total_seconds() / 3600) | int }}'
   rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
   # Remove launcher so execution commands run directly in the notebook/runtime.
   launcher: !remove
