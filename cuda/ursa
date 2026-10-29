@@ -1,2 +1,2 @@
 module purge
-module load cuda/12.8.1
+module load cuda/13.1.0
