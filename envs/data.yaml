@@ -3,19 +3,18 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
-  - cf-xarray 0.10.11.*
-  - impi_rt 2021.13.*
-  - mpi4py 4.1.*
-  - numpy 2.2.6.*
-  - pandas 2.3.3.*
-  - pip
-  - setuptools 81.0.*
-  - types-pyyaml
-  - ufs2arco 0.19.*
-  - uwtools 2.21.*
-  - xarray 2026.2.*
-  - xesmf 0.9.2.*
+  - impi_rt 2021.18.*
+  - numpy 2.2.*
+  - pandas 2.3.*
+  - python 3.13
+  - python-dateutil 2.9.*
+  - xarray 2024.10.*
+  - xesmf 0.9.*
   - pip:
       - anemoi-datasets==0.5.*
       - anemoi-graphs==0.9.*
       - anemoi-transform==0.5.*
+      #- impi-rt==2021.18.*
+      - mpi4py==4.1.*
+      - ufs2arco==0.19.*
+      - unified-workflow-tools==2.21.*
