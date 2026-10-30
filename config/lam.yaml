@@ -1,7 +1,10 @@
 # This is the Nested EAGLE case.
 
 # yamllint disable rule:anchors rule:line-length
-
+app:
+  experiment_name: lam
+  time:
+    step: !timedelta 1
 grids_and_meshes:
   filenames:
     gfs_target_grid: !remove
@@ -23,6 +26,12 @@ inference:
         dataset:
           dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
 ufs2arco:
+  source:
+    forecast:
+      fhr:
+        start: 1
+        step: !int '{{ val.step }}'
+        end: 1
   multisource_gfs:
     analysis:
       fhr:
@@ -92,7 +101,7 @@ training:
     # Blocks to customize default Anemoi training config.
     data:
       format: zarr
-      frequency: 6h
+      frequency: 1h
       datasets:
         hrrr:
           diagnostic:
