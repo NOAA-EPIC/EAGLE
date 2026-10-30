@@ -22,6 +22,19 @@ inference:
       gfs:
         dataset:
           dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
+ufs2arco:
+  multisource_gfs:
+    analysis:
+      fhr:
+        start: 0
+        step: 1
+        end: 5
+      levels: !list '{{ val.levels }}'
+      t0:
+        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ val.step }}h'
+        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ val.variables.multisource_gfs }}'
 prewxvx:
   common:
     prewxvx: &prewxvx-common
@@ -936,20 +949,11 @@ zarrs:
         source: !dict '{{ dict(ufs2arco.multisource_gfs.analysis, name="gfs_archive") }}'
         target: !dict '{{ ufs2arco.target }}'
         transforms: !remove
-ufs2arco:
-  multisource_gfs:
-    analysis:
-      fhr:
-        start: 0
-        step: 1
-        end: 5
-      levels: !list '{{ val.levels }}'
-      t0:
-        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ val.step }}h'
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
-      variables: !list '{{ val.variables.multisource_gfs }}'
 val:
+  filenames:
+    gfs_target_grid: !remove
+    hrrr_target_grid: hrrr_6km.nc
+    latent_mesh: latentx2.spongex1.combined.sorted.npz
   variables:
     multisource_gfs:
       # 3D Prognostic
@@ -972,8 +976,3 @@ val:
       # Forcing
       - lsm
       - orog
-val:
-  filenames:
-    gfs_target_grid: !remove
-    hrrr_target_grid: hrrr_6km.nc
-    latent_mesh: latentx2.spongex1.combined.sorted.npz
