@@ -8,15 +8,10 @@ grids_and_meshes:
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
     latent_mesh: '{{ val.filenames.latent_mesh }}'
   rundir: '{{ val.data.rundir }}'
-  global_grid_resolution_deg: !remove
+  global_grid_resolution_deg: 0.25
   conus_grid_resolution_km: 6
   latent_mesh_conus_coarsen_factor: 2    # need to decide what to do here.. because its not this
   latent_mesh_global_resolution_deg: 2.0    # need to decide what to do here.. because its not this
-val:
-  filenames:
-    gfs_target_grid: !remove
-    hrrr_target_grid: hrrr_6km.nc
-    latent_mesh: latentx2.spongex1.combined.sorted.npz
 inference:
   anemoi:
     input_dataset_kwargs: &dataset-kwargs
@@ -933,6 +928,7 @@ zarrs:
           horizontal_regrid:
             regridder_kwargs: !dict '{{ dict(ufs2arco.regridder, filename="conservative_1059x1799_211x359.nc") }}'
             target_grid_path: '{{ val.data.rundir }}/{{ val.filenames.hrrr_target_grid }}'
+    platform: !dict '{{ app.platform }}'
   gfs:
     zarr:
       ufs2arco:
@@ -976,3 +972,8 @@ val:
       # Forcing
       - lsm
       - orog
+val:
+  filenames:
+    gfs_target_grid: !remove
+    hrrr_target_grid: hrrr_6km.nc
+    latent_mesh: latentx2.spongex1.combined.sorted.npz
