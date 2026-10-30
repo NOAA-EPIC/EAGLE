@@ -52,7 +52,7 @@ ufs2arco:
         end: 5
       levels: !list '{{ val.levels }}'
       t0:
-        start: '{{ (app.time.start + app.timne.gfs_step).strftime("%Y-%m-%dT%H") }}'
+        start: '{{ (app.time.start + app.time.gfs_step).strftime("%Y-%m-%dT%H") }}'
         freq: '6h'
         end: '{{ (app.time.stop + app.time.gfs_step).strftime("%Y-%m-%dT%H") }}'
       variables: !list '{{ val.variables.multisource_gfs }}'
