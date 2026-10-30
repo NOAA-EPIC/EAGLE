@@ -41,7 +41,7 @@ ufs2arco:
         end: 1
       t0:
         start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
-        freq: '{{ val.step }}h'
+        freq: '1h'
         end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
       variables: !list '{{ val.variables.forecast }}'
   multisource_gfs:
