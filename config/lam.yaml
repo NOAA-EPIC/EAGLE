@@ -4,8 +4,9 @@
 app:
   experiment_name: lam
   time:
-    step: !timedelta 1
+    step: !timedelta 6
     gfs_step: !timedelta 6
+    hrrr_step: !timedelta 1
 grids_and_meshes:
   filenames:
     gfs_target_grid: !remove
@@ -28,11 +29,21 @@ inference:
           dataset: '{{ grids_and_meshes.rundir }}/gfs.zarr'
 ufs2arco:
   source:
+    analysis:
+      t0:
+        start: '{{ (app.time.start + app.time.gfs_step).strftime("%Y-%m-%dT%H") }}'
+        freq: '1h'
+        end: '{{ (app.time.stop + app.time.gfs_step).strftime("%Y-%m-%dT%H") }}'
     forecast:
       fhr:
         start: 1
         step: !int '{{ val.step }}'
         end: 1
+      t0:
+        start: '{{ app.time.start.strftime("%Y-%m-%dT%H") }}'
+        freq: '{{ val.step }}h'
+        end: '{{ app.time.stop.strftime("%Y-%m-%dT%H") }}'
+      variables: !list '{{ val.variables.forecast }}'
   multisource_gfs:
     analysis:
       fhr:
