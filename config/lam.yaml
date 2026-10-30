@@ -4,14 +4,19 @@
 
 grids_and_meshes:
   filenames:
-    gfs_target_grid: '{{ val.filenames.gfs_target_grid }}'
+    gfs_target_grid: !remove
     hrrr_target_grid: '{{ val.filenames.hrrr_target_grid }}'
     latent_mesh: '{{ val.filenames.latent_mesh }}'
   rundir: '{{ val.data.rundir }}'
-  global_grid_resolution_deg: 1.0
-  conus_grid_resolution_km: 15
-  latent_mesh_conus_coarsen_factor: 2
-  latent_mesh_global_resolution_deg: 2.0
+  global_grid_resolution_deg: !remove
+  conus_grid_resolution_km: 6
+  latent_mesh_conus_coarsen_factor: 2    # need to decide what to do here.. because its not this
+  latent_mesh_global_resolution_deg: 2.0    # need to decide what to do here.. because its not this
+val:
+  filenames:
+    gfs_target_grid: !remove
+    hrrr_target_grid: hrrr_6km.nc
+    latent_mesh: latentx2.spongex1.combined.sorted.npz
 inference:
   anemoi:
     input_dataset_kwargs: &dataset-kwargs
@@ -733,10 +738,6 @@ training:
   remove:
     # Dot-separated config keys paths to delete from the composed runtime config.
     - graph.nodes.hidden.node_builder.grid
-val:
-  filenames:
-    hrrr_target_grid: hrrr_15km.nc
-    latent_mesh: latentx2.spongex1.combined.sorted.npz
 visualization:
   grid2grid:
     global:
