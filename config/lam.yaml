@@ -5,6 +5,7 @@ app:
   experiment_name: lam
   time:
     step: !timedelta 1
+    gfs_step: !timedelta 6
 grids_and_meshes:
   filenames:
     gfs_target_grid: !remove
@@ -40,9 +41,9 @@ ufs2arco:
         end: 5
       levels: !list '{{ val.levels }}'
       t0:
-        start: '{{ (app.time.start + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        start: '{{ (app.time.start + app.timne.gfs_step).strftime("%Y-%m-%dT%H") }}'
         freq: '6h'
-        end: '{{ (app.time.stop + app.time.step).strftime("%Y-%m-%dT%H") }}'
+        end: '{{ (app.time.stop + app.time.gfs_step).strftime("%Y-%m-%dT%H") }}'
       variables: !list '{{ val.variables.multisource_gfs }}'
 prewxvx:
   common:
