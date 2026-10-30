@@ -10,4 +10,5 @@ dependencies:
   - pytest-randomly 3.15.*
   - ruff 0.14.*
   - shellcheck 0.11.*
+  - types-pyyaml
   - yamllint 1.38.*
