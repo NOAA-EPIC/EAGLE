@@ -937,7 +937,7 @@ zarrs:
     zarr:
       ufs2arco:
         multisource: !remove
-        source: !dict '{{ dict(ufs2arco.source_gfs.analysis, name="gfs_archive") }}'
+        source: !dict '{{ dict(ufs2arco.multisource_gfs.analysis, name="gfs_archive") }}'
         target: !dict '{{ ufs2arco.target }}'
 ufs2arco:
   multisource_gfs:
