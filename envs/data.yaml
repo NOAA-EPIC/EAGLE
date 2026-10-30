@@ -1,7 +1,6 @@
 channels:
-  - nodefaults
   - conda-forge
-  - ufs-community
+  - nodefaults
 dependencies:
   - impi_rt 2021.18.*
   - numpy 2.2.*
@@ -14,7 +13,19 @@ dependencies:
       - anemoi-datasets==0.5.*
       - anemoi-graphs==0.9.*
       - anemoi-transform==0.5.*
-      #- impi-rt==2021.18.*
       - mpi4py==4.1.*
       - ufs2arco==0.19.*
       - unified-workflow-tools==2.21.*
+      - xarray==2024.10.*
+
+# NOTES
+#
+# A pip impi-rt package is available, but leads to a hung job on Ursa.
+#
+# A pip xesmf package is available, but does not provide ESMF executables. The
+# conda xesmf package installs, via a dependency, the ESMF executables.
+#
+# The conda numpy, pandas, python-dateutil, and xarray packages are installed by
+# default as dependencies of the conda xesmf package, but pip replaces them with
+# different versions. Install the pip-required versions via conda to avoid this
+# wasteful behavior.
