@@ -21,7 +21,7 @@ clean_conda_pkgs_maybe() {
     (
       env_activate base
       msg Cleaning conda package cache
-      mamba clean --all --yes
+      conda clean --all --yes
     )
   fi
 }
@@ -29,12 +29,12 @@ clean_conda_pkgs_maybe() {
 env_activate() {
   local env
   env=$1
-  source $INSTALLDIR/etc/profile.d/mamba.sh
+  source $INSTALLDIR/etc/profile.d/conda.sh
   # Activation scripts shipped with conda packages may contain statements either expanding undefined
   # variables or exiting with error status, so temporarily disable the checks for these conditions,
   # then enable again.
   set +eu
-  mamba activate $env
+  conda activate $env
   set -eu
 }
 
@@ -65,6 +65,10 @@ install_conda() {
   wget -nv $url
   bash $installer -bfp $INSTALLDIR
   rm -v $installer
+  cat <<EOF >$INSTALLDIR/.condarc
+plugins:
+  conda_pypi_pip_warning: false
+EOF
 }
 
 install_devpkgs_maybe() {
@@ -74,7 +78,7 @@ install_devpkgs_maybe() {
     msg Installing dev packages into environment: $name
     (
       env_activate $name
-      mamba env update ${MAMBAFLAGS[@]} --file envs/dev.yaml
+      conda env update --file envs/dev.yaml --quiet
     )
   fi
 }
@@ -86,17 +90,17 @@ msg() {
 prep_env() {
   local args name
   name=$1
-  args=(${MAMBAFLAGS[@]} --file envs/$name.yaml --name $name)
+  args=(--file envs/$name.yaml --name $name --quiet)
   (
     export PIP_PROGRESS_BAR=off
-    export PIP_VERBOSE=0 # set to 1 for debugging
+    export PIP_VERBOSE=1
     env_activate base
     if env_exists $name; then
       msg Updating environment: $name
-      mamba env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
+      conda env update ${args[@]}
     else
       msg Creating environment: $name
-      mamba env create ${args[@]}
+      conda env create ${args[@]} --yes
     fi
   )
   cat <<EOF
@@ -160,7 +164,7 @@ prep_env_base() {
   (
     env_activate $name
     msg Updating environment: $name
-    mamba env update ${MAMBAFLAGS[@]} --file envs/$name.yaml
+    conda env update --file envs/$name.yaml --quiet
     install_devpkgs_maybe $name
     clean_conda_pkgs_maybe
   )
@@ -215,10 +219,8 @@ prep_env_wxvx() {
 
 install_conda
 CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
-MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
-export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
-MAMBAFLAGS=(--log-level error --yes)
+export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
 environments=(anemoi base data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
