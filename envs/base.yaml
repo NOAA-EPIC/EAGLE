@@ -3,5 +3,6 @@ channels:
   - conda-forge
   - ufs-community
 dependencies:
+  - pip
   - pip:
       - unified-workflow-tools==2.21.*

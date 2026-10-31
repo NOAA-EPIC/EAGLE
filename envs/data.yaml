@@ -5,6 +5,7 @@ dependencies:
   - impi_rt 2021.18.*
   - numpy 2.2.*
   - pandas 2.3.*
+  - pip
   - python 3.13
   - python-dateutil 2.9.*
   - xarray 2024.10.*

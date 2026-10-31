@@ -5,6 +5,7 @@ dependencies:
   - cuda-version=13.1
   - flash-attn 2.8.*
   - numpy 2.2.*
+  - pip
   - python 3.13
   - pytorch=2.10.*=cuda*
   - torchvision=0.25.*=cuda*
