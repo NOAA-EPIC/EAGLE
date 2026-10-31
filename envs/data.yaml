@@ -25,6 +25,6 @@ dependencies:
 # conda xesmf package installs, via a dependency, the ESMF executables.
 #
 # The conda numpy, pandas, python-dateutil, and xarray packages are installed by
-# default as dependencies of the conda xesmf package, but pip replaces them with
+# default as dependencies of other conda package(s), but pip replaces them with
 # different versions. Install the pip-required versions via conda to avoid this
 # wasteful behavior.

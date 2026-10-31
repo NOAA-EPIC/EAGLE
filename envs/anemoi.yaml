@@ -27,9 +27,9 @@ dependencies:
 # The conda flash-attn package provides prebuilt executables and libraries.
 #
 # The conda numpy, pytorch, and triton packages are installed by default as
-# dependencies of the conda flash-attn package, but pip replaces them with
-# different versions. Install the pip-required versions via conda to avoid this
-# wasteful behavior.
+# dependencies of other conda package(s), but pip replaces them with different
+# versions. Install the pip-required versions via conda to avoid this wasteful
+# behavior.
 #
 # The current Anemoi packages don't support pytorch > 2.10, so install this
 # version.

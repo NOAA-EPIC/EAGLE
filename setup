@@ -88,13 +88,14 @@ prep_env() {
   name=$1
   args=(${MAMBAFLAGS[@]} --file envs/$name.yaml --name $name)
   (
+    export PIP_PROGRESS_BAR=off
+    export PIP_VERBOSE=0 # set to 1 for debugging
     env_activate base
     if env_exists $name; then
       msg Updating environment: $name
       mamba env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
     else
       msg Creating environment: $name
-      export PIP_VERBOSE=0 # set to 1 for debugging
       mamba env create ${args[@]}
     fi
   )
