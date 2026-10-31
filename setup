@@ -4,8 +4,6 @@
 
 set -aeuo pipefail
 
-INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
-
 # In all functions, make variables local unless they are either intended for global use, or set in
 # a subshell that exits at the end of the function.
 
@@ -78,7 +76,7 @@ install_devpkgs_maybe() {
     msg Installing dev packages into environment: $name
     (
       env_activate $name
-      conda env update --file envs/dev.yaml --quiet
+      conda env update ${FLAGS_UPDATE[@]} --file envs/dev.yaml
     )
   fi
 }
@@ -90,17 +88,17 @@ msg() {
 prep_env() {
   local args name
   name=$1
-  args=(--file envs/$name.yaml --name $name --quiet)
+  args=(--file envs/$name.yaml --name $name)
   (
+    export PIP_LOG=$INSTALLDIR/pip.log
     export PIP_PROGRESS_BAR=off
-    export PIP_VERBOSE=1
     env_activate base
     if env_exists $name; then
       msg Updating environment: $name
-      conda env update ${args[@]}
+      conda env update ${FLAGS_UPDATE[@]} ${args[@]}
     else
       msg Creating environment: $name
-      conda env create ${args[@]} --yes
+      conda env create ${FLAGS_CREATE[@]} ${args[@]}
     fi
   )
   cat <<EOF
@@ -164,7 +162,7 @@ prep_env_base() {
   (
     env_activate $name
     msg Updating environment: $name
-    conda env update --file envs/$name.yaml --quiet
+    conda env update ${FLAGS_UPDATE[@]} --file envs/$name.yaml
     install_devpkgs_maybe $name
     clean_conda_pkgs_maybe
   )
@@ -219,9 +217,12 @@ prep_env_wxvx() {
 
 install_conda
 CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
+FLAGS_CREATE=(--quiet --yes)
+FLAGS_UPDATE=(-vv --quiet)
+INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA XDG_CACHE_HOME
-environments=(anemoi base data visualization wxvx)
+environments=(anemoi) # base data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
 done
