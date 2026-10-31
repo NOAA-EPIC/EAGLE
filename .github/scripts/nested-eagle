@@ -6,7 +6,7 @@ set -euo pipefail
 export SETVARS_CALL=${SETVARS_CALL:-0}
 cd "$GITHUB_WORKSPACE"
 
-time make env cudascript=ursa INSTALLDIR="$INSTALLDIR"
+time make env INSTALLDIR="$INSTALLDIR"
 
 source conda/etc/profile.d/conda.sh
 conda activate base

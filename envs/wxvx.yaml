@@ -2,14 +2,12 @@ channels:
   - nodefaults
   - conda-forge
   - oar-gsl
-  - ufs-community
 dependencies:
-  - pip
+  #- requests 2.34.*
+  #- zarr 2.18.*
   - python 3.13
-  - requests 2.34.*
-  - uwtools 2.21.*
   - wxvx >=0.8.0
   - xesmf 0.8.*
-  - zarr 2.18.*
   - pip:
-      - eagle-tools==0.9.1
+      - eagle-tools==0.9.*
+      - unified-workflow-tools==2.21.*

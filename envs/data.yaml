@@ -16,7 +16,6 @@ dependencies:
       - mpi4py==4.1.*
       - ufs2arco==0.19.*
       - unified-workflow-tools==2.21.*
-      - xarray==2024.10.*
 
 # NOTES
 #

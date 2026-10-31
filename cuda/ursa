@@ -1,2 +1,0 @@
-module purge
-module load cuda/13.1.0

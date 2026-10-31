@@ -26,21 +26,6 @@ clean_conda_pkgs_maybe() {
   fi
 }
 
-cuda_command_file() {
-  local path val
-  val=${ARGS[cudascript]}
-  path=$val
-  test -e $path || path=$(dirname $(readlink -f $0))/cuda/$val
-  echo $path
-}
-
-cuda_release() {
-  (
-    source $(cuda_command_file)
-    nvcc --version | grep release | sed -E 's/^.*release ([0-9]+\.[0-9]+).*/\1/'
-  )
-}
-
 env_activate() {
   local env
   env=$1
@@ -73,7 +58,7 @@ install_conda() {
     msg Found existing conda installation: $INSTALLDIR
     return
   fi
-  ver=26.1.1-3
+  ver=26.9.4-1
   installer=Miniforge3-$ver-$(uname -s)-$(uname -p).sh
   url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
   msg Installing conda
@@ -96,20 +81,6 @@ install_devpkgs_maybe() {
 
 msg() {
   echo -e "=> $*"
-}
-
-parse_kvargs() {
-  local arg key required val
-  declare -g -A ARGS
-  for arg in $@; do
-    IFS="=" read -r key val <<<$arg
-    ARGS[$key]=$val
-  done
-  required="cudascript"
-  for arg in $required; do
-    test -z "${ARGS[$arg]:-}" && echo Argument $arg= missing && exit 1
-  done
-  export ARGS
 }
 
 prep_env() {
@@ -170,7 +141,6 @@ modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '
 if [[ -n "\$modules" ]]; then
   export EAGLE_OLD_MODULES="\$modules"
 fi
-$(cat $(cuda_command_file))
 EOF
     # NB: Append to the existing script:
     cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
@@ -242,13 +212,12 @@ prep_env_wxvx() {
   prep_env wxvx
 }
 
-parse_kvargs $@
 install_conda
-CONDA_OVERRIDE_CUDA=$(cuda_release)
-MAMBAFLAGS=(--log-level error --yes)
+CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
 MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
+MAMBAFLAGS=(--log-level error --yes)
 environments=(anemoi base data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name

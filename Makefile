@@ -49,11 +49,9 @@ data:
 	@for x in gfs hrrr; do if [[ -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)" ]]; then $(make) zarr source=$$x; fi; done
 
 devenv:
-	$(call check,$(cudascript),cudascript)
-	EAGLEDEV=1 INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
+	EAGLEDEV=1 INSTALLDIR=$(INSTALLDIR) ./setup
 env:
-	$(call check,$(cudascript),cudascript)
-	INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
+	INSTALLDIR=$(INSTALLDIR) ./setup
 
 format:
 	$(call activate,base)

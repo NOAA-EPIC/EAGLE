@@ -36,7 +36,7 @@ Building and Running :term:`EAGLE`
 
    .. code-block:: bash
 
-      make env cudascript=ursa
+      make env
 
    This step creates the runtime software environment, comprising conda virtual environments to support data preparation, 
    training, :term:`inference`, and verification. The ``conda/`` subdirectory it creates is self-contained and can be removed 
