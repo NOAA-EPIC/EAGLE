@@ -94,7 +94,7 @@ prep_env() {
       mamba env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
     else
       msg Creating environment: $name
-      export PIP_VERBOSE=1
+      export PIP_VERBOSE=0 # set to 1 for debugging
       mamba env create ${args[@]}
     fi
   )
