@@ -37,7 +37,7 @@ cuda_command_file() {
 cuda_release() {
   (
     source $(cuda_command_file)
-    nvcc --version | grep release | sed -E 's/^.*release ([0-9]+).*/\1/'
+    nvcc --version | grep release | sed -E 's/^.*release ([0-9]+\.[0-9]+).*/\1/'
   )
 }
 
