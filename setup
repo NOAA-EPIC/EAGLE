@@ -201,32 +201,21 @@ prep_env_wxvx() {
   prep_env wxvx
 }
 
-# If a pip log file is set, ensure it is an absolute path.
-
-test -v PIP_LOG && PIP_LOG=$(readlink -f $PIP_LOG) || true
-
-# Inform conda about the CUDA version to target.
+# Set CONDA_OVERRIDE_CUDA to inform conda about the CUDA version to target. If PIP_LOG is set, to
+# direct pip output to a file, ensure it is an absolute path. Set the conda install directory,
+# then install (a no-op if conda is already installed) and initialize. Set the cache directory for
+# pip package files. Prepare the conda environments, 'base' first so that it can support prep of
+# other environments. Clean up unused conda and pip files.
 
 CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
-
-# Set or update the conda install directory, then install and initialize conda.
-
+test -v PIP_LOG && PIP_LOG=$(readlink -f $PIP_LOG) || true
 INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 install_conda
 . $INSTALLDIR/etc/profile.d/conda.sh
-
-# Set a cache directory for pip package files.
-
 XDG_CACHE_HOME=$_CONDA_ROOT/cache
-
-# Prepare conda environments -- 'base' first so it can support preparation of other environments.
-
 environments=(base anemoi) # base data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
 done
-
-# Clean up unused conda and pip files.
-
 cleanup
 msg Done
