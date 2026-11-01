@@ -183,10 +183,10 @@ prep_env_wxvx() {
   prep_env wxvx
 }
 
+INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 install_conda
 . $INSTALLDIR/etc/profile.d/conda.sh
 CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
-INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 XDG_CACHE_HOME=$_CONDA_ROOT/cache
 environments=(anemoi) # base data visualization wxvx)
 for name in ${environments[@]}; do
