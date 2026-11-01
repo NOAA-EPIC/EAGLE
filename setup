@@ -48,7 +48,6 @@ env_update() {
   eval "$opts"
   new="$($cmd)"
   if [[ "$new" != "$old" ]]; then
-    msg Updates made to environment $name:
     echo "$new" | conda run --live-stream jq -r 'last'
   fi
 }
