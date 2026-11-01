@@ -41,10 +41,16 @@ env_update() {
   stem=${2:-$name}
   msg Updating environment: $name
   opts="$(shopt -po)"
+  cmd="conda list --json --name $name --revisions"
+  old="$($cmd)"
   set +u
-  conda env update -v --file envs/$stem.yaml --name $name
-  conda list --name $name --revisions
+  conda env update --file envs/$stem.yaml --name $name --quiet
   eval "$opts"
+  new="$($cmd)"
+  if [[ "$new" != "$old" ]]; then
+    msg Updates made to environment $name:
+    echo "$new" | conda run --live-stream jq -r 'last'
+  fi
 }
 
 install_conda() {
@@ -89,7 +95,7 @@ prep_env() {
     env_update $name
   else
     msg Creating environment: $name
-    conda env create -v --file envs/$name.yaml --name $name --yes
+    conda env create --file envs/$name.yaml --name $name --quiet --yes
   fi
   test -v EAGLEDEV && env_update $name dev || true
   (
