@@ -15,6 +15,8 @@ To build the EAGLE runtime virtual environments:
 
 This will install :term:`Miniforge conda` in the current directory and create the various virtual environments.
 
+Some packages are installed from PyPI via ``pip``. By default, conda captures and discards ``pip`` output. For debugging, etc., export ``PIP_LOG=/path/to/pip.log`` to instruct ``pip`` to log to a file, which can be inspected after installation completes.
+
 Available Make Targets
 ------------------------------------------------------------------------------
 

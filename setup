@@ -29,11 +29,14 @@ env_exists() {
 }
 
 env_update() {
-  local name stem
+  local name opts stem
   name=$1
   stem=${2:-$name}
   msg Updating environment: $name
+  opts="$(shopt -po)"
+  set +u
   conda env update --file envs/$stem.yaml --name $name --quiet --verbose
+  eval "$opts"
 }
 
 install_conda() {
@@ -55,28 +58,8 @@ plugins:
 EOF
 }
 
-install_devpkgs_maybe() {
-  if [[ -v EAGLEDEV ]]; then
-    local name
-    name=$1
-    env_update $name dev
-  fi
-}
-
 msg() {
   echo -e "=> $*"
-}
-
-pip_log_post() {
-  msg Captured pip output:
-  grep -v "^ *$" $PIP_LOG
-  rm $PIP_LOG
-  unset PIP_LOG
-}
-
-pip_log_prep() {
-  PIP_LOG=$(mktemp)
-  export PIP_LOG
 }
 
 prep_env() {
@@ -86,13 +69,9 @@ prep_env() {
     env_update $name
   else
     msg Creating environment: $name
-    pip_log_prep
     conda env create --file envs/$name.yaml --name $name --quiet --yes
-    pip_log_post
   fi
-  cat <<EOF
-EOF
-  install_devpkgs_maybe $name
+  test -v EAGLEDEV && env_update $name dev || true
   # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
   # files in the runtime area, rather than in the user's home directory, which might impact their
   # quota. When deactivated, environments should reset or unset this value, as appropriate.
@@ -151,7 +130,7 @@ prep_env_base() {
   local name
   name=base
   env_update $name
-  install_devpkgs_maybe $name
+  test -v EAGLEDEV && env_update $name dev || true
   test -v EAGLE_CLEAN_CONDA_PKGS && cleanup || true
 }
 
