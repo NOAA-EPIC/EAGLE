@@ -36,6 +36,7 @@ env_update() {
   opts="$(shopt -po)"
   set +u
   conda env update -v --file envs/$stem.yaml --name $name
+  conda list --name $name --revisions
   eval "$opts"
 }
 
