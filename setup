@@ -29,7 +29,14 @@ env_exists() {
 }
 
 env_update() {
-  local name opts stem
+
+  # Update the environment with the given name, by default using an environment YAML file with the
+  # same stem as the environment name, but optionally using the given stem. Disable unset-variable
+  # checking while conda runs, which can otherwise trigger unexpected failure; reset shell options
+  # after the update. Compare environment revision history before and after the update and report
+  # changed packages, if any.
+
+  local cmd name new old opts stem
   name=$1
   stem=${2:-$name}
   msg Updating environment: $name
@@ -41,6 +48,10 @@ env_update() {
 }
 
 install_conda() {
+
+  # After installing conda, create a .condarc file that suppressed a distracting warning message
+  # about installing pip packages with conda.
+
   local installer url ver
   if [[ -d $INSTALLDIR ]]; then
     msg Found existing conda installation: $INSTALLDIR
@@ -64,6 +75,14 @@ msg() {
 }
 
 prep_env() {
+
+  # After creating or updating an environment, create scripts that [re]set XDG_CACHE_HOME when the
+  # environment is [de]activated, so that pip caches package files in the runtime area, rather than
+  # in the user's home directory, which might impact their quota. Always run this step to re-create
+  # these scripts, as subsequent steps will *append* to them. In the subshell, set shell option e to
+  # exit on any error and u to treat undefined variables as errors, as these are not propagated from
+  # the parent shell.
+
   local name
   name=$1
   if env_exists $name; then
@@ -73,11 +92,6 @@ prep_env() {
     conda env create -v --file envs/$name.yaml --name $name --yes
   fi
   test -v EAGLEDEV && env_update $name dev || true
-  # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
-  # files in the runtime area, rather than in the user's home directory, which might impact their
-  # quota. When deactivated, environments should reset or unset this value, as appropriate.
-  #
-  # Always run this step to re-create these scripts, as downstream steps will *append* to them.
   (
     set -eu
     conda activate $name
@@ -109,15 +123,13 @@ prep_env_anemoi() {
   (
     set -eu
     conda activate $name
-    # NB: Append to the existing script:
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
 modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
 if [[ -n "\$modules" ]]; then
   export EAGLE_OLD_MODULES="\$modules"
 fi
 EOF
-    # NB: Append to the existing script:
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh # NB: append!
 module purge 2>/dev/null
 if [[ -v EAGLE_OLD_MODULES ]]; then
   module load \$EAGLE_OLD_MODULES
@@ -136,18 +148,19 @@ prep_env_base() {
 }
 
 prep_env_data() {
+
+  # Add logic to the [de]activation scripts to silence run-time complaints and avoid
+  # segfaults when importing mpi4py in environments without InfiniBand hardware:
+
   local name
   name=data
   prep_env $name
-  # Add logic to the [de]activation scripts to silence run-time complaints and avoid
-  # segfaults when importing mpi4py in environments without InfiniBand hardware:
   (
     set -eu
     conda activate $name
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
-    # NB: Append to the existing script:
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh
+    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
 if [[ -v FI_PSM3_UUID ]]; then
   export EAGLE_OLD_FI_PSM3_UUID=\$FI_PSM3_UUID
 fi
@@ -159,8 +172,7 @@ export FI_PROVIDER=tcp
 EOF
     dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
     mkdir -pv $dir_deactivate
-    # NB: Append to the existing script:
-    cat <<EOF >>$dir_deactivate/eagle.sh
+    cat <<EOF >>$dir_deactivate/eagle.sh # NB: append!
 unset FI_PSM3_UUID
 if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
   export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
@@ -183,14 +195,32 @@ prep_env_wxvx() {
   prep_env wxvx
 }
 
+# If a pip log file is set, ensure it is an absolute path.
+
+test -v PIP_LOG && PIP_LOG=$(readlink -f $PIP_LOG) || true
+
+# Inform conda about the CUDA version to target.
+
+CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
+
+# Set or update the conda install directory, then install and initialize conda.
+
 INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 install_conda
 . $INSTALLDIR/etc/profile.d/conda.sh
-CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
+
+# Set a cache directory for pip package files.
+
 XDG_CACHE_HOME=$_CONDA_ROOT/cache
-environments=(anemoi) # base data visualization wxvx)
+
+# Prepare conda environments -- 'base' first so it can support preparation of other environments.
+
+environments=(base anemoi) # base data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
 done
+
+# Clean up unused conda and pip files.
+
 cleanup
 msg Done
