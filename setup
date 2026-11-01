@@ -35,7 +35,7 @@ env_update() {
   msg Updating environment: $name
   opts="$(shopt -po)"
   set +u
-  conda env update --file envs/$stem.yaml --name $name --quiet --verbose
+  conda env update -v --file envs/$stem.yaml --name $name
   eval "$opts"
 }
 
@@ -69,7 +69,7 @@ prep_env() {
     env_update $name
   else
     msg Creating environment: $name
-    conda env create --file envs/$name.yaml --name $name --quiet --yes
+    conda env create -v --file envs/$name.yaml --name $name --yes
   fi
   test -v EAGLEDEV && env_update $name dev || true
   # When runtime virtual environments are activated, set XDG_CACHE_HOME so that pip caches package
