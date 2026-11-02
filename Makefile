@@ -1,4 +1,5 @@
 BASHSRCS = $(wildcard ../.github/scripts/*) format setup
+COMMA    = ,
 HELPERS  = vx zarr
 MODULES  = data inference training visualization wxvx
 PACKAGE  = eagle
@@ -49,9 +50,10 @@ data:
 	@for x in gfs hrrr; do if [[ -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)" ]]; then $(make) zarr source=$$x; fi; done
 
 devenv:
-	EAGLEDEV=1 INSTALLDIR=$(INSTALLDIR) ./setup
+	EAGLEDEV=1 $(MAKE) env
+
 env:
-	INSTALLDIR=$(INSTALLDIR) ./setup
+	INSTALLDIR=$(INSTALLDIR) ./setup $(subst $(COMMA), ,$(only))
 
 format:
 	$(call activate,base)
