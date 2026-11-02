@@ -10,7 +10,6 @@ dependencies:
   - zarr 2.18.*
   - pip:
       - eagle-tools==0.9.*
-      - unified-workflow-tools==2.21.*
 
 # NOTES
 #
