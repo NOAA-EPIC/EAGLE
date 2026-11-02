@@ -46,9 +46,7 @@ env_update() {
   cmd="conda list --json --name $name --revisions"
   old="$($cmd)"
   conda env update --file envs/$stem.yaml --name $name --quiet
-  if [[ $name == $stem ]]; then
-    pip_install $name
-  fi
+  pip_install $name $stem
   new="$($cmd)"
   if [[ "$new" != "$old" ]]; then
     echo "$new" | conda run --live-stream --name base jq -r 'last'
@@ -80,16 +78,40 @@ plugins:
 EOF
 }
 
+main() {
+
+  # Set CONDA_OVERRIDE_CUDA to inform conda about the CUDA version to target. Set the conda install
+  # directory, then install (a no-op if conda is already installed) and initialize. Set the cache
+  # directory for pip package files. Prepare the conda environments, 'base' first so that it can
+  # support prep of other environments. Clean up unused conda and pip files.
+
+  CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
+  if [[ -v PIP_LOG ]]; then
+    PIP_LOG=$(readlink -f $PIP_LOG)
+  fi
+  INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
+  install_conda
+  . $INSTALLDIR/etc/profile.d/conda.sh
+  XDG_CACHE_HOME=$_CONDA_ROOT/cache
+  environments=(base anemoi data visualization wxvx)
+  for name in ${environments[@]}; do
+    time prep_env_$name
+  done
+  cleanup
+  msg Done
+}
+
 msg() {
   echo -e "=> $*"
 }
 
 pip_install() {
-  local name reqs
+  local name reqs stem
   name=$1
-  reqs=envs/$name.txt
+  stem=$2
+  reqs=envs/$stem.txt
   if [[ -f $reqs ]]; then
-    msg Installing pip packages into environment "'$name'"
+    msg Installing "'$stem'" pip packages into environment "'$name'"
     (
       set -e +u
       conda activate $name
@@ -117,7 +139,7 @@ prep_env() {
     set +u
     conda env create --file envs/$name.yaml --name $name --quiet --yes
     eval "$opts"
-    pip_install $name
+    pip_install $name $name
   fi
   if [[ -v EAGLEDEV ]]; then
     env_update $name dev
@@ -241,22 +263,4 @@ prep_env_wxvx() {
   prep_env wxvx
 }
 
-# Set CONDA_OVERRIDE_CUDA to inform conda about the CUDA version to target. Set the conda install
-# directory, then install (a no-op if conda is already installed) and initialize. Set the cache
-# directory for pip package files. Prepare the conda environments, 'base' first so that it can
-# support prep of other environments. Clean up unused conda and pip files.
-
-CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
-if [[ -v PIP_LOG ]]; then
-  PIP_LOG=$(readlink -f $PIP_LOG)
-fi
-INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
-install_conda
-. $INSTALLDIR/etc/profile.d/conda.sh
-XDG_CACHE_HOME=$_CONDA_ROOT/cache
-environments=(base anemoi data visualization wxvx)
-for name in ${environments[@]}; do
-  time prep_env_$name
-done
-cleanup
-msg Done
+time main
