@@ -39,7 +39,7 @@ env_update() {
   local cmd name new old opts stem
   name=$1
   stem=${2:-$name}
-  msg Updating environment: $name
+  msg_plus_pip Updating environment: $name
   opts="$(shopt -po)"
   cmd="conda list --json --name $name --revisions"
   old="$($cmd)"
@@ -78,6 +78,11 @@ msg() {
   echo -e "=> $*"
 }
 
+msg_plus_pip() {
+  msg "$*"
+  test -v PIP_LOG && msg "$*" >>$PIP_LOG || true
+}
+
 prep_env() {
 
   # After creating or updating an environment, create scripts that [re]set XDG_CACHE_HOME when the
@@ -92,7 +97,7 @@ prep_env() {
   if env_exists $name; then
     env_update $name
   else
-    msg Creating environment: $name
+    msg_plus_pip Creating environment: $name
     opts="$(shopt -po)"
     set +u
     conda env create --file envs/$name.yaml --name $name --quiet --yes
