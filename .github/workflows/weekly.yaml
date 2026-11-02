@@ -22,7 +22,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-        working-directory: /scratch3/NAGAPE/epic/role-epic/actions-runner/_work
       - name: Clean old conda installs
         working-directory: /scratch3/NAGAPE/epic/role-epic/actions-runner/_work
         run: .github/scripts/clean-old-conda-installs
