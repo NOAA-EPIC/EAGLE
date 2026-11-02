@@ -1,6 +1,7 @@
 dependencies:
   - cuda-version=13.1
   - flash-attn 2.8.*
+  - impi_rt 2021.18.*
   - numpy 2.2.*
   - pip
   - python 3.13
@@ -15,6 +16,8 @@ dependencies:
 # packages conda selects.
 #
 # The conda flash-attn package provides prebuilt executables and libraries.
+#
+# The impi_rt package supports the mpi4py package installed by pip.
 #
 # The conda numpy, pytorch, and triton packages are installed by default as
 # dependencies of other conda package(s), but pip replaces them with different
