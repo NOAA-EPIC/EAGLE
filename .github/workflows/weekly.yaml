@@ -3,8 +3,10 @@ name: NRT EAGLE CI Pipeline Weekly
 on:
   schedule:
     # Runs every Saturday at 06:00 UTC
-    - cron: '0 6 * * 6'
-
+    - cron: '0 15 * * 1'
+defaults:
+  run:
+    working-directory: /scratch3/NAGAPE/epic/role-epic/actions-runner/_work
 permissions:
   contents: read
   pull-requests: write
