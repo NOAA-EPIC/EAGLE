@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from uwtools.api.config import compose
@@ -227,7 +227,7 @@ def test_app__gpu__platform(logged, tmp_path, validator, with_set):
         assert logged("is not of type 'string'")
 
 
-def test_app__gpu__time(caplog, logged, tmp_path, validator, with_del, with_set):
+def test_app__gpu__time(caplog, logged, tmp_path, validator, with_del, with_set):  # noqa: PLR0917
     ok = validator(
         __file__, "eagle", tmp_path, "properties", "app", "properties", "time"
     )
@@ -268,7 +268,7 @@ def test_app__gpu__time(caplog, logged, tmp_path, validator, with_del, with_set)
 
 def test_eagle__defs__datetime(caplog, logged, tmp_path, validator):
     ok = validator(__file__, "eagle", tmp_path, "$defs", "datetime")
-    for val in [datetime(2026, 4, 8, 12, tzinfo=timezone.utc), "2026-04-08T01:23:45"]:
+    for val in [datetime(2026, 4, 8, 12, tzinfo=UTC), "2026-04-08T01:23:45"]:
         assert ok(val)
     assert not ok("foo")
     assert "is not valid under any of the given schemas" in caplog.text
