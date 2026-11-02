@@ -98,8 +98,8 @@ main() {
   if [[ $# == 0 ]]; then
     environments+=(anemoi data visualization wxvx)
   else
-    environments+=($@)
-  fi    
+    environments+=("$@")
+  fi
   for name in ${environments[@]}; do
     time prep_env_$name
   done
