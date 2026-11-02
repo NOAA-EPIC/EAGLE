@@ -41,11 +41,11 @@ jobs:
     steps:
 
       - name: Perform cleanup
+        working-directory: /scratch3/NAGAPE/epic/role-epic/actions-runner/_work
         run: .github/scripts/cleanup
 
       - name: Checkout main develop head
         uses: actions/checkout@v4
-        working-directory: /scratch3/NAGAPE/epic/role-epic/actions-runner/_work
         with:
           ref: main 
           fetch-depth: 0
