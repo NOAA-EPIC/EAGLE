@@ -133,7 +133,7 @@ prep_env() {
   # exit on any error and u to treat undefined variables as errors, as these are not propagated from
   # the parent shell.
 
-  local f name opts reqs
+  local name opts reqs
   name=$1
   if env_exists $name; then
     env_update $name
@@ -148,8 +148,8 @@ prep_env() {
   if [[ -v EAGLEDEV ]]; then
     env_update $name dev
   fi
-  f() {
-    set -e #+u PM
+  prep_env_post() {
+    set -e
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
     cat <<EOF >$dir_activate/eagle.sh
@@ -168,18 +168,18 @@ if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
 fi
 EOF
   }
-  conda run --name $name --no-capture-output f
+  conda run --name $name --no-capture-output prep_env_post
   if [[ -v EAGLE_CLEAN_CONDA_PKGS ]]; then
     cleanup
   fi
 }
 
 prep_env_anemoi() {
-  local f name
+  local name
   name=anemoi
   prep_env $name
-  f() {
-    set -e #+u PM
+  prep_env_anemoi_post() {
+    set -e
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
 modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
 if [[ -n "\$modules" ]]; then
@@ -194,7 +194,7 @@ if [[ -v EAGLE_OLD_MODULES ]]; then
 fi
 EOF
   }
-  conda run --name $name --no-capture-output f
+  conda run --name $name --no-capture-output prep_env_anemoi_post
 }
 
 prep_env_base() {
@@ -214,11 +214,11 @@ prep_env_data() {
   # Add logic to the [de]activation scripts to silence run-time complaints and avoid
   # segfaults when importing mpi4py in environments without InfiniBand hardware:
 
-  local f name
+  local name
   name=data
   prep_env $name
-  f() {
-    set -e # +u PM
+  prep_env_data_post() {
+    set -e
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
@@ -246,7 +246,7 @@ if [[ -v EAGLE_OLD_FI_PROVIDER ]]; then
 fi
 EOF
   }
-  conda run --name $name --no-capture-output f
+  conda run --name $name --no-capture-output prep_env_data_post
 }
 
 prep_env_visualization() {
