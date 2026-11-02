@@ -227,7 +227,7 @@ def test_app__gpu__platform(logged, tmp_path, validator, with_set):
         assert logged("is not of type 'string'")
 
 
-def test_app__gpu__time(caplog, logged, tmp_path, validator, with_del, with_set):  # noqa: PLR0917
+def test_app__gpu__time(caplog, logged, tmp_path, validator, with_del, with_set):
     ok = validator(
         __file__, "eagle", tmp_path, "properties", "app", "properties", "time"
     )

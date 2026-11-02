@@ -42,6 +42,7 @@ ignore = [
   "E731",    # lambda-assignment
   "LOG015",  # root-logger-call
   "PLR0913", # too-many-arguments
+  "PLR0917", # too-many-positional-arguments
   "PLR2004", # magic-value-comparison
   "S101",    # assert
   "S602",    # subprocess-popen-with-shell-equals-true

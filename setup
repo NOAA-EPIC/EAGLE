@@ -88,6 +88,7 @@ pip_install() {
     (
       set -e
       conda activate $name
+      set -u
       pip install -r $reqs | { grep --line-buffered -v "Requirement already satisfied" || true; }
     )
   fi
@@ -116,8 +117,9 @@ prep_env() {
   fi
   test -v EAGLEDEV && env_update $name dev || true
   (
-    set -eu
+    set -e
     conda activate $name
+    set -u
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
     cat <<EOF >$dir_activate/eagle.sh
@@ -144,8 +146,9 @@ prep_env_anemoi() {
   name=anemoi
   prep_env $name
   (
-    set -eu
+    set -e
     conda activate $name
+    set -u
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
 modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
 if [[ -n "\$modules" ]]; then
@@ -189,8 +192,9 @@ prep_env_data() {
   name=data
   prep_env $name
   (
-    set -eu
+    set -e
     conda activate $name
+    set -u
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
@@ -239,7 +243,7 @@ INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 install_conda
 . $INSTALLDIR/etc/profile.d/conda.sh
 XDG_CACHE_HOME=$_CONDA_ROOT/cache
-environments=(base anemoi) # base data visualization wxvx)
+environments=(base anemoi data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
 done
