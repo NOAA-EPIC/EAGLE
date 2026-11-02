@@ -8,8 +8,6 @@ dependencies:
   - wxvx >=0.8.0
   - xesmf 0.8.*
   - zarr 2.18.*
-  - pip:
-      - eagle-tools==0.9.*
 
 # NOTES
 #

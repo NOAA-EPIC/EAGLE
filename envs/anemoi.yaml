@@ -7,14 +7,6 @@ dependencies:
   - pytorch=2.10.*=cuda*
   - torchvision=0.25.*=cuda*
   - triton 3.6.*
-  - pip:
-      - anemoi-inference==0.12.*
-      - anemoi-models==0.19.*
-      - anemoi-training==0.17.*
-      - anemoi-transform==0.5.*
-      - datashader==0.19.*
-      - eagle-tools==0.9.*
-      - unified-workflow-tools==2.21.*
 
 # NOTES
 #

@@ -1,6 +1,3 @@
 dependencies:
   - python 3.13
   - pip
-  - pip:
-      - eagle-tools==0.9.*
-      - unified-workflow-tools==2.21.*

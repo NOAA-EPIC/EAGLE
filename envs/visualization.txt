@@ -1,0 +1,2 @@
+eagle-tools==0.9.*
+unified-workflow-tools==2.21.*

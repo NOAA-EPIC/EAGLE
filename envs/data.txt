@@ -1,0 +1,6 @@
+anemoi-datasets==0.5.*
+anemoi-graphs==0.9.*
+anemoi-transform==0.5.*
+mpi4py==4.1.*
+ufs2arco==0.19.*
+unified-workflow-tools==2.21.*

@@ -39,13 +39,14 @@ env_update() {
   local cmd name new old opts stem
   name=$1
   stem=${2:-$name}
-  msg_plus_pip Updating environment: $name
-  opts="$(shopt -po)"
+  msg Updating environment: $name
   cmd="conda list --json --name $name --revisions"
   old="$($cmd)"
+  opts="$(shopt -po)"
   set +u
   conda env update --file envs/$stem.yaml --name $name --quiet
   eval "$opts"
+  pip_install $name
   new="$($cmd)"
   if [[ "$new" != "$old" ]]; then
     echo "$new" | conda run --live-stream jq -r 'last'
@@ -78,9 +79,18 @@ msg() {
   echo -e "=> $*"
 }
 
-msg_plus_pip() {
-  msg "$*"
-  test -v PIP_LOG && msg "$*" >>$PIP_LOG || true
+pip_install() {
+  local name reqs
+  name=$1
+  reqs=envs/$name.txt
+  if [[ -f $reqs ]]; then
+    msg Installing pip packages into environment: $name
+    (
+      set -e
+      conda activate $name
+      pip install -r $reqs | { grep --line-buffered -v "Requirement already satisfied" || true; }
+    )
+  fi
 }
 
 prep_env() {
@@ -92,16 +102,17 @@ prep_env() {
   # exit on any error and u to treat undefined variables as errors, as these are not propagated from
   # the parent shell.
 
-  local name opts
+  local name opts reqs
   name=$1
   if env_exists $name; then
     env_update $name
   else
-    msg_plus_pip Creating environment: $name
+    msg Creating conda environment: $name
     opts="$(shopt -po)"
     set +u
     conda env create --file envs/$name.yaml --name $name --quiet --yes
     eval "$opts"
+    pip_install $name
   fi
   test -v EAGLEDEV && env_update $name dev || true
   (
@@ -217,11 +228,10 @@ prep_env_wxvx() {
   prep_env wxvx
 }
 
-# Set CONDA_OVERRIDE_CUDA to inform conda about the CUDA version to target. If PIP_LOG is set, to
-# direct pip output to a file, ensure it is an absolute path. Set the conda install directory,
-# then install (a no-op if conda is already installed) and initialize. Set the cache directory for
-# pip package files. Prepare the conda environments, 'base' first so that it can support prep of
-# other environments. Clean up unused conda and pip files.
+# Set CONDA_OVERRIDE_CUDA to inform conda about the CUDA version to target. Set the conda install
+# directory, then install (a no-op if conda is already installed) and initialize. Set the cache
+# directory for pip package files. Prepare the conda environments, 'base' first so that it can
+# support prep of other environments. Clean up unused conda and pip files.
 
 CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
 test -v PIP_LOG && PIP_LOG=$(readlink -f $PIP_LOG) || true
