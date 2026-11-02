@@ -3,7 +3,7 @@ name: NRT EAGLE CI Pipeline Weekly
 on:
   schedule:
     # Runs every Saturday at 06:00 UTC
-    - cron: '05 16 * * 1'
+    - cron: '0 6 * * 6'
 permissions:
   contents: read
   pull-requests: write
@@ -23,7 +23,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Clean old conda installs
-        working-directory: /scratch3/NAGAPE/epic/role-epic/actions-runner/_work
         run: .github/scripts/clean-old-conda-installs
 
   run_pipeline:
@@ -40,7 +39,6 @@ jobs:
     steps:
 
       - name: Perform cleanup
-        working-directory: /scratch3/NAGAPE/epic/role-epic/actions-runner/_work
         run: .github/scripts/cleanup
 
       - name: Checkout main develop head
@@ -54,8 +52,7 @@ jobs:
         env:
           INSTALLDIR: conda
           PR_NUM: 99999
-          SHA: ${{ github.sha }}
-        working-directory: /scratch3/NAGAPE/epic/role-epic/actions-runner/_work  
+          SHA: ${{ github.sha }} 
         run: .github/scripts/nested-eagle
     
       - name: Send Slack Notification
