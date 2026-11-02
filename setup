@@ -43,7 +43,7 @@ env_update() {
   msg Updating "'$name'" environment with "'$stem'" packages
   opts="$(shopt -po)"
   set +u
-  list="conda list --name $name"
+  list="conda list --name $name --canonical --quiet"
   old="$($list)"
   conda env update --file envs/$stem.yaml --name $name --quiet
   pip_install $name $stem
@@ -51,8 +51,8 @@ env_update() {
   if [[ "$new" == "$old" ]]; then
     msg No changes detected
   else
-    msg Update change diff:
-    diff <(echo "$old") <(echo "$new")
+    msg Changes from update:
+    diff -U0 <(echo "$old") <(echo "$new") | sed -e '/^--- /d' -e '/^+++ /d' -e '/^@@ /d' || :
   fi
   eval "$opts"
 }
@@ -113,13 +113,14 @@ msg() {
 }
 
 pip_install() {
-  local name reqs stem
+  local cmd name reqs stem
   name=$1
   stem=$2
   reqs=envs/$stem.txt
   if [[ -f $reqs ]]; then
     msg Installing "'$stem'" pip packages into environment "'$name'"
-    conda run --live-stream --name $name pip install --progress-bar off --requirement $reqs | { grep --line-buffered -v "Requirement already satisfied" || true; }
+    cmd="pip install --progress-bar off --requirement $reqs"
+    conda run --name $name --no-capture-output $cmd | { grep --line-buffered -v "Requirement already satisfied" || :; }
   fi
 }
 
@@ -132,7 +133,7 @@ prep_env() {
   # exit on any error and u to treat undefined variables as errors, as these are not propagated from
   # the parent shell.
 
-  local name opts reqs
+  local f name opts reqs
   name=$1
   if env_exists $name; then
     env_update $name
@@ -147,9 +148,8 @@ prep_env() {
   if [[ -v EAGLEDEV ]]; then
     env_update $name dev
   fi
-  (
-    set -e +u
-    conda activate $name
+  f() {
+    set -e #+u PM
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
     cat <<EOF >$dir_activate/eagle.sh
@@ -167,19 +167,19 @@ if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
   unset EAGLE_OLD_XDG_CACHE_HOME
 fi
 EOF
-  )
+  }
+  conda run --name $name --no-capture-output f
   if [[ -v EAGLE_CLEAN_CONDA_PKGS ]]; then
     cleanup
   fi
 }
 
 prep_env_anemoi() {
-  local name
+  local f name
   name=anemoi
   prep_env $name
-  (
-    set -e +u
-    conda activate $name
+  f() {
+    set -e #+u PM
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
 modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
 if [[ -n "\$modules" ]]; then
@@ -193,7 +193,8 @@ if [[ -v EAGLE_OLD_MODULES ]]; then
   unset EAGLE_OLD_MODULES
 fi
 EOF
-  )
+  }
+  conda run --name $name --no-capture-output f
 }
 
 prep_env_base() {
@@ -213,12 +214,11 @@ prep_env_data() {
   # Add logic to the [de]activation scripts to silence run-time complaints and avoid
   # segfaults when importing mpi4py in environments without InfiniBand hardware:
 
-  local name
+  local f name
   name=data
   prep_env $name
-  (
-    set -e +u
-    conda activate $name
+  f() {
+    set -e # +u PM
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
@@ -245,7 +245,8 @@ if [[ -v EAGLE_OLD_FI_PROVIDER ]]; then
   unset EAGLE_OLD_FI_PROVIDER
 fi
 EOF
-  )
+  }
+  conda run --name $name --no-capture-output f
 }
 
 prep_env_visualization() {
