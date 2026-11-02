@@ -53,10 +53,6 @@ env_update() {
 }
 
 install_conda() {
-
-  # After installing conda, create a .condarc file that suppressed a distracting warning message
-  # about installing pip packages with conda.
-
   local installer url ver
   if [[ -d $INSTALLDIR ]]; then
     msg Found existing conda installation: $INSTALLDIR
