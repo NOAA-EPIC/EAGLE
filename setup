@@ -37,21 +37,22 @@ env_update() {
   # name and YAML-file stem are the same. Compare environment revision history before and after the
   # update and report changed packages, if any.
 
-  local cmd name new old opts stem
+  local list name new old opts stem
   name=$1
   stem=${2:-$name}
   msg Updating "'$name'" environment with "'$stem'" packages
   opts="$(shopt -po)"
   set +u
-  cmd="conda list --json --name $name --revisions"
-  old="$($cmd)"
+  list="conda list --name $name"
+  old="$($list)"
   conda env update --file envs/$stem.yaml --name $name --quiet
   pip_install $name $stem
-  new="$($cmd)"
-  if [[ "$new" != "$old" ]]; then
-    echo "$new" | conda run --live-stream --name base jq -r 'last'
-  else
+  new="$($list)"
+  if [[ "$new" == "$old" ]]; then
     msg No changes detected
+  else
+    msg Update change diff:
+    diff <(echo "$old") <(echo "$new")
   fi
   eval "$opts"
 }
@@ -82,8 +83,8 @@ main() {
 
   # Set CONDA_OVERRIDE_CUDA to inform conda about the CUDA version to target. Set the conda install
   # directory, then install (a no-op if conda is already installed) and initialize. Set the cache
-  # directory for pip package files. Prepare the conda environments, 'base' first so that it can
-  # support prep of other environments. Clean up unused conda and pip files.
+  # directory for pip package files. Prepare the conda environments, then clean up unused conda and
+  # pip files.
 
   local environments name
   CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
@@ -196,18 +197,8 @@ EOF
 }
 
 prep_env_base() {
-
-  # Install jq into the 'base' environment 1. To make it available for reporting updated packages
-  # later, and 2. To force a one-time update to revision metadata in the 'base' environment that
-  # prevents reporting of no-op "updates" like
-  # {
-  #   "old": "conda-26.9.4-py314h9e666f3_0-conda-forge",
-  #   "new": "conda-26.9.4-py314h9e666f3_0-conda-forge/linux-64"
-  # },
-
   local name
   name=base
-  conda install --freeze-installed --name $name --quiet jq --yes
   env_update $name
   if [[ -v EAGLEDEV ]]; then
     env_update $name dev
@@ -265,4 +256,4 @@ prep_env_wxvx() {
   prep_env wxvx
 }
 
-time main "$*"
+time main "$@"
