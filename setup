@@ -87,13 +87,16 @@ prep_env() {
   # exit on any error and u to treat undefined variables as errors, as these are not propagated from
   # the parent shell.
 
-  local name
+  local name opts
   name=$1
   if env_exists $name; then
     env_update $name
   else
     msg Creating environment: $name
+    opts="$(shopt -po)"
+    set +u
     conda env create --file envs/$name.yaml --name $name --quiet --yes
+    eval "$opts"
   fi
   test -v EAGLEDEV && env_update $name dev || true
   (
