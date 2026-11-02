@@ -1,6 +1,4 @@
 channels:
-  - conda-forge
-  - nodefaults
   - oar-gsl
   - ufs-community
 dependencies:

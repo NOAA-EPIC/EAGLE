@@ -70,6 +70,9 @@ install_conda() {
   bash $installer -bfp $INSTALLDIR
   rm -v $installer
   cat <<EOF >$INSTALLDIR/.condarc
+channels:
+  - conda-forge
+  - nodefaults
 plugins:
   conda_pypi_pip_warning: false
 EOF

@@ -1,6 +1,4 @@
 channels:
-  - nodefaults
-  - conda-forge
   - ufs-community
 dependencies:
   - jq 1.8.*

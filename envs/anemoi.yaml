@@ -1,6 +1,3 @@
-channels:
-  - conda-forge
-  - nodefaults
 dependencies:
   - cuda-version=13.1
   - flash-attn 2.8.*
