@@ -81,9 +81,6 @@ main() {
 
   local environments name
   CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
-  if [[ -v PIP_LOG ]]; then
-    PIP_LOG=$(readlink -f $PIP_LOG)
-  fi
   INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
   install_conda
   . $INSTALLDIR/etc/profile.d/conda.sh
