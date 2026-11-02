@@ -21,7 +21,7 @@ env_exists() {
   mkdir -p $d
   for x in $(find $d -maxdepth 1 -mindepth 1 -type d | sort); do
     if [[ $(basename $x) == "$name" ]]; then
-      msg Found existing conda environment: $name
+      msg Found existing "'$name'" conda environment
       return 0
     fi
   done
@@ -31,26 +31,31 @@ env_exists() {
 env_update() {
 
   # Update the environment with the given name, by default using an environment YAML file with the
-  # same stem as the environment name, but optionally using the given stem. Disable unset-variable
-  # checking while conda runs, which can otherwise trigger unexpected failure; reset shell options
-  # after the update. Compare environment revision history before and after the update and report
-  # changed packages, if any.
+  # same stem as the environment name, but optionally using the given stem (probably "dev"). Disable
+  # unset-variable checking for various conda commands, which can otherwise trigger failures; reset
+  # shell options after the update. Install pip packages separately, and only when the environment
+  # name and YAML-file stem are the same. Compare environment revision history before and after the
+  # update and report changed packages, if any.
 
   local cmd name new old opts stem
   name=$1
   stem=${2:-$name}
-  msg Updating environment: $name
-  cmd="conda list --json --name $name --revisions"
-  old="$($cmd)"
+  msg Updating "'$name'" environment with "'$stem'" packages
   opts="$(shopt -po)"
   set +u
+  cmd="conda list --json --name $name --revisions"
+  old="$($cmd)"
   conda env update --file envs/$stem.yaml --name $name --quiet
-  eval "$opts"
-  pip_install $name
+  if [[ $name == $stem ]]; then
+    pip_install $name
+  fi
   new="$($cmd)"
   if [[ "$new" != "$old" ]]; then
-    echo "$new" | conda run --live-stream jq -r 'last'
+    echo "$new" | conda run --live-stream --name base jq -r 'last'
+  else
+    msg No changes detected
   fi
+  eval "$opts"
 }
 
 install_conda() {
@@ -84,12 +89,11 @@ pip_install() {
   name=$1
   reqs=envs/$name.txt
   if [[ -f $reqs ]]; then
-    msg Installing pip packages into environment: $name
+    msg Installing pip packages into environment "'$name'"
     (
-      set -e
+      set -e +u
       conda activate $name
-      set -u
-      pip install -r $reqs | { grep --line-buffered -v "Requirement already satisfied" || true; }
+      pip install --progress-bar off --requirement $reqs | { grep --line-buffered -v "Requirement already satisfied" || true; }
     )
   fi
 }
@@ -108,18 +112,19 @@ prep_env() {
   if env_exists $name; then
     env_update $name
   else
-    msg Creating conda environment: $name
+    msg Creating "'$name'" conda environment
     opts="$(shopt -po)"
     set +u
     conda env create --file envs/$name.yaml --name $name --quiet --yes
     eval "$opts"
     pip_install $name
   fi
-  test -v EAGLEDEV && env_update $name dev || true
+  if [[ -v EAGLEDEV ]]; then
+    env_update $name dev
+  fi
   (
-    set -e
+    set -e +u
     conda activate $name
-    set -u
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
     cat <<EOF >$dir_activate/eagle.sh
@@ -138,7 +143,9 @@ if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
 fi
 EOF
   )
-  test -v EAGLE_CLEAN_CONDA_PKGS && cleanup || true
+  if [[ -v EAGLE_CLEAN_CONDA_PKGS ]]; then
+    cleanup
+  fi
 }
 
 prep_env_anemoi() {
@@ -146,9 +153,8 @@ prep_env_anemoi() {
   name=anemoi
   prep_env $name
   (
-    set -e
+    set -e +u
     conda activate $name
-    set -u
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
 modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
 if [[ -n "\$modules" ]]; then
@@ -179,8 +185,12 @@ prep_env_base() {
   name=base
   conda install --freeze-installed --name $name --quiet jq --yes
   env_update $name
-  test -v EAGLEDEV && env_update $name dev || true
-  test -v EAGLE_CLEAN_CONDA_PKGS && cleanup || true
+  if [[ -v EAGLEDEV ]]; then
+    env_update $name dev
+  fi
+  if [[ -v EAGLE_CLEAN_CONDA_PKGS ]]; then
+    cleanup
+  fi
 }
 
 prep_env_data() {
@@ -192,9 +202,8 @@ prep_env_data() {
   name=data
   prep_env $name
   (
-    set -e
+    set -e +u
     conda activate $name
-    set -u
     dir_activate=$CONDA_PREFIX/etc/conda/activate.d
     mkdir -pv $dir_activate
     cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
@@ -238,7 +247,9 @@ prep_env_wxvx() {
 # support prep of other environments. Clean up unused conda and pip files.
 
 CONDA_OVERRIDE_CUDA=$(grep '^ *\- cuda-version=' envs/anemoi.yaml | sed 's/^[^=]*=//')
-test -v PIP_LOG && PIP_LOG=$(readlink -f $PIP_LOG) || true
+if [[ -v PIP_LOG ]]; then
+  PIP_LOG=$(readlink -f $PIP_LOG)
+fi
 INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 install_conda
 . $INSTALLDIR/etc/profile.d/conda.sh
