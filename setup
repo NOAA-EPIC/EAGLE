@@ -92,7 +92,7 @@ main() {
     environments+=("$@")
   fi
   for name in ${environments[@]}; do
-    time prep_env_$name
+    time prep_$name
   done
   cleanup
   msg Done
@@ -112,6 +112,63 @@ pip_install() {
     cmd="pip install --progress-bar off --requirement $reqs"
     conda run --name $name --no-capture-output $cmd | { grep --line-buffered -v "Requirement already satisfied" || :; }
   fi
+}
+
+prep_anemoi() {
+  prep_env anemoi
+}
+
+prep_base() {
+  local name
+  name=base
+  env_update $name
+  if [[ -v EAGLEDEV ]]; then
+    env_update $name dev
+  fi
+  if [[ -v EAGLE_CLEAN_CONDA_PKGS ]]; then
+    cleanup
+  fi
+}
+
+prep_data() {
+
+  # Add logic to the [de]activation scripts to silence run-time complaints and avoid
+  # segfaults when importing mpi4py in environments without InfiniBand hardware.
+
+  local name
+  name=data
+  prep_env $name
+  conda run --name $name --no-capture-output prep_data_post
+}
+
+prep_data_post() {
+  local dir_activate dir_deactivate
+  dir_activate=$CONDA_PREFIX/etc/conda/activate.d
+  mkdir -pv $dir_activate
+  cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
+if [[ -v FI_PSM3_UUID ]]; then
+  export EAGLE_OLD_FI_PSM3_UUID=\$FI_PSM3_UUID
+fi
+export FI_PSM3_UUID=eagle
+if [[ -v FI_PROVIDER ]]; then
+  export EAGLE_OLD_FI_PROVIDER=\$FI_PROVIDER
+fi
+export FI_PROVIDER=tcp
+EOF
+  dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
+  mkdir -pv $dir_deactivate
+  cat <<EOF >>$dir_deactivate/eagle.sh # NB: append!
+unset FI_PSM3_UUID
+if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
+  export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
+  unset EAGLE_OLD_FI_PSM3_UUID
+fi
+unset FI_PROVIDER
+if [[ -v EAGLE_OLD_FI_PROVIDER ]]; then
+  export FI_PROVIDER=\$EAGLE_OLD_FI_PROVIDER
+  unset EAGLE_OLD_FI_PROVIDER
+fi
+EOF
 }
 
 prep_env() {
@@ -138,112 +195,38 @@ prep_env() {
   if [[ -v EAGLEDEV ]]; then
     env_update $name dev
   fi
-  prep_env_post() {
-    set -e
-    dir_activate=$CONDA_PREFIX/etc/conda/activate.d
-    mkdir -pv $dir_activate
-    cat <<EOF >$dir_activate/eagle.sh
-if [[ -v XDG_CACHE_HOME ]]; then
-  export EAGLE_OLD_XDG_CACHE_HOME=\$XDG_CACHE_HOME
-fi
-export XDG_CACHE_HOME=$XDG_CACHE_HOME
-EOF
-    dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
-    mkdir -pv $dir_deactivate
-    cat <<EOF >$dir_deactivate/eagle.sh
-unset XDG_CACHE_HOME
-if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
-  export XDG_CACHE_HOME=\$EAGLE_OLD_XDG_CACHE_HOME
-  unset EAGLE_OLD_XDG_CACHE_HOME
-fi
-EOF
-  }
   conda run --name $name --no-capture-output prep_env_post
   if [[ -v EAGLE_CLEAN_CONDA_PKGS ]]; then
     cleanup
   fi
 }
 
-prep_env_anemoi() {
-  local name
-  name=anemoi
-  prep_env $name
-  prep_env_anemoi_post() {
-    set -e
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
-modules="\$(module --terse list 2>/dev/null | grep -v 'No modules loaded' | tr '\n' ' ')"
-if [[ -n "\$modules" ]]; then
-  export EAGLE_OLD_MODULES="\$modules"
+prep_env_post() {
+  local dir_activate dir_deactivate
+  dir_activate=$CONDA_PREFIX/etc/conda/activate.d
+  mkdir -pv $dir_activate
+  cat <<EOF >$dir_activate/eagle.sh
+if [[ -v XDG_CACHE_HOME ]]; then
+  export EAGLE_OLD_XDG_CACHE_HOME=\$XDG_CACHE_HOME
+fi
+export XDG_CACHE_HOME=$XDG_CACHE_HOME
+EOF
+  dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
+  mkdir -pv $dir_deactivate
+  cat <<EOF >$dir_deactivate/eagle.sh
+unset XDG_CACHE_HOME
+if [[ -v EAGLE_OLD_XDG_CACHE_HOME ]]; then
+  export XDG_CACHE_HOME=\$EAGLE_OLD_XDG_CACHE_HOME
+  unset EAGLE_OLD_XDG_CACHE_HOME
 fi
 EOF
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/deactivate.d/eagle.sh # NB: append!
-module purge 2>/dev/null
-if [[ -v EAGLE_OLD_MODULES ]]; then
-  module load \$EAGLE_OLD_MODULES
-  unset EAGLE_OLD_MODULES
-fi
-EOF
-  }
-  conda run --name $name --no-capture-output prep_env_anemoi_post
 }
 
-prep_env_base() {
-  local name
-  name=base
-  env_update $name
-  if [[ -v EAGLEDEV ]]; then
-    env_update $name dev
-  fi
-  if [[ -v EAGLE_CLEAN_CONDA_PKGS ]]; then
-    cleanup
-  fi
-}
-
-prep_env_data() {
-
-  # Add logic to the [de]activation scripts to silence run-time complaints and avoid
-  # segfaults when importing mpi4py in environments without InfiniBand hardware:
-
-  local name
-  name=data
-  prep_env $name
-  prep_env_data_post() {
-    set -e
-    dir_activate=$CONDA_PREFIX/etc/conda/activate.d
-    mkdir -pv $dir_activate
-    cat <<EOF >>$CONDA_PREFIX/etc/conda/activate.d/eagle.sh # NB: append!
-if [[ -v FI_PSM3_UUID ]]; then
-  export EAGLE_OLD_FI_PSM3_UUID=\$FI_PSM3_UUID
-fi
-export FI_PSM3_UUID=eagle
-if [[ -v FI_PROVIDER ]]; then
-  export EAGLE_OLD_FI_PROVIDER=\$FI_PROVIDER
-fi
-export FI_PROVIDER=tcp
-EOF
-    dir_deactivate=$CONDA_PREFIX/etc/conda/deactivate.d
-    mkdir -pv $dir_deactivate
-    cat <<EOF >>$dir_deactivate/eagle.sh # NB: append!
-unset FI_PSM3_UUID
-if [[ -v EAGLE_OLD_FI_PSM3_UUID ]]; then
-  export FI_PSM3_UUID=\$EAGLE_OLD_FI_PSM3_UUID
-  unset EAGLE_OLD_FI_PSM3_UUID
-fi
-unset FI_PROVIDER
-if [[ -v EAGLE_OLD_FI_PROVIDER ]]; then
-  export FI_PROVIDER=\$EAGLE_OLD_FI_PROVIDER
-  unset EAGLE_OLD_FI_PROVIDER
-fi
-EOF
-  }
-  conda run --name $name --no-capture-output prep_env_data_post
-}
-
-prep_env_visualization() {
+prep_visualization() {
   prep_env visualization
 }
 
-prep_env_wxvx() {
+prep_wxvx() {
   prep_env wxvx
 }
 
