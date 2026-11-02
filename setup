@@ -148,8 +148,18 @@ EOF
 }
 
 prep_env_base() {
+
+  # Install jq into the 'base' environment 1. To make it available for reporting updated packages
+  # later, and 2. To force a one-time update to revision metadata in the 'base' environment that
+  # prevents reporting of no-op "updates" like
+  # {
+  #   "old": "conda-26.9.4-py314h9e666f3_0-conda-forge",
+  #   "new": "conda-26.9.4-py314h9e666f3_0-conda-forge/linux-64"
+  # },
+
   local name
   name=base
+  conda install --freeze-installed --name $name --quiet jq --yes
   env_update $name
   test -v EAGLEDEV && env_update $name dev || true
   test -v EAGLE_CLEAN_CONDA_PKGS && cleanup || true

@@ -1,7 +1,6 @@
 channels:
   - ufs-community
 dependencies:
-  - jq 1.8.*
   - pip
   - pip:
       - unified-workflow-tools==2.21.*
