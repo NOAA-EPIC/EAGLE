@@ -118,11 +118,7 @@ pip_install() {
   reqs=envs/$stem.txt
   if [[ -f $reqs ]]; then
     msg Installing "'$stem'" pip packages into environment "'$name'"
-    (
-      set -e +u
-      conda activate $name
-      pip install --progress-bar off --requirement $reqs | { grep --line-buffered -v "Requirement already satisfied" || true; }
-    )
+    conda run --live-stream --name $name pip install --progress-bar off --requirement $reqs | { grep --line-buffered -v "Requirement already satisfied" || true; }
   fi
 }
 
