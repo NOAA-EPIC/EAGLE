@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-# shellcheck disable=2015,2086
+# shellcheck disable=2086
 
 echo "=> Formatting code"
 ruff format "$@"
@@ -14,5 +14,9 @@ ruff check --select I --fix "$@"
 echo "=> Formatting JSON"
 find "$@" -not -path "*/.*" -type f -name "*.json" -o -name "*.jsonschema" | while read -r f; do
   jq -S . $f >$f.new || (echo "    in $f" && rm $f.new && false)
-  cmp --quiet $f.new $f && rm $f.new || mv $f.new $f
+  if cmp --quiet $f.new $f; then
+    rm $f.new
+  else
+    mv $f.new $f
+  fi
 done
