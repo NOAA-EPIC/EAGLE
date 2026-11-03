@@ -1,0 +1,112 @@
+# Colab cleanup overlay for creating reforecasts with global_mini.
+
+# yamllint disable rule:anchors rule:line-length
+
+app:
+  base: /content/EAGLE
+  experiment_name: global_mini
+  forcasting:
+    init_choice: !datetime '{{ "INIT_CHOICE" | env }}'
+    multistep_input_offset: !timedelta 6
+    ic_start: !datetime '{{ app.forcasting.inference_start - app.forcasting.multistep_input_offset }}'
+    inference_start: !datetime '{{ app.forcasting.init_choice - app.forcasting.offset - app.forcasting.latency }}'
+    latency: !timedelta 0
+    leadtime: !timedelta 48
+    offset: !timedelta '0:0:{{ (app.forcasting.init_choice.timestamp() % 21600) | int }}'
+    stop: !datetime '{{ app.forcasting.inference_start + app.forcasting.leadtime }}'
+  time:
+    inference_start: !datetime '{{ app.forcasting.inference_start }}'
+    inference_stop: !datetime '{{ app.forcasting.inference_start }}'
+    start: !datetime '{{ app.forcasting.ic_start }}'
+    stop: !datetime '{{ app.forcasting.stop }}'
+    max_leadtime: !int '{{ (app.forcasting.leadtime.total_seconds() / 3600) | int }}'
+  rundir: '{{ app.base }}/run/{{ app.experiment_name }}/nrt_inference/{{ app.time.inference_start.strftime("%Y/%m/%d/%H") }}'
+  # Remove launcher so execution commands run directly in the notebook/runtime.
+  launcher: !remove
+  # Placeholder objects retained for schema compatibility.
+  # The anchor is kept because base.yaml aliases *gpu-batchargs.
+  gpu:
+    batchargs: &gpu-batchargs
+      nodes: 1
+      partition: placeholder
+      queue: placeholder
+  partitions:
+    netaccess: placeholder
+  platform:
+    account: placeholder
+    scheduler: slurm
+inference:
+  execution:
+    batchargs: !remove
+    envcmds: !list '{{ val.inference.envcmds }}'
+    executable: eagle-tools inference inference.yaml
+  checkpoint_dir: '{{ app.base }}/run/{{ app.experiment_name }}/training/outputs/checkpoint'
+training: !remove
+ufs2arco:
+  mover:
+    name: datamover
+    batch_size: 2
+  source:
+    analysis: !remove
+    forecast: !remove
+    fhr:
+      start: 0
+      step: !int '{{ val.step }}'
+      end: 0
+    levels: !list '{{ val.levels }}'
+    t0:
+      start: '{{ (app.time.start).strftime("%Y-%m-%dT%H") }}'
+      freq: '{{ val.step }}h'
+      end: '{{ (app.time.stop).strftime("%Y-%m-%dT%H") }}'
+    variables: !list '{{ val.variables }}'
+  target:
+    name: anemoi_inference_with_forcings
+    multistep_input: !int '{{ app.time.multistep_input }}'
+    statistics_period: !remove
+val:
+  slurm_script: !remove
+  variables:
+    - gh
+    - u
+    - v
+    - w
+    - t
+    - q
+    - sp
+    - u10
+    - v10
+    - t2m
+    - t_surface
+    - sh2
+    - lsm
+    - orog
+  inference:
+    envcmds:
+      - set -ex
+  zarrs:
+    envcmds:
+      - set -ex
+zarrs:
+  common:
+    execution:
+      # Schema-compatible placeholder, replacing inherited batch settings.
+      batchargs: !dict '{walltime: "00:10:00"}'
+      envcmds:
+        - set -ex
+      mpiargs: []
+      mpicmd: ""
+  gfs:
+    zarr:
+      execution:
+        batchargs: !dict '{walltime: "00:10:00"}'
+        envcmds:
+          - set -ex
+        executable: ufs2arco ufs2arco-gfs.yaml --overwrite
+        mpiargs: []
+        mpicmd: ""
+      ufs2arco:
+        multisource: !remove
+        source: !dict '{{ dict(ufs2arco.source, name="gfs_archive", slices=ufs2arco.slices) }}'
+        transforms:
+          horizontal_regrid:
+            target_grid_path: '{{ grids_and_meshes.rundir}}/{{ val.filenames.gfs_target_grid }}'

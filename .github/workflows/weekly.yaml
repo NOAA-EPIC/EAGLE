@@ -4,7 +4,6 @@ on:
   schedule:
     # Runs every Saturday at 06:00 UTC
     - cron: '0 6 * * 6'
-
 permissions:
   contents: read
   pull-requests: write
@@ -53,7 +52,7 @@ jobs:
         env:
           INSTALLDIR: conda
           PR_NUM: 99999
-          SHA: ${{ github.sha }}
+          SHA: ${{ github.sha }} 
         run: .github/scripts/nested-eagle
     
       - name: Send Slack Notification
