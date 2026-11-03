@@ -41,7 +41,7 @@ env_update() {
   name=$1
   stem=${2:-$name}
   msg Updating "'$name'" environment with "'$stem'" packages
-  opts="$(shopt -po)"
+  opts="$(set -e && shopt -po)"
   set +u
   list="conda list --name $name --canonical --quiet"
   old="$($list)"
@@ -186,7 +186,7 @@ prep_env() {
     env_update $name
   else
     msg Creating "'$name'" conda environment
-    opts="$(shopt -po)"
+    opts="$(set -e && shopt -po)"
     set +u
     conda env create --file envs/$name.yaml --name $name --quiet --yes
     eval "$opts"
