@@ -110,7 +110,7 @@ pip_install() {
   if [[ -f $reqs ]]; then
     msg Installing "'$stem'" pip packages into environment "'$name'"
     cmd="pip install --progress-bar off --requirement $reqs"
-    conda run --name $name --no-capture-output $cmd | { grep --line-buffered -v "Requirement already satisfied" || :; }
+    conda run --live-stream --name $name $cmd | { grep --line-buffered -v "Requirement already satisfied" || :; }
   fi
 }
 
@@ -138,7 +138,7 @@ prep_data() {
   local name
   name=data
   prep_env $name
-  conda run --name $name --no-capture-output prep_data_post
+  conda run --live-stream --name $name prep_data_post
 }
 
 prep_data_post() {
@@ -195,7 +195,7 @@ prep_env() {
   if [[ -v EAGLEDEV ]]; then
     env_update $name dev
   fi
-  conda run --name $name --no-capture-output prep_env_post
+  conda run --live-stream --name $name prep_env_post
   if [[ -v EAGLE_CLEAN_CONDA_PKGS ]]; then
     cleanup
   fi
