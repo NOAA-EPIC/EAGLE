@@ -2,6 +2,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
+  - cuda-cudart-dev
   - cuda-version=13.1
   - flash-attn 2.8.*
   - impi_rt 2021.18.*
@@ -13,6 +14,9 @@ dependencies:
   - triton 3.6.*
 
 # NOTES
+#
+# cuda-cudart-dev provides support files (e.g. cuda.h) needed by triton for its
+# run-time compilation of C extensions.
 #
 # cuda-version is a metapackage that constrains the CUDA version used to resolve
 # dependencies. It influences which CUDA runtime libraries and CUDA-enabled
