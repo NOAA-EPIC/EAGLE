@@ -11,22 +11,6 @@ permissions:
 
 jobs:
 
-  cleanup:
-    concurrency:
-      group: nested-eagle-ci-cleanup
-      cancel-in-progress: false
-      queue: max
-    name: Clean old conda installs
-    if: >-
-      ${{
-        contains(github.event.pull_request.labels.*.name, 'eagle-ursa') &&
-        !contains(github.event.pull_request.labels.*.name, 'ci-running')
-      }}
-    runs-on: ursa
-    steps:
-      - name: Clean old conda installs
-        run: .github/scripts/clean-old-conda-installs
-
   run_pipeline:
     concurrency:
       group: nested-eagle-ci-run-pipeline
