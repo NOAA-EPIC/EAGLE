@@ -5,4 +5,5 @@ anemoi-transform==0.5.*
 datashader==0.19.*
 eagle-tools==0.9.*
 mpi4py==4.1.*
+trimesh==5.2.*
 unified-workflow-tools==2.21.*
