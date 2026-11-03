@@ -11,7 +11,9 @@ cleanup() {
   msg Cleaning conda cache
   conda clean --all --yes
   msg Purging pip cache
-  pip cache purge
+  if [[ ! -v PIP_NO_CACHE_DIR ]]; then
+    conda run --live-stream --name base pip cache purge
+  fi
 }
 
 env_exists() {
