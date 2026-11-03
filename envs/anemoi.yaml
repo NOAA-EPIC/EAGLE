@@ -20,7 +20,7 @@ dependencies:
 #
 # cuda-version is a metapackage that constrains the CUDA version used to resolve
 # dependencies. It influences which CUDA runtime libraries and CUDA-enabled
-# packages conda selects.
+# packages conda selects. This line is consulted by the EAGLE setup script.
 #
 # The conda flash-attn package provides prebuilt executables and libraries.
 #
