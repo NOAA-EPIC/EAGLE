@@ -1,7 +1,10 @@
+anemoi-datasets==0.5.49
+anemoi-graphs==0.9.8
 anemoi-inference==0.12.0
 anemoi-models==0.19.0
 anemoi-training==0.17.1
 anemoi-transform==0.5.1
+anemoi-utils==0.5.14
 datashader==0.19.*
 eagle-tools==0.9.*
 mpi4py==4.1.*
