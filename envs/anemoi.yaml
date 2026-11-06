@@ -1,27 +1,38 @@
-# yamllint disable rule:anchors rule:line-length
-
 channels:
-  - nodefaults
   - conda-forge
-  - ufs-community
+  - nodefaults
 dependencies:
-  - datashader 0.19.*
+  - cuda-cudart-dev
+  - cuda-version=13.1
   - flash-attn 2.8.*
-  - matplotlib >=3.7.1,<3.9 # low bound per anemoi-training; high bound per matplotlib Issue 28317
-  - mkl <2026 # 2026.x omits libmkl_gf_lp64.so.3 required by the resolved NumPy build
-  - mpi4py 4.1.*
-  - numpy 2.2.6.*
+  - impi_rt 2021.18.*
+  - numpy 2.2.*
   - pip
-  - python 3.12
-  - pytorch 2.10.*
-  - setuptools 81.0.*
-  - torchvision 0.25.*
-  - trimesh 5.1.*
+  - python 3.13
+  - pytorch=2.10.*=cuda*
+  - torchvision=0.25.*=cuda*
   - triton 3.6.*
-  - uwtools 2.21.*
-  - pip:
-      - anemoi-inference==0.12.*
-      - anemoi-models==0.19.*
-      - anemoi-training==0.17.*
-      - anemoi-transform==0.5.*
-      - eagle-tools==0.9.1
+
+# NOTES
+#
+# cuda-cudart-dev provides support files (e.g. cuda.h) needed by triton for its
+# run-time compilation of C extensions.
+#
+# cuda-version is a metapackage that constrains the CUDA version used to resolve
+# dependencies. It influences which CUDA runtime libraries and CUDA-enabled
+# packages conda selects. This line is consulted by the EAGLE setup script.
+#
+# The conda flash-attn package provides prebuilt executables and libraries.
+#
+# The impi_rt package supports the mpi4py package installed by pip.
+#
+# The conda numpy, pytorch, and triton packages are installed by default as
+# dependencies of other conda package(s), but pip replaces them with different
+# versions. Install the pip-required versions via conda to avoid this wasteful
+# behavior.
+#
+# The current Anemoi packages don't support pytorch > 2.10, so install this
+# version.
+#
+# torchvision is required by Anemoi. Installing with conda ensures that the
+# selected package is compatible with the other CUDA-enabled packages.

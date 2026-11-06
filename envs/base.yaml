@@ -1,6 +1,5 @@
 channels:
-  - nodefaults
   - conda-forge
-  - ufs-community
+  - nodefaults
 dependencies:
-  - uwtools 2.21.*
+  - pip

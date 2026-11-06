@@ -5,5 +5,5 @@
 set -euo pipefail
 export EAGLE_CLEAN_CONDA_PKGS=1
 export PIP_NO_CACHE_DIR=1
-time make devenv cudascript=dummy
+time make devenv
 . conda/etc/profile.d/conda.sh

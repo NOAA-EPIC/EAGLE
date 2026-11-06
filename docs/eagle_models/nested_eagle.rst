@@ -92,7 +92,7 @@ To run NRT:
 
 #. If running on Microsoft Azure CycleCloud, make the following Azure-specific changes before continuing with the NRT workflow:
 
-   * Create the environment: ``make env cudascript=dummy``
+   * Create the environment: ``make env``
    * Compose the NRT configuration: ``make config compose=base:nested:azure:nrt-nested > nrt-composed.yaml``
 
 

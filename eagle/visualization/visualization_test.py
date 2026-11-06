@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import call, patch
 
@@ -446,7 +446,7 @@ def test_visualization__spatial_stat_plots__figsize(
 
 def test_visualization__defs__datetime(caplog, logged, tmp_path, validator):
     ok = validator(__file__, "visualization", tmp_path, "$defs", "datetime")
-    for val in [datetime(2026, 4, 8, 12, tzinfo=timezone.utc), "2026-04-08T01:23:45"]:
+    for val in [datetime(2026, 4, 8, 12, tzinfo=UTC), "2026-04-08T01:23:45"]:
         assert ok(val)
     assert not ok("foo")
     assert "is not valid under any of the given schemas" in caplog.text

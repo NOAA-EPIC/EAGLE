@@ -1,0 +1,10 @@
+anemoi-datasets==0.5.49
+anemoi-graphs==0.9.8
+anemoi-transform==0.5.1
+mpi4py==4.1.*
+ufs2arco==0.19.*
+unified-workflow-tools==2.21.*
+
+# NOTES
+#
+# Anemoi packages are unstable down to the semver patch level: Pin them strictly.

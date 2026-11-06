@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -414,7 +414,7 @@ def test_wxvx_prewxvx__eagle_tools__levels(config, logged, validator, tmp_path):
 
 def test_wxvx_prewxvx__defs__datetime(caplog, logged, tmp_path, validator):
     ok = validator(__file__, "wxvx", tmp_path, "$defs", "datetime")
-    for val in [datetime(2026, 4, 8, 12, tzinfo=timezone.utc), "2026-04-08T01:23:45"]:
+    for val in [datetime(2026, 4, 8, 12, tzinfo=UTC), "2026-04-08T01:23:45"]:
         assert ok(val)
     assert not ok("foo")
     assert "is not valid under any of the given schemas" in caplog.text

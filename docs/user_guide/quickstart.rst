@@ -36,7 +36,7 @@ Building and Running :term:`EAGLE`
 
    .. code-block:: bash
 
-      make env cudascript=ursa
+      make env
 
    This step creates the runtime software environment, comprising conda virtual environments to support data preparation, 
    training, :term:`inference`, and verification. The ``conda/`` subdirectory it creates is self-contained and can be removed 
@@ -45,16 +45,6 @@ Building and Running :term:`EAGLE`
    Developers who will be modifying Python driver code should replace ``make env`` with ``make devenv``, which will 
    create the same environments but also install additional code-quality tools for formatting, linting, shellchecking, 
    typechecking, unit testing, and :term:`YAML` linting.
-
-   .. note::
-
-      EAGLE virtual environments are built using both conda and pip packages. If you examine the output from the ``make env`` command above, you may see messages like the following, from pip:
-
-      .. code-block:: text
-
-         ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
-
-      This will be followed by a report of packages pip believes are not installed or are installed with incompatible versions. These messages are due to fundamental differences in how conda and pip operate, and are generally safe to ignore. But please open an :ref:`Issue <Issues>` if you later encounter problems you believe are related to package versions.
 
 #. Create the EAGLE YAML config
 

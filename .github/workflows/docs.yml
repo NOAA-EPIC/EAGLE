@@ -15,7 +15,7 @@ jobs:
 
     permissions:
       contents: read
-      issues: write
+      pull-requests: write
 
     runs-on: ubuntu-22.04
     name: Build and deploy documentation

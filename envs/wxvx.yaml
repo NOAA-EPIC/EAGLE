@@ -1,15 +1,22 @@
 channels:
-  - nodefaults
   - conda-forge
+  - nodefaults
   - oar-gsl
   - ufs-community
 dependencies:
+  - numpy 2.2.*
   - pip
   - python 3.13
-  - requests 2.34.*
-  - uwtools 2.21.*
   - wxvx >=0.8.0
   - xesmf 0.8.*
   - zarr 2.18.*
-  - pip:
-      - eagle-tools==0.9.1
+
+# NOTES
+#
+# The conda numpy and zarr packages are installed by default as dependencies of
+# other conda package(s), but pip replaces them with different versions. Install
+# the pip-required versions via conda to avoid this wasteful behavior.
+#
+# The wxvx package, currently only available via conda, installs uwtools as a
+# dependency, so the ufs-community channel must be enabled, and there's then no
+# need to install unified-workflow-tools via pip, as it will already be present.

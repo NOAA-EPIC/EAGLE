@@ -384,7 +384,7 @@ zarrs:
         export: false
         partition: '{{ app.partitions.netaccess }}'
         rundir: '{{ val.data.rundir }}'
-        walltime: '00:10:00'
+        walltime: '00:30:00'
       envcmds: !list '{{ val.zarrs.envcmds }}'
       mpiargs: []
       mpicmd: '{{ "srun" if app.platform.scheduler == "slurm" else "mpiexec" }}'

@@ -11,15 +11,9 @@ To build the EAGLE runtime virtual environments:
 
 .. code-block:: bash
 
-    make env cudascript=<name-or-path> # alternatively: ./setup cudascript=<name-or-path>
+    make env # alternatively: ./setup
 
 This will install :term:`Miniforge conda` in the current directory and create the various virtual environments.
-
-The value of the ``cudascript=`` argument should be either the name of a file under ``cuda/`` (e.g. ``cudascript=ursa``), 
-or an arbitrary path to a file (e.g. ``cudascript=/path/to/file``). The file should contain a list of commands that need 
-to be executed on the current system to make the CUDA ``nvcc`` program available on ``PATH``. The ``setup`` script uses ``nvcc`` 
-to determine the CUDA release number, used to select a matching ``flash-attn`` package. For systems needing no special 
-setup to make ``nvcc`` available, ``cudascript=none`` may be specified.
 
 Available Make Targets
 ------------------------------------------------------------------------------

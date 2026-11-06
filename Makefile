@@ -1,4 +1,5 @@
 BASHSRCS = $(wildcard ../.github/scripts/*) format setup
+COMMA    = ,
 HELPERS  = vx zarr
 MODULES  = data inference training visualization wxvx
 PACKAGE  = eagle
@@ -38,6 +39,9 @@ all:
 	@echo
 	false
 
+# For the config target, run 'make config compose=base:x:y' to compose configs
+# base, x, and y.
+
 config:
 	$(call check,$(compose),compose)
 	$(call activate,base)
@@ -48,12 +52,14 @@ data:
 	@$(make) grids-and-meshes
 	@for x in gfs hrrr; do if [[ -n "$$(uw config realize -i $(config) --key-path zarrs.$$x 2>/dev/null)" ]]; then $(make) zarr source=$$x; fi; done
 
+# For the [dev]env targets, run 'make env only=x,y' to build only environments
+# x and y (and base, which is always included).
+
 devenv:
-	$(call check,$(cudascript),cudascript)
-	EAGLEDEV=1 INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
+	EAGLEDEV=1 $(MAKE) env
+
 env:
-	$(call check,$(cudascript),cudascript)
-	INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
+	INSTALLDIR=$(INSTALLDIR) ./setup $(subst $(COMMA), ,$(only))
 
 format:
 	$(call activate,base)

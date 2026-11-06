@@ -6,7 +6,13 @@ set -euo pipefail
 export SETVARS_CALL=${SETVARS_CALL:-0}
 cd "$GITHUB_WORKSPACE"
 
-time make env cudascript=ursa INSTALLDIR="$INSTALLDIR"
+# Remove any old conda installs, in the background.
+
+rm -rf conda.* >cleanup.out 2>&1 &
+
+# Build and activate the software envrionment.
+
+time make env INSTALLDIR="$INSTALLDIR"
 
 source conda/etc/profile.d/conda.sh
 conda activate base
@@ -225,6 +231,10 @@ find "$NRTDIR/inference/output" -type f -name "*.nc" -print -quit | grep -q . ||
   echo ERROR: No inference NetCDF outputs found under $NRTDIR/inference
   exit 1
 }
+
+# Wait for backgrounded cleanup process.
+
+wait
 
 # Done.
 
