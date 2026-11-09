@@ -3,7 +3,7 @@ name: NRT EAGLE CI Pipeline Weekly
 on:
   schedule:
     # Runs every Saturday at 06:00 UTC
-    - cron: '0 16 * * 1'
+    - cron: '0 6 * * 6'
 permissions:
   contents: read
   pull-requests: write
