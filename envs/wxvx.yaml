@@ -4,6 +4,7 @@ channels:
   - oar-gsl
   - ufs-community
 dependencies:
+  - netcdf-cxx4 4.3.1.*
   - numpy 2.2.*
   - pip
   - python 3.13
@@ -12,6 +13,12 @@ dependencies:
   - zarr 2.18.*
 
 # NOTES
+#
+# The netcdf-cxx4 item works around an issue with the metplus package reported
+# here: https://github.com/dtcenter/METplus/discussions/3411. The MET programs
+# require libnetcdf-cxx4.so.1, but the metplus conda package does not pin its
+# netcdf-cxx4 package version, so libnetcdf-cxx4.so.3 is installed instead. This
+# item can be removed if/when the upstream metplus conda package is fixed.
 #
 # The conda numpy and zarr packages are installed by default as dependencies of
 # other conda package(s), but pip replaces them with different versions. Install
