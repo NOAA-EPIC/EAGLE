@@ -66,7 +66,7 @@ install_conda() {
     return
   fi
   ver=26.9.4-1
-  installer=Miniforge3-$ver-$(uname -s)-$(uname -p).sh
+  installer=Miniforge3-$ver-$(uname -s)-$(uname -m).sh
   url=https://github.com/conda-forge/miniforge/releases/download/$ver/$installer
   msg Installing conda
   wget -nv $url
