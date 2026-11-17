@@ -4,6 +4,7 @@ channels:
   - oar-gsl
   - ufs-community
 dependencies:
+  - h5py 3.16.*
   - numpy 2.2.*
   - pip
   - python 3.13
