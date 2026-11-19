@@ -74,18 +74,22 @@ for this case study.
 
 To verify temperature for the forecast, use wxvx_temperature.yaml as a template. Set: 
 
-cycles:
-  start: 2025-04-01T00:00:00
-  step: 0
-  stop: 2025-04-01T00:00:00  
+.. code-block:: yaml
+
+   cycles:
+   start: 2025-04-01T00:00:00
+   step: 0
+   stop: 2025-04-01T00:00:00  
 
 These times indicate the initialization date and time of the forecast created from nested-EAGLE. In this case, 2025-04-01 at 00Z. To verify separate times 
 across the 240-hr forecast, define desired leadtimes:
 
-leadtimes:
-  start: '0'
-  step: '6:00:00'
-  stop: '24'
+.. code-block:: yaml
+
+   leadtimes:
+   start: '0'
+   step: '6:00:00'
+   stop: '24'
 
 We begin with the first 24 hours of the forecast in increments of 6 hours. Temperature is verified using the PREPBUFR 
 observational data. More information can be found in the wxvx documentation. The verification is run using: 
@@ -115,7 +119,9 @@ Critical Success Index (CSI), Heidke Skill Score (HSS), and Fraction Skill Score
 
 CSI is a measure used to evaluate forecast precipitation occurrence, in other words: 
 
-CSI = Hits / (Hits + Misses + False Alarms)
+.. math::
+
+   CSI = \frac{\text{Hits}}{\text{Hits} + \text{Misses} + \text{False Alarm
 
 On a scale from 0 to 1, a higher CSI indicates higher skill. 
 
@@ -157,10 +163,12 @@ Next, we will verify a different time period in the forecast using the same wxvx
 wxvx_precipitation.yaml files. The cycles definition remains the same as before, however, we will now verify a 
 different point in the event where precipitation intensity is much greater.  
 
-leadtimes:
-  start: '60'
-  step: '6:00:00'
-  stop: '108'
+.. code-block:: yaml
+
+   leadtimes:
+   start: '60'
+   step: '6:00:00'
+   stop: '108'
 
 Here, the forecast is verified beginning at hour 60 (2025-04-03 at 12Z) through hour 108 (2025-04-05 at 12Z), the 
 concentration of heaviest precipitation during this event, though any start and stop time can be specified as 
@@ -214,11 +222,14 @@ with the goal of at least being as skillful or better than the HRRR. We will hav
 because the HRRR only produces 48-hr forecasts. 
 
 We begin again with the first 24 hours of this event (using the hrrr.yaml and running with ufs2arco): 
-    t0:
+
+.. code-block:: yaml
+
+   t0:
       start: 2025-04-01T00
       end: 2025-04-01T00
       freq: 6h
-    fhr:
+   fhr:
       start: 6
       end: 24
       step: 6
@@ -282,14 +293,16 @@ placement of heavier rainfall beyond the first few forecast hours.
 Next, we examine the forecast for the part of this event with the heaviest precipitation, hours 60-108 from
 4-1-26 at 0Z, or hours 6-48 for the HRRR forecast initialized at 4-3-26 at 12Z (hrrr.yaml.):
 
-    t0:
-      start: 2025-04-03T12
-      end: 2025-04-03T12
-      freq: 6h
-    fhr:
-      start: 6
-      end: 48
-      step: 6
+.. code-block:: yaml
+
+   t0:
+     start: 2025-04-03T12
+     end: 2025-04-03T12
+     freq: 6h
+   fhr:
+     start: 6
+     end: 48
+     step: 6
 
 Results of the temperature verification are as follows:
 
