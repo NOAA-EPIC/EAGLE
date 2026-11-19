@@ -96,11 +96,14 @@ Two plots for temperature verification are produced: Root Mean Square Error (RMS
 
 .. image:: images/2t-heightAboveGround-0002-begin-RMSE-plot.png
    :align: center
-   The RMSE of 2m temperature for the first 24 hours of the forecast shows forecast error generally increase 
-   as forecast time increases.
+
+The RMSE of 2m temperature for the first 24 hours of the forecast shows forecast error generally increase 
+as forecast time increases.
 
 .. image:: images/2t-heightAboveGround-0002-begin-ME-plot.png
-   The ML forecast has a strong, consistent cold bias during the first 24 hours, averaging approximately −0.60 K. 
+   :align: center
+
+The ML forecast has a strong, consistent cold bias during the first 24 hours, averaging approximately −0.60 K. 
 
 Similarly, to verify precipitation for the forecast, use wxvx_precipitation.yaml as a template. The precipitation data
 is verified using the NCEP/CPC Four Kilometer Precipitation, dataset d507005 ("STAGEIV"). Data in the archive for 
@@ -129,19 +132,25 @@ and 25, each representing precipitation in kg m^-3, or mm. The results of the fo
 wxvx for precipitation in the first 24 hours of this event are shown below:
 
 .. image:: tp-surface-CSI-plot_begin.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-3-plot_begin.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-5-plot_begin.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-11-plot_begin.png
+   :align: center
 
 .. image:: tp-surface-HSS-plot_begin.png
-    For this event, the Nested-Eagle forecast demonstrated consistently strong skill for light precipitation 
-    (≥1 mm) throughout the first 24 hours and maintained useful skill for moderate (≥5 mm) and heavy (≥10 mm) 
-    precipitation even as lead time increased. High FSS values across all neighborhood sizes indicate that the 
-    model generally captured the placement and spatial structure of precipitation systems well, with only a 
-    temporary reduction in skill around hour 12 before recovering by hours 18-24.
+   :align: center
+
+For this event, the Nested-Eagle forecast demonstrated consistently strong skill for light precipitation 
+(≥1 mm) throughout the first 24 hours and maintained useful skill for moderate (≥5 mm) and heavy (≥10 mm) 
+precipitation even as lead time increased. High FSS values across all neighborhood sizes indicate that the 
+model generally captured the placement and spatial structure of precipitation systems well, with only a 
+temporary reduction in skill around hour 12 before recovering by hours 18-24.
 
 
 Next, we will verify a different time period in the forecast using the same wxvx_temperature.yaml and 
@@ -159,27 +168,37 @@ number of hours (in increments of 6 hours) from forecast initialization. The fol
 Kelvin of the temperature for this forecast from hours 60 through 108. 
 
 .. image:: images/2t-heightAboveGround-0002-RMSE-plot.png
-   The RMSE varies with time throughout hours 60 through 108. 
+   :align: center
+
+The RMSE varies with time throughout hours 60 through 108. 
 
 .. image:: images/2t-heightAboveGround-0002-ME-plot.png
-    During hours 60–108, the average bias improves substantially to about −0.12 K, but the lead-by-lead behavior 
-    becomes less stable, alternating between warm and cold biases.
+   :align: center
+
+During hours 60–108, the average bias improves substantially to about −0.12 K, but the lead-by-lead behavior 
+becomes less stable, alternating between warm and cold biases.
 
 For precipitation: 
 
 .. image:: tp-surface-CSI-plot.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-3-plot.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-5-plot.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-11-plot.png
+   :align: center
 
 .. image:: tp-surface-HSS-plot.png
-    For forecast hours 60–108, precipitation skill remains useful but becomes more variable by lead time and 
-    threshold. The model appears better at forecasting the precipitation system and its approximate regional 
-    footprint than the exact location of threshold exceedances. That conclusion is especially strong later in the 
-    forecast, when width-11 FSS frequently exceeds 0.9 even where CSI is only 0.2–0.4.
+   :align: center
+
+For forecast hours 60–108, precipitation skill remains useful but becomes more variable by lead time and 
+threshold. The model appears better at forecasting the precipitation system and its approximate regional 
+footprint than the exact location of threshold exceedances. That conclusion is especially strong later in the 
+forecast, when width-11 FSS frequently exceeds 0.9 even where CSI is only 0.2–0.4.
 
 Compared with the first 24 hours, later forecasts have slightly reduced light-precipitation categorical skill but 
 surprisingly stronger heavy- and extreme-event performance at selected times. The high large-neighborhood FSS 
@@ -211,40 +230,54 @@ and data structure for formatting into the wxvx format requirements. Finally, th
 following visualization of the forecast:
 
 .. image:: hrrr_6hr_precip_forecast_begin.gif
-   For the first 24 hours of the event 
+   :align: center
+
+For the first 24 hours of the event.
 
 .. image:: hrrr_6hr_precip_forecast_middle.gif
-   For forecast hours 60-108 of the event. Please note that this figure shows hours 6-48, as The
-   HRRR forecast must be initialized again beginning 4-3-26 at 12Z given that HRRR is only able to produce 
-   48-hr forecasts, and not the full 240-hr forecast like Nested-EAGLE. For the HRRR images in this section, 
-   hours 6-48 are equivalent in time to hours 60-108 of the Nested-EAGLE forecast (4-3-26 at 12Z through 4-5-26 at 12Z).
+   :align: center
+
+For forecast hours 60-108 of the event. Please note that this figure shows hours 6-48, as The
+HRRR forecast must be initialized again beginning 4-3-26 at 12Z given that HRRR is only able to produce 
+48-hr forecasts, and not the full 240-hr forecast like Nested-EAGLE. For the HRRR images in this section, 
+hours 6-48 are equivalent in time to hours 60-108 of the Nested-EAGLE forecast (4-3-26 at 12Z through 4-5-26 at 12Z).
 
 The forecast is verified similarly to Nested-EAGLE, using wxvx and the following yaml: wxvx_temperature_hrrr.yaml 
 We obtain the following results for temperature for the first 24 hours of the event: 
 
 .. image:: 2t-heightAboveGround-0002-RMSE-plot_hrrr_begin.png
-   Error increases as forecast time increases in the first 24 hours. 
+   :align: center
+
+Error increases as forecast time increases in the first 24 hours. 
 
 .. image:: 2t-heightAboveGround-0002-ME-plot_hrrr_begin.png
-   The forecast shows increasingly negative cold bias with time. 
+   :align: center
+
+The forecast shows increasingly negative cold bias with time. 
 
 The precipitation forecast is verified similarly to Nested_EAGLE, using wxvx and the following yaml: wxvx_precipitation_hrrr.yaml 
 We obtain the following results:
 
 .. image:: tp-surface-CSI-plot_hrrr.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-3-plot_hrrr.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-5-plot_hrrr.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-11-plot_hrrr.png
+   :align: center
 
 .. image:: tp-surface-HSS-plot_hrrr.png
-   HRRR showed strong skill for light precipitation and reasonable skill for moderate to heavy precipitation 
-   at the shortest lead time (6 h), but skill degraded rapidly after initialization, particularly for the ≥10 mm 
-   and ≥25 mm thresholds. While neighborhood-based FSS indicated HRRR often captured the general precipitation 
-   region,categorical skill metrics (CSI and HSS) suggest it struggled to accurately forecast the intensity and 
-   placement of heavier rainfall beyond the first few forecast hours.
+   :align: center
+
+HRRR showed strong skill for light precipitation and reasonable skill for moderate to heavy precipitation 
+at the shortest lead time (6 h), but skill degraded rapidly after initialization, particularly for the ≥10 mm 
+and ≥25 mm thresholds. While neighborhood-based FSS indicated HRRR often captured the general precipitation 
+region,categorical skill metrics (CSI and HSS) suggest it struggled to accurately forecast the intensity and 
+placement of heavier rainfall beyond the first few forecast hours.
 
 Next, we examine the forecast for the part of this event with the heaviest precipitation, hours 60-108 from
 4-1-26 at 0Z, or hours 6-48 for the HRRR forecast initialized at 4-3-26 at 12Z (hrrr.yaml.):
@@ -261,27 +294,37 @@ Next, we examine the forecast for the part of this event with the heaviest preci
 Results of the temperature verification are as follows:
 
 .. image:: 2t-heightAboveGround-0002-RMSE-plot_hrrr_middle.png
-   The RMSE varies with time through 4-3-26 at 12Z to 4-5-25 at 12Z. 
+   :align: center
+
+The RMSE varies with time through 4-3-26 at 12Z to 4-5-25 at 12Z. 
 
 .. image:: 2t-heightAboveGround-0002-ME-plot_hrrr_middle.png
-   A cold bias is present throughout the forecast, with hours 30-36 having the greatest error. 
+   :align: center
+   
+A cold bias is present throughout the forecast, with hours 30-36 having the greatest error. 
 
 Then, we run the wxvx verification for precipitation for this forecast and obtain the following results:
 
 .. image:: tp-surface-CSI-plot_hrrr_middle.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-3-plot_hrrr_middle.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-5-plot_hrrr_middle.png
+   :align: center
 
 .. image:: tp-surface-FSS-width-11-plot_hrrr_middle.png
+   :align: center
 
 .. image:: tp-surface-HSS-plot_hrrr_middle.png
-   For this later period of the event, HRRR exhibits substantially better and more sustained precipitation skill 
-   than it showed during the first 24-hour evaluation window. Skill remains relatively high across all thresholds 
-   through 48 hours, with particularly strong performance for light (≥1 mm) and moderate (≥5 mm) precipitation 
-   and some useful skill for heavy (≥10 mm) and extreme (≥25 mm) precipitation thresholds compared to the first 24 
-   hours of the event.
+   :align: center
+
+For this later period of the event, HRRR exhibits substantially better and more sustained precipitation skill 
+than it showed during the first 24-hour evaluation window. Skill remains relatively high across all thresholds 
+through 48 hours, with particularly strong performance for light (≥1 mm) and moderate (≥5 mm) precipitation 
+and some useful skill for heavy (≥10 mm) and extreme (≥25 mm) precipitation thresholds compared to the first 24 
+hours of the event.
 
 Compared to HRRR, the Nested-Eagle forecast generally maintained higher CSI, HSS, and FSS values from hours 12-24, 
 especially for the operationally important ≥5 mm and ≥10 mm precipitation thresholds. This suggests Nested-Eagle 
