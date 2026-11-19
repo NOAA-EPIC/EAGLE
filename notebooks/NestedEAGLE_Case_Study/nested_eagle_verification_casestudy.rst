@@ -14,7 +14,7 @@ Step 1: Introduction and Requirements
 This case study uses the example of the April 1-6, 2025 severe weather outbreak which spanned parts of the lower Mississippi
 Valley, mid-South, and lower Ohio Valley. Widespread flooding across multiple states and historic river levels occurred.
 Over 15 inches of rain were observed in some areas, as an Atlantic high-pressure system stalled over the region. 
-Approximately `$4.1 billion in damages <https://www.ajg.com/gallagherre/-/media/files/gallagher/gallagherre/news-and-insights/2025/october/natural-catastrophe-and-climate-report-q3-2025.pdf>_` 
+Approximately `$4.1 billion in damages <https://www.ajg.com/gallagherre/-/media/files/gallagher/gallagherre/news-and-insights/2025/october/natural-catastrophe-and-climate-report-q3-2025.pdf>`_ 
 were reported in addition to greater economic losses (supply-chain disruptions, uninsured damages, etc.), and 
 `24 people died <https://abcnews.com/US/deadly-flooding-south-severe/story?id=120636843>`_. 
 
@@ -24,17 +24,17 @@ experimental machine-learning weather forecast system in predicting this event.
 
 .. image:: images/6day_precip_observed.png
       :align: center
-   Image: `National Weather Service <https://www.weather.gov/crh/2025April1-6>`_
 
+Image: `National Weather Service <https://www.weather.gov/crh/2025April1-6>`_
 
 First, an environment to run the Nested-EAGLE forecast notebook (nested_eagle_case_study.ipynb) can be set up using the requirements.txt file.
 
-Additionally, the wxvx package will need to be installed. Please follow the instructions `here <https://github.com/NOAA-GSL/wxvx/blob/main/README.md#example>_` 
+Additionally, the wxvx package will need to be installed. Please follow the instructions `here <https://github.com/NOAA-GSL/wxvx/blob/main/README.md#example>`_
 to do so. 
 
 This case study also provides instructions on creating and verifying, using the same method, a HRRR forecast to compare to the 
 verification of the Nested-EAGLE forecast. To do this, the ufs2arco package is used to create a forecast using the hrrr.yaml file. The
-instructions for ufs2arco can be found `here <https://ufs2arco.readthedocs.io/en/latest/>_`.
+instructions for ufs2arco can be found `here <https://ufs2arco.readthedocs.io/en/latest/>`_.
 
 Step 2: Running Nested-EAGLE Notebook and Creating the Forecast
 ###################
@@ -95,6 +95,7 @@ wxvx -n 1 -c /wxvx_temperature.yaml -t plots
 Two plots for temperature verification are produced: Root Mean Square Error (RMSE) and Mean Error (ME) in Kelvin.
 
 .. image:: images/2t-heightAboveGround-0002-begin-RMSE-plot.png
+   :align: center
    The RMSE of 2m temperature for the first 24 hours of the forecast shows forecast error generally increase 
    as forecast time increases.
 
@@ -103,7 +104,7 @@ Two plots for temperature verification are produced: Root Mean Square Error (RMS
 
 Similarly, to verify precipitation for the forecast, use wxvx_precipitation.yaml as a template. The precipitation data
 is verified using the NCEP/CPC Four Kilometer Precipitation, dataset d507005 ("STAGEIV"). Data in the archive for 
-April 2025 can be found `here <https://data.gdex.ucar.edu/d507005/stage4/stage4.202504.tartar>_`.
+April 2025 can be found `here <https://data.gdex.ucar.edu/d507005/stage4/stage4.202504.tartar>`_.
 
 The cycles and leadtimes definitions remain the same as before. Five verification plots are produced: 
 Critical Success Index (CSI), Heidke Skill Score (HSS), and Fraction Skill Score (FSS) at three widths: 
@@ -188,7 +189,7 @@ precipitation intensity.
 Step 3: Verifying a HRRR Forecast with wxvx to Compare to Nested-EAGLE Verification 
 ###################
 
-Given these findings, it is also important to verify the `High Resolution Rapid Refresh (HRRR) <https://rapidrefresh.noaa.gov/hrrr/>_`
+Given these findings, it is also important to verify the `High Resolution Rapid Refresh (HRRR) <https://rapidrefresh.noaa.gov/hrrr/>`_
 for this same forecast time. We want to compare how the Nested-EAGLE forecast performed against the HRRR, 
 with the goal of at least being as skillful or better than the HRRR. We will have two HRRR forecast initializations,
 because the HRRR only produces 48-hr forecasts. 
