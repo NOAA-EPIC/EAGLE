@@ -121,7 +121,7 @@ CSI is a measure used to evaluate forecast precipitation occurrence, in other wo
 
 .. math::
 
-   CSI = \frac{\text{Hits}}{\text{Hits} + \text{Misses} + \text{False Alarm
+   CSI = \frac{\text{Hits}}{\text{Hits} + \text{Misses} + \text{False Alarm}
 
 On a scale from 0 to 1, a higher CSI indicates higher skill. 
 
@@ -137,19 +137,19 @@ For all of these metrics, forecast skill is evaluated at four thresholds: 1, 5, 
 and 25, each representing precipitation in kg m^-3, or mm. The results of the forecast verification using 
 wxvx for precipitation in the first 24 hours of this event are shown below:
 
-.. image:: tp-surface-CSI-plot_begin.png
+.. image:: images/tp-surface-CSI-plot_begin.png
    :align: center
 
-.. image:: tp-surface-FSS-width-3-plot_begin.png
+.. image:: images/tp-surface-FSS-width-3-plot_begin.png
    :align: center
 
-.. image:: tp-surface-FSS-width-5-plot_begin.png
+.. image:: images/tp-surface-FSS-width-5-plot_begin.png
    :align: center
 
-.. image:: tp-surface-FSS-width-11-plot_begin.png
+.. image:: images/tp-surface-FSS-width-11-plot_begin.png
    :align: center
 
-.. image:: tp-surface-HSS-plot_begin.png
+.. image:: images/tp-surface-HSS-plot_begin.png
    :align: center
 
 For this event, the Nested-Eagle forecast demonstrated consistently strong skill for light precipitation 
@@ -188,19 +188,19 @@ becomes less stable, alternating between warm and cold biases.
 
 For precipitation: 
 
-.. image:: tp-surface-CSI-plot.png
+.. image:: images/tp-surface-CSI-plot.png
    :align: center
 
-.. image:: tp-surface-FSS-width-3-plot.png
+.. image:: images/tp-surface-FSS-width-3-plot.png
    :align: center
 
-.. image:: tp-surface-FSS-width-5-plot.png
+.. image:: images/tp-surface-FSS-width-5-plot.png
    :align: center
 
-.. image:: tp-surface-FSS-width-11-plot.png
+.. image:: images/tp-surface-FSS-width-11-plot.png
    :align: center
 
-.. image:: tp-surface-HSS-plot.png
+.. image:: images/tp-surface-HSS-plot.png
    :align: center
 
 For forecast hours 60–108, precipitation skill remains useful but becomes more variable by lead time and 
@@ -240,12 +240,12 @@ in the second half of the nested_eagle_case_study.ipynb. This notebook then adju
 and data structure for formatting into the wxvx format requirements. Finally, this notebook produces the 
 following visualization of the forecast:
 
-.. image:: hrrr_6hr_precip_forecast_begin.gif
+.. image:: images/hrrr_6hr_precip_forecast_begin.gif
    :align: center
 
 For the first 24 hours of the event.
 
-.. image:: hrrr_6hr_precip_forecast_middle.gif
+.. image:: images/hrrr_6hr_precip_forecast_middle.gif
    :align: center
 
 For forecast hours 60-108 of the event. Please note that this figure shows hours 6-48, as The
@@ -256,12 +256,12 @@ hours 6-48 are equivalent in time to hours 60-108 of the Nested-EAGLE forecast (
 The forecast is verified similarly to Nested-EAGLE, using wxvx and the following yaml: wxvx_temperature_hrrr.yaml 
 We obtain the following results for temperature for the first 24 hours of the event: 
 
-.. image:: 2t-heightAboveGround-0002-RMSE-plot_hrrr_begin.png
+.. image:: images/2t-heightAboveGround-0002-RMSE-plot_hrrr_begin.png
    :align: center
 
 Error increases as forecast time increases in the first 24 hours. 
 
-.. image:: 2t-heightAboveGround-0002-ME-plot_hrrr_begin.png
+.. image:: images/2t-heightAboveGround-0002-ME-plot_hrrr_begin.png
    :align: center
 
 The forecast shows increasingly negative cold bias with time. 
@@ -269,19 +269,19 @@ The forecast shows increasingly negative cold bias with time.
 The precipitation forecast is verified similarly to Nested_EAGLE, using wxvx and the following yaml: wxvx_precipitation_hrrr.yaml 
 We obtain the following results:
 
-.. image:: tp-surface-CSI-plot_hrrr.png
+.. image:: images/tp-surface-CSI-plot_hrrr.png
    :align: center
 
-.. image:: tp-surface-FSS-width-3-plot_hrrr.png
+.. image:: images/tp-surface-FSS-width-3-plot_hrrr.png
    :align: center
 
-.. image:: tp-surface-FSS-width-5-plot_hrrr.png
+.. image:: images/tp-surface-FSS-width-5-plot_hrrr.png
    :align: center
 
-.. image:: tp-surface-FSS-width-11-plot_hrrr.png
+.. image:: images/tp-surface-FSS-width-11-plot_hrrr.png
    :align: center
 
-.. image:: tp-surface-HSS-plot_hrrr.png
+.. image:: images/tp-surface-HSS-plot_hrrr.png
    :align: center
 
 HRRR showed strong skill for light precipitation and reasonable skill for moderate to heavy precipitation 
@@ -306,31 +306,31 @@ Next, we examine the forecast for the part of this event with the heaviest preci
 
 Results of the temperature verification are as follows:
 
-.. image:: 2t-heightAboveGround-0002-RMSE-plot_hrrr_middle.png
+.. image:: images/2t-heightAboveGround-0002-RMSE-plot_hrrr_middle.png
    :align: center
 
 The RMSE varies with time through 4-3-26 at 12Z to 4-5-25 at 12Z. 
 
-.. image:: 2t-heightAboveGround-0002-ME-plot_hrrr_middle.png
+.. image:: images/2t-heightAboveGround-0002-ME-plot_hrrr_middle.png
    :align: center
    
 A cold bias is present throughout the forecast, with hours 30-36 having the greatest error. 
 
 Then, we run the wxvx verification for precipitation for this forecast and obtain the following results:
 
-.. image:: tp-surface-CSI-plot_hrrr_middle.png
+.. image:: images/tp-surface-CSI-plot_hrrr_middle.png
    :align: center
 
-.. image:: tp-surface-FSS-width-3-plot_hrrr_middle.png
+.. image:: images/tp-surface-FSS-width-3-plot_hrrr_middle.png
    :align: center
 
-.. image:: tp-surface-FSS-width-5-plot_hrrr_middle.png
+.. image:: images/tp-surface-FSS-width-5-plot_hrrr_middle.png
    :align: center
 
-.. image:: tp-surface-FSS-width-11-plot_hrrr_middle.png
+.. image:: images/tp-surface-FSS-width-11-plot_hrrr_middle.png
    :align: center
 
-.. image:: tp-surface-HSS-plot_hrrr_middle.png
+.. image:: images/tp-surface-HSS-plot_hrrr_middle.png
    :align: center
 
 For this later period of the event, HRRR exhibits substantially better and more sustained precipitation skill 
