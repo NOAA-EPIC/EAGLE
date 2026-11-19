@@ -121,7 +121,7 @@ CSI is a measure used to evaluate forecast precipitation occurrence, in other wo
 
 .. math::
 
-   CSI = \frac{\text{Hits}}{\text{Hits} + \text{Misses} + \text{False Alarm}}
+   CSI = \frac{Hits}{Hits + Misses + False\ Alarms}
 
 On a scale from 0 to 1, a higher CSI indicates higher skill. 
 
