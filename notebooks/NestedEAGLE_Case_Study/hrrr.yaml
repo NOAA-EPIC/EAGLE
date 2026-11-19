@@ -1,0 +1,33 @@
+mover:
+  name: datamover
+  batch_size: 1
+
+directories:
+  zarr: hrrr_april_middle.zarr
+  cache: cache/hrrr
+  logs: logs/hrrr
+
+source:
+    name: aws_hrrr_archive
+    t0:
+      start: 2025-04-03T12
+      end: 2025-04-03T12
+      freq: 6h
+    fhr:
+      start: 6
+      end: 48
+      step: 6
+    variables:
+      - lsm
+      - t2m
+      - accum_tp
+
+target:
+  name: base
+
+  chunks:
+    t0: 1
+    fhr: 1
+    level: -1
+    y: -1
+    x: -1
