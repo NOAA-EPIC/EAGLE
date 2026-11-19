@@ -118,10 +118,8 @@ Critical Success Index (CSI), Heidke Skill Score (HSS), and Fraction Skill Score
 3, 5, and 11. 
 
 CSI is a measure used to evaluate forecast precipitation occurrence, in other words: 
-
-.. math::
-
-   CSI = \frac{Hits}{Hits + Misses + False\ Alarms}
+::
+   CSI = Hits / (Hits + Misses + False Alarms)
 
 On a scale from 0 to 1, a higher CSI indicates higher skill. 
 
