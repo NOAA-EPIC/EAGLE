@@ -3,7 +3,7 @@ anemoi-graphs==0.9.8
 anemoi-transform==0.5.1
 mpi4py==4.1.*
 ufs2arco==0.19.*
-unified-workflow-tools==2.21.*
+unified-workflow-tools==2.22.*
 
 # NOTES
 #
