@@ -48,7 +48,7 @@ Finally, perform the editable install and return to your EAGLE clone and origina
 
    pip install --editable --force-reinstall .
    conda list anemoi-training
-   # packages in environment at /scratch4/BMC/gsd-hpcs/Paul.Madden/eagle-152/conda/envs/anemoi:
+   # packages in environment at ./conda/envs/anemoi:
    #
    # Name                     Version          Build            Channel
    anemoi-training            0.17.2           pypi_0           pypi
