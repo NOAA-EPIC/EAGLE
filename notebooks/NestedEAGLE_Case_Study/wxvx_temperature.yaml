@@ -1,0 +1,51 @@
+truth:
+  name: PREPBUFR
+  type: point
+  url: https://noaa-reanalyses-pds.s3.amazonaws.com/observations/reanalysis/conv/prepbufr/{{ yyyymmdd[:4] }}/{{ yyyymmdd[4:6] }}/prepbufr/gdas.{{ yyyymmdd }}.t{{ hh }}z.prepbufr.nr
+cycles:
+  start: 2025-04-01T00:00:00
+  step: 0
+  stop: 2025-04-01T00:00:00  
+forecast:
+  coords:
+    latitude: latitude
+    longitude: longitude
+    level: heightAboveGround
+    time:
+      inittime: forecast_reference_time
+      validtime: time
+  name: nested_eagle_casestudy
+  path: nested_eagle.zarr #assumes file is in the same directory as .yaml
+  projection:
+    a: 6371229
+    b: 6371229
+    lat_0: 38.5
+    lat_1: 38.5
+    lat_2: 38.5
+    lon_0: 262.5
+    proj: lcc
+leadtimes:
+  start: '60'
+  step: '6:00:00'
+  stop: '108'
+
+meta:
+  workdir: wxvx_output_prepbufr
+  grids: wxvx_output_prepbufr/grids
+  post_files: .
+
+paths:
+  grids:
+    forecast: wxvx_output_prepbufr/grids/forecast
+  obs: wxvx_output_prepbufr/obs
+  run: wxvx_output_prepbufr/run
+
+regrid:
+  method: BILIN
+  to: G104
+variables:
+  2m_temperature:
+    level_type: heightAboveGround
+    levels:
+      - 2
+    name: 2t

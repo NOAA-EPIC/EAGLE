@@ -1,0 +1,51 @@
+truth:
+  name: STAGEIV
+  type: grid
+  url: stage4.202504/extracted/st4_conus.{{ yyyymmdd }}{{ hh }}.01h.grb2 # path to locally stored data
+cycles:
+  start: 2025-04-01T00:00:00
+  step: 0
+  stop: 2025-04-01T00:00:00  
+forecast:
+  coords: 
+    latitude: latitude
+    longitude: longitude
+    level: heightAboveGround
+    time:
+      inittime: forecast_reference_time
+      validtime: time
+  name: casestudy_hrrr_results
+  path: hrrr_april_wxvx.zarr #assumes file is in the same directory as .yaml
+  projection:
+    a: 6371229
+    b: 6371229
+    lat_0: 38.5
+    lat_1: 38.5
+    lat_2: 38.5
+    lon_0: 262.5
+    proj: lcc
+leadtimes:
+  start: '6'
+  step: '6:00:00'
+  stop: '24'
+
+meta:
+  workdir: wxvx_output_stageiv_hrrr
+  grids: wxvx_output_stageiv_hrrr/grids
+  post_files: .
+
+paths:
+  grids:
+    forecast: wxvx_output_stageiv_hrrr/grids/forecast
+    truth: wxvx_output_stageiv_hrrr/grids/truth
+  obs: wxvx_output_stageiv_hrrr/obs
+  run: wxvx_output_stageiv_hrrr/run
+
+regrid:
+  method: BILIN
+  to: G104
+
+variables:
+  accum_tp:
+    level_type: surface
+    name: tp
