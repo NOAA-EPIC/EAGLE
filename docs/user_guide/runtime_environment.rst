@@ -11,9 +11,52 @@ To build the EAGLE runtime virtual environments:
 
 .. code-block:: bash
 
-    make env # alternatively: ./setup
+   make env # alternatively: ./setup
 
-This will install :term:`Miniforge conda` in the current directory and create the various virtual environments.
+This will install :term:`Miniforge conda` as ``conda/`` in the current directory and create the various virtual environments.
+
+Custom Anemoi Installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It may sometimes be useful to install a version of an Anemoi package other than the EAGLE default version, including from code that can be modified and immediately tested. This can be done by activating the ``anemoi`` conda environment provided by EAGLE and doing an editable install of the Anemoi package, replacing the package version currently installed by EAGLE. In the following example, the currently installed ``anemoi-training`` version ``0.17.1`` is replaced with an editable install of on-disk ``0.17.2`` code. It assumes that the previous ``make env`` step has already been carried out.
+
+First, in your EAGLE clone, create a temporary bash shell, activate conda and its ``anemoi`` environment, and note the currently installed ``anemoi-training`` version:
+
+.. code-block:: bash
+
+   bash
+   . conda/etc/profile.d/conda.sh
+   conda activate anemoi
+   conda list anemoi-training
+   # packages in environment at ./conda/envs/anemoi:
+   #
+   # Name                     Version          Build            Channel
+   anemoi-training            0.17.1           pypi_0           pypi
+
+Next, clone the ``anemoi-core`` repo, navigate to its ``training`` directory, and check out the required tag:
+
+.. code-block:: bash
+
+   git git@github.com:ecmwf/anemoi-core.git /path/to/clone
+   cd /path/to/clone
+   cd training
+   git checkout training-0.17.2
+
+Finally, perform the editable install and return to your EAGLE clone and original shell:
+
+.. code-block:: bash
+
+   pip install --editable --force-reinstall .
+   conda list anemoi-training
+   # packages in environment at /scratch4/BMC/gsd-hpcs/Paul.Madden/eagle-152/conda/envs/anemoi:
+   #
+   # Name                     Version          Build            Channel
+   anemoi-training            0.17.2           pypi_0           pypi
+   exit
+
+At this point, EAGLE will be using ``anemoi-training`` as represented by the code in the ``anemoi-core`` clone: Any changes made to this code will be immediately seen by the EAGLE ``anemoi`` runtime environment and reflected in its behavior.
+
+To obtain a default set of EAGLE runtime environments, remove the ``./conda`` directory and run ``make env`` again.
 
 Available Make Targets
 ------------------------------------------------------------------------------
