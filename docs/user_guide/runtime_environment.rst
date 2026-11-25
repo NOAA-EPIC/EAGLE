@@ -13,7 +13,20 @@ To build the EAGLE runtime virtual environments:
 
     make env # alternatively: ./setup
 
-This will install :term:`Miniforge conda` in the current directory and create the various virtual environments.
+This will install :term:`Miniforge conda` as ``conda/`` in the current directory and create the various virtual environments.
+
+Custom Anemoi Installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It may sometimes be necessary to install a version of an Anemoi package other than the defined EAGLE default version, including from code that can be modified and immediately tested. This can be done by activating the ``anemoi`` conda environment provided by EAGLE and doing an "editable" install of the Anemoi package, replacing the package version previously installed by EAGLE. In the following example, the previously installed ``anemoi-training`` version ``0.17.1`` is replaced with an editable install of version ``0.17.2``. It assumes that the previous ``make env`` step has already been carried out.
+
+. conda/etc/profile.d/conda.sh
+conda activate anemoi
+conda list anemoi-training
+# packages in environment at /scratch4/BMC/gsd-hpcs/Paul.Madden/eagle-152/conda/envs/anemoi:
+#
+# Name                     Version          Build            Channel
+anemoi-training            0.17.1           pypi_0           pypi
 
 Available Make Targets
 ------------------------------------------------------------------------------
